@@ -15,7 +15,7 @@ import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserChec
 import algorandMark from '@/assets/algorand_logo_mark_white.png';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
-import QuickMessageModal from '@/components/hub/QuickMessageModal';
+import QuickMessageModal, { QuickMessagePanel } from '@/components/hub/QuickMessageModal';
 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
@@ -94,6 +94,17 @@ const employerMenuItems = [
 ];
 
 const HubPage = () => {
+  // ...all state declarations...
+
+  // Send quick message, close all dialogs, and show toast
+  const handleSendQuickMessage = (msg) => {
+    const recipient = quickMessageRecipient || selectedMatch;
+    toast({ title: `Message Sent to ${recipient?.name || recipient?.company || 'Match'}!`, description: `\u2709\ufe0f ${msg}` });
+    setDialogMode('details');
+    setSelectedMatch(null); // Close dialog
+    setQuickMessageRecipient(null);
+  };
+
   // Debug: log userType and userEmail
   console.log('HubPage userType:', sessionStorage.getItem('userType'));
   console.log('HubPage userEmail:', sessionStorage.getItem('userEmail'));
@@ -121,6 +132,7 @@ const HubPage = () => {
   const [aiCoachOpen, setAiCoachOpen] = useState(false);
   // For match details popup
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [dialogMode, setDialogMode] = useState('details');
   
   // Job form state
   const [jobForm, setJobForm] = useState({
@@ -334,80 +346,88 @@ const renderCardBack = (item) => {
 
       {/* Match Details Dialog */}
       <Dialog open={!!selectedMatch} onOpenChange={open => {
-        // Only close if the dialog itself is closed, not when opening QuickMessageModal
         if (!open && selectedMatch !== null) setSelectedMatch(null);
+        setDialogMode('details');
+        if (open) {
+          console.log('Dialog opened:', { selectedMatch, dialogMode });
+        }
       }}>
         <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
-          <DialogHeader>
-  <div className="flex items-center gap-4 mb-2">
-    <Avatar className="w-14 h-14">
-      <AvatarImage
-        src={userType === 'candidate'
-          ? (selectedMatch?.logo || `https://avatar.vercel.sh/${selectedMatch?.company || 'job'}.png`)
-          : (selectedMatch?.avatar || `https://avatar.vercel.sh/${selectedMatch?.name || 'candidate'}.png`)
-        }
-        alt={userType === 'candidate' ? selectedMatch?.company : selectedMatch?.name}
-      />
-      <AvatarFallback>
-        {userType === 'candidate'
-          ? (selectedMatch?.company?.[0] || 'J')
-          : (selectedMatch?.name?.split(' ').map(n => n[0]).join('') || 'C')}
-      </AvatarFallback>
-    </Avatar>
-    <div>
-      <DialogTitle className="text-2xl gradient-text">
-        {userType === 'candidate'
-          ? `${selectedMatch?.title} @ ${selectedMatch?.company}`
-          : selectedMatch?.name}
-      </DialogTitle>
-      <DialogDescription className="text-gray-300">
-        {userType === 'candidate'
-          ? `${selectedMatch?.location} • ${selectedMatch?.jobType || selectedMatch?.type}`
-          : `${selectedMatch?.title} • ${selectedMatch?.location}`}
-      </DialogDescription>
-    </div>
-  </div>
-</DialogHeader>
-<div className="py-4">
-  {userType === 'candidate' ? (
-    <>
-      <div className="mb-2"><span className="font-semibold">Job Description:</span> {selectedMatch?.description || 'No description.'}</div>
-      <div className="mb-2"><span className="font-semibold">Requirements:</span> {selectedMatch?.requirements || 'N/A'}</div>
-      <div className="mb-2"><span className="font-semibold">Salary:</span> {selectedMatch?.salaryMin && selectedMatch?.salaryMax ? `$${selectedMatch.salaryMin} - $${selectedMatch.salaryMax}` : 'N/A'}</div>
-    </>
-  ) : (
-    <>
-      <div className="mb-2"><span className="font-semibold">Skills:</span> {selectedMatch?.skills || 'N/A'}</div>
-      <div className="mb-2"><span className="font-semibold">Experience:</span> {selectedMatch?.experience || 'N/A'}</div>
-      <div className="mb-2"><span className="font-semibold">Bio:</span> {selectedMatch?.bio || 'N/A'}</div>
-    </>
-  )}
-</div>
-<DialogFooter>
-  <Button
-    onClick={() => {
-      setQuickMessageRecipient(selectedMatch);
-      setQuickMessageModalOpen(true);
-      // Do NOT setSelectedMatch(null) here; keep dialog open while QuickMessageModal is open
-      // Do NOT setFlippedCardId(null) here; leave the card open
-    }}
-    className="bg-green-600 hover:bg-green-700 mr-2"
-  >
-    Message
-  </Button>
-  <Button onClick={() => setSelectedMatch(null)} className="bg-purple-600 hover:bg-purple-700">Close</Button>
-</DialogFooter>
+          {dialogMode === 'details' && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-4 mb-2">
+                  <Avatar className="w-14 h-14">
+                    <AvatarImage
+                      src={userType === 'candidate'
+                        ? (selectedMatch?.logo || `https://avatar.vercel.sh/${selectedMatch?.company || 'job'}.png`)
+                        : (selectedMatch?.avatar || `https://avatar.vercel.sh/${selectedMatch?.name || 'candidate'}.png`)
+                      }
+                      alt={userType === 'candidate' ? selectedMatch?.company : selectedMatch?.name}
+                    />
+                    <AvatarFallback>
+                      {userType === 'candidate'
+                        ? (selectedMatch?.company?.[0] || 'J')
+                        : (selectedMatch?.name?.split(' ').map(n => n[0]).join('') || 'C')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <DialogTitle className="text-2xl gradient-text">
+                      {userType === 'candidate'
+                        ? `${selectedMatch?.title} @ ${selectedMatch?.company}`
+                        : selectedMatch?.name}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-300">
+                      {userType === 'candidate'
+                        ? `${selectedMatch?.location} • ${selectedMatch?.jobType || selectedMatch?.type}`
+                        : `${selectedMatch?.title} • ${selectedMatch?.location}`}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              <div className="py-4">
+                {userType === 'candidate' ? (
+                  <>
+                    <div className="mb-2"><span className="font-semibold">Job Description:</span> {selectedMatch?.description || 'No description.'}</div>
+                    <div className="mb-2"><span className="font-semibold">Requirements:</span> {selectedMatch?.requirements || 'N/A'}</div>
+                    <div className="mb-2"><span className="font-semibold">Salary:</span> {selectedMatch?.salaryMin && selectedMatch?.salaryMax ? `$${selectedMatch.salaryMin} - $${selectedMatch.salaryMax}` : 'N/A'}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-2"><span className="font-semibold">Skills:</span> {selectedMatch?.skills || 'N/A'}</div>
+                    <div className="mb-2"><span className="font-semibold">Experience:</span> {selectedMatch?.experience || 'N/A'}</div>
+                    <div className="mb-2"><span className="font-semibold">Bio:</span> {selectedMatch?.bio || 'N/A'}</div>
+                  </>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  onClick={e => {
+                    e.stopPropagation();
+                    setQuickMessageRecipient(selectedMatch);
+                    setDialogMode('quickMessage');
+                  }}
+                  className="bg-green-600 hover:bg-green-700 mr-2"
+                >
+                  Message
+                </Button>
+                <Button onClick={() => setSelectedMatch(null)} className="bg-purple-600 hover:bg-purple-700">Close</Button>
+              </DialogFooter>
+            </>
+          )}
+          {dialogMode === 'quickMessage' && (
+            <QuickMessagePanel
+              userType={userType}
+              recipient={quickMessageRecipient || selectedMatch}
+              onSend={handleSendQuickMessage}
+              onClose={() => setDialogMode('details')}
+            />
+          )}
+
         </DialogContent>
       </Dialog>
     </div>
   );
-  // Quick Message Modal integration
-  const handleSendQuickMessage = (msg) => {
-    toast({ title: "Message Sent!", description: `\u2709\ufe0f ${msg}` });
-    setQuickMessageModalOpen(false);
-    setQuickMessageRecipient(null);
-  };
-
   // ...rest of HubPage logic...
 
   // MAIN RETURN (ensure only one return in the component)
@@ -416,14 +436,7 @@ const renderCardBack = (item) => {
   return (
     <>
       {/* ...existing JSX... */}
-      {quickMessageModalOpen && (
-        <QuickMessageModal
-          isOpen={quickMessageModalOpen}
-          onClose={() => { setQuickMessageModalOpen(false); setQuickMessageRecipient(null); }}
-          userType={userType}
-          onSend={handleSendQuickMessage}
-        />
-      )}
+
       {/* ...existing JSX... */}
     </>
   );
