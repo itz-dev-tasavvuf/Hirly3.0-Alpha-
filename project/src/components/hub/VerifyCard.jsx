@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import algorandLogo from '@/assets/algorand_full_logo_white.png';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
@@ -44,7 +46,10 @@ export default function VerifyCard() {
   return (
     <div className="bg-white/5 rounded-xl p-8 shadow-lg max-w-md mx-auto mt-8 h-full flex flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto invisible-scrollbar" style={{ maxHeight: '60vh' }}>
-        <h2 className="text-2xl font-bold mb-4 text-white">Verify Your Identity On-Chain</h2>
+        <div className="flex flex-col items-center mb-6">
+          <span className="text-2xl font-bold text-white mb-2">Verify with</span>
+          <img src={algorandLogo} alt="Algorand Logo" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 2px #fff)' }} />
+        </div>
         <form className="space-y-4" onSubmit={handleVerify}>
           <input
             name="fullName"
@@ -89,29 +94,40 @@ export default function VerifyCard() {
           </Button>
         </form>
       </div>
-      {result && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-green-900/90 rounded-xl p-8 shadow-lg text-white flex flex-col items-center relative max-w-xs w-full">
+      {result && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="relative max-w-lg w-full mx-4 rounded-2xl p-8 flex flex-col items-center shadow-2xl border border-white/10"
+               style={{ background: 'rgba(30,32,45,0.55)', backdropFilter: 'blur(16px)' }}>
             <button
-              className="absolute top-2 right-2 text-green-200 hover:text-white text-2xl font-bold focus:outline-none"
+              className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl font-bold focus:outline-none"
               onClick={() => setResult(null)}
               aria-label="Close"
             >
               ×
             </button>
-            <CheckCircle className="text-green-400 mb-2" size={40} />
-            <div className="font-semibold text-lg">Verified on Algorand!</div>
-            <div className="mt-2 text-sm break-all">TxID: {result.txId}</div>
+            <CheckCircle className="mb-4" size={56} color="#22c55e" />
+            <div className="text-3xl font-bold text-white mb-2 text-center">Transaction Verified!</div>
+            <div className="text-base text-gray-200 mb-4 text-center">Your verification has been recorded on Algorand TestNet.</div>
+            <div className="bg-black/30 rounded px-4 py-2 text-xs text-gray-300 break-all mb-4 text-center">
+              TxID: {result.txId}
+            </div>
             <a
               href={`https://testnet.explorer.perawallet.app/tx/${result.txId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 underline text-green-300 hover:text-green-200"
+              className="text-sm underline text-blue-200 hover:text-blue-100 mb-6 text-center"
             >
               View on Pera Explorer
             </a>
+            <button
+              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-lg px-6 py-2 shadow-md hover:from-purple-400 hover:to-blue-400 transition-colors"
+              onClick={() => setResult(null)}
+            >
+              Got it!
+            </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {error && (
         <div className="mt-4 p-3 rounded bg-red-900/70 text-red-200">{error}</div>

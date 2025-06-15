@@ -12,6 +12,7 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck } from 'lucide-react';
+import algorandMark from '@/assets/algorand_logo_mark_white.png';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
@@ -73,7 +74,7 @@ const candidateMenuItems = [
   { id: 'matches', title: 'Matches', icon: UserCheck, description: "Your matches with jobs", gradient: "from-green-400 to-blue-400" },
   { id: 'messages', title: 'Messages', icon: MessageSquare, description: "Chat with recruiters", gradient: "from-indigo-500 to-purple-500", action: 'openMessagesModal' },
   { id: 'profile', title: 'Profile', icon: User, description: "View and edit your profile", gradient: "from-purple-600 to-pink-600" },
-  { id: 'verify_algorand', title: 'Verify with Algorand', icon: Shield, description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
+  { id: 'verify_algorand', title: 'Verify with Algorand', icon: (props) => (<img src={algorandMark} alt="Algorand" className={props && props.className ? props.className : "w-8 h-8"} />), description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
   { id: 'settings', title: 'Settings', icon: Settings, description: "Adjust your preferences", gradient: "from-orange-500 to-red-500" },
   { id: 'coach', title: 'AI Coach', icon: Bot, description: "AI-powered career coaching", gradient: "from-blue-500 to-cyan-500", action: 'openAICoach' },
 ];
@@ -85,7 +86,7 @@ const employerMenuItems = [
   { id: 'dashboard', title: 'Dashboard', icon: BarChart3, description: "View hiring metrics", gradient: "from-blue-500 to-cyan-500" },
   { id: 'upload_jobs', title: 'Upload Jobs', icon: PlusSquare, description: "Add new job postings", gradient: "from-yellow-500 to-orange-500" },
   { id: 'company', title: 'Company', icon: Building, description: "Edit company profile", gradient: "from-purple-600 to-pink-600" },
-  { id: 'verify_algorand', title: 'Verify with Algorand', icon: Shield, description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
+  { id: 'verify_algorand', title: 'Verify with Algorand', icon: (props) => (<img src={algorandMark} alt="Algorand" className={props && props.className ? props.className : "w-8 h-8"} />), description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
   { id: 'settings', title: 'Settings', icon: Settings, description: "Adjust preferences", gradient: "from-orange-500 to-red-500" },
   { id: 'coach', title: 'AI Coach', icon: Bot, description: "AI-powered hiring coaching", gradient: "from-cyan-500 to-blue-600", action: 'openAICoach' },
 ];
