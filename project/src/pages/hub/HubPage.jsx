@@ -139,11 +139,7 @@ const HubPage = () => {
   const handleCardSwipe = (swipedItem) => {
     setCards(prev => [swipedItem, ...prev.slice(0, -1)]);
     x.set(0);
-    toast({
-        title: "Card Stacked",
-        description: `${swipedItem.title} moved to the back.`,
-        duration: 2000,
-    });
+    // Removed toast notification on card swipe
   };
 
   const handleLogout = () => {
