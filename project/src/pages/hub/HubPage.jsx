@@ -319,7 +319,7 @@ const renderCardBack = (item) => {
     <div className="relative w-full h-full p-6 flex flex-col justify-between text-white bg-gradient-to-br from-green-500/60 to-blue-700/60 rounded-2xl shadow-xl">
       <div className="overflow-y-auto invisible-scrollbar h-[370px]">
         <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
-        {matches.length > 0 && (
+        {matches.length > 0 ? (
   <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
     {matches.map((match, idx) => (
       <li
@@ -349,6 +349,10 @@ const renderCardBack = (item) => {
       </li>
     ))}
   </ul>
+) : (
+  <div className="flex items-center justify-center h-40 text-lg text-white/60 font-semibold text-center px-4">
+    No matches... Yet! Get to swiping to see your matches here!
+  </div>
 )}
       </div>
       <div className="mt-4 flex justify-center">
