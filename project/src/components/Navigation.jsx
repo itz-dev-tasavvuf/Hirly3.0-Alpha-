@@ -44,14 +44,6 @@ const Navigation = () => {
             <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">
               Pricing
             </Link>
-             <Link to="/hub-auth">
-              <Button 
-                variant="outline" 
-                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20 flex items-center"
-              >
-                <Briefcase className="mr-2 h-4 w-4" /> Hub
-              </Button>
-            </Link>
             <Link to="/login">
               <Button 
                 variant="outline" 

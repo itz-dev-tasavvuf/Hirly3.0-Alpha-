@@ -186,7 +186,13 @@ const CandidateOnboarding = () => {
               <PartyPopper className="w-24 h-24 text-yellow-400" />
               <h2 className="text-4xl font-bold text-white">You're All Set!</h2>
               <p className="text-gray-300 max-w-md mx-auto">Your Hirly profile is ready. Get ready to start swiping and find your next opportunity.</p>
-               <img  class="w-full max-w-sm rounded-lg shadow-lg mt-4" alt="Animated tutorial showing how to swipe on job cards" src="https://images.unsplash.com/photo-1659841135771-727afd559f49" />
+              <img className="w-full max-w-sm rounded-lg shadow-lg mt-4" alt="Animated tutorial showing how to swipe on job cards" src="https://images.unsplash.com/photo-1659841135771-727afd559f49" />
+              <button
+                className="mt-8 px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-lg rounded-full font-bold shadow-lg hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                onClick={() => navigate('/hub')}
+              >
+                Continue to Hub
+              </button>
             </div>
           )
       default:
