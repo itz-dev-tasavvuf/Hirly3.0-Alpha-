@@ -11,12 +11,49 @@ import {
 } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X } from 'lucide-react';
+import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck } from 'lucide-react';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
 import AI_Prompt from '@/components/AI_Prompt';
+
+
+// AnimatedMetric component for dashboard
+const AnimatedMetric = ({ label, value, icon, delay }) => {
+  const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
+  React.useEffect(() => {
+    if (typeof value === 'number') {
+      let start = 0;
+      const duration = 800;
+      const step = Math.ceil(value / (duration / 16));
+      let raf;
+      const animate = () => {
+        start += step;
+        if (start >= value) {
+          setDisplayValue(value);
+        } else {
+          setDisplayValue(start);
+          raf = requestAnimationFrame(animate);
+        }
+      };
+      const timeout = setTimeout(() => animate(), delay * 600);
+      return () => {
+        clearTimeout(timeout);
+        cancelAnimationFrame(raf);
+      };
+    }
+  }, [value, delay]);
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.6 }} className="bg-white/10 rounded-lg p-4 flex flex-col items-center shadow-lg">
+      <div className="mb-1">{icon}</div>
+      <div className="text-2xl font-bold text-white">
+        {typeof value === 'number' ? displayValue : value}
+      </div>
+      <div className="text-xs text-white/70 mt-1">{label}</div>
+    </motion.div>
+  );
+};
 
 const candidateMenuItems = [
   { id: 'jobs', title: 'Jobs', icon: Briefcase, description: "Browse job opportunities", gradient: "from-green-500 to-teal-500", action: 'openSwipeJobs' },
@@ -99,8 +136,8 @@ const HubPage = () => {
       setIsNavMenuOpen(false);
     }
 
-    // Handle flippable cards (profile, settings, company, upload_jobs, verify_algorand)
-    if (item.id === 'profile' || item.id === 'settings' || item.id === 'company' || item.id === 'upload_jobs' || item.id === 'verify_algorand') {
+    // Handle flippable cards (profile, settings, company, upload_jobs, verify_algorand, dashboard)
+    if (item.id === 'profile' || item.id === 'settings' || item.id === 'company' || item.id === 'upload_jobs' || item.id === 'verify_algorand' || item.id === 'dashboard') {
       if (fromNavMenu) {
         // When coming from nav menu, bring card to top and flip it
         bringCardToTop(item.id);
@@ -338,6 +375,56 @@ const renderCardBack = (item) => {
             <div className="bg-white/10 rounded-lg p-2">
               <p className="text-lg font-bold text-white">{mockCompanyProfile.avgTimeToHire}</p>
               <p className="text-xs opacity-60 text-white/70">Time to Hire</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (item.id === 'dashboard') {
+      // Animated dashboard overlay
+      return (
+        <div className="w-full h-full p-6 flex flex-col justify-between text-white">
+          <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+            <h2 className="text-2xl font-bold mb-2 text-center text-white">Dashboard</h2>
+            <p className="text-center text-sm mb-6 text-white/80">Your hiring metrics at a glance</p>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {/* Animated stats */}
+              <AnimatedMetric label="Applicants" value={128} icon={<Users className="w-5 h-5 text-cyan-400" />} delay={0.1} />
+              <AnimatedMetric label="Matches" value={37} icon={<UserCheck className="w-5 h-5 text-green-400" />} delay={0.2} />
+              <AnimatedMetric label="Interviews" value={14} icon={<MessageSquare className="w-5 h-5 text-yellow-400" />} delay={0.3} />
+              <AnimatedMetric label="Offers" value={5} icon={<Award className="w-5 h-5 text-purple-400" />} delay={0.4} />
+              <AnimatedMetric label="Hires" value={3} icon={<Briefcase className="w-5 h-5 text-pink-400" />} delay={0.5} />
+              <AnimatedMetric label="Avg. Time to Fill" value="21d" icon={<Clock className="w-5 h-5 text-orange-400" />} delay={0.6} />
+            </div>
+            {/* Diversity bar */}
+            <div className="mb-6">
+              <p className="text-xs mb-2 text-white/70">Team Diversity</p>
+              <div className="flex items-center gap-2">
+                <motion.div initial={{ width: 0 }} animate={{ width: '55%' }} transition={{ delay: 0.7, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 shadow-lg" style={{ width: '55%' }} />
+                <span className="text-xs text-white/80">55% Women</span>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <motion.div initial={{ width: 0 }} animate={{ width: '40%' }} transition={{ delay: 0.8, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-green-400 shadow-lg" style={{ width: '40%' }} />
+                <span className="text-xs text-white/80">40% Minorities</span>
+              </div>
+            </div>
+            {/* Recent activity */}
+            <div>
+              <p className="text-xs mb-2 text-white/70">Recent Activity</p>
+              <motion.ul initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }} className="space-y-2">
+                {[
+                  { label: 'New applicant: Jane Doe', icon: <User className="w-4 h-4 text-cyan-400" /> },
+                  { label: 'Interview scheduled with John Smith', icon: <MessageSquare className="w-4 h-4 text-yellow-400" /> },
+                  { label: 'Offer sent to Emily Lee', icon: <Award className="w-4 h-4 text-purple-400" /> },
+                  { label: 'New hire: Michael Chen', icon: <Briefcase className="w-4 h-4 text-pink-400" /> },
+                ].map((item, i) => (
+                  <motion.li key={i} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.2 }} className="flex items-center gap-2 text-sm bg-white/10 rounded-lg px-3 py-2">
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </motion.li>
+                ))}
+              </motion.ul>
             </div>
           </div>
         </div>
