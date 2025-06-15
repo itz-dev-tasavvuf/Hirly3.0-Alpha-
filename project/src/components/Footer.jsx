@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import algorandLogo from '@/assets/algorand-logo.svg';
 
 const Footer = () => {
   const handleLinkClick = (linkName) => {
@@ -45,7 +46,7 @@ const Footer = () => {
             </p>
             
             <div className="flex items-center mb-6">
-              <img  alt="Algorand logo" className="w-6 h-6 mr-2" src="https://images.unsplash.com/photo-1639327380086-f13b8fef4211" />
+              <img alt="Algorand logo" className="w-6 h-6 mr-2" src={algorandLogo} />
               <span className="text-green-400 font-medium">Powered by Algorand</span>
             </div>
 

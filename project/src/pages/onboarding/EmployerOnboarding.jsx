@@ -176,8 +176,8 @@ const EmployerOnboarding = () => {
             <h2 className="text-3xl font-bold text-white">Verify Your Company</h2>
             <p className="text-gray-300 max-w-md mx-auto">Increase trust and attract better candidates by verifying your company on the blockchain.</p>
             <div className="flex items-center justify-center space-x-2 my-4">
-                <img  alt="Algorand logo" className="w-6 h-6" src="https://images.unsplash.com/photo-1639327380086-f13b8fef4211" />
-                <span className="text-green-400 font-medium">Powered by Algorand</span>
+                <img src='/src/assets/algorand-logo.svg' className='inline w-6 h-6 mr-2 align-middle' alt='Algorand logo' />
+                <span className="text-green-400 font-medium"><span className='inline-flex items-center'><img src='/src/assets/algorand-logo.svg' className='inline w-5 h-5 mr-2 align-middle' alt='Algorand logo' />Powered by Algorand</span></span>
             </div>
             <div className="space-y-4">
                 <Button size="lg" className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white" onClick={() => toast({ title: "Feature coming soon!" })}>Start Verification</Button>

@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
+import { ArrowRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const HeroSection = () => {
@@ -40,8 +40,8 @@ const HeroSection = () => {
               transition={{ delay: 0.2 }}
               className="flex items-center justify-center lg:justify-start mb-6"
             >
-              <Sparkles className="w-6 h-6 text-purple-400 mr-2" />
-              <span className="text-purple-300 font-medium">Powered by Algorand</span>
+              <span className="text-green-400 font-medium mr-2">Powered by</span>
+              <img src={algorandFullLogoWhite} alt="Algorand" className="h-8 w-auto" />
             </motion.div>
 
             <motion.h1

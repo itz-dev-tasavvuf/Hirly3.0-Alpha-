@@ -16,6 +16,7 @@ import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
+import algorandLogo from '@/assets/algorand-logo.svg';
 import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '@/components/AI_Prompt';
 
@@ -578,7 +579,7 @@ const renderCardBack = (item) => {
         return (
           <div className="w-full h-full p-6 flex flex-col justify-between text-white">
             <div className="overflow-y-auto invisible-scrollbar h-[370px]">
-              <h2 className="text-2xl font-bold mb-4 text-center text-white">Verify with Algorand</h2>
+              <h2 className="text-2xl font-bold mb-4 text-center text-white"><span className="inline-flex items-center"><AlgorandLogo className="inline w-6 h-6 mr-2 align-middle" /><span className="inline-flex items-center"><AlgorandLogo className="inline w-6 h-6 mr-2 align-middle" />Verify with Algorand</span></span></h2>
               <form className="space-y-4" onSubmit={e => handleAlgorandVerificationSubmit(e, 'candidate')}>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">Full Name</label>
@@ -780,7 +781,17 @@ const renderCardBack = (item) => {
                       onClick={() => handleCardClick(item, true)} // Pass fromNavMenu = true
                       className="w-full justify-start hover:bg-white/10 text-white"
                     >
-                      <item.icon className="mr-2 h-4 w-4" /> {item.title}
+                      {item.id === 'verify_algorand' ? (
+  <span className="flex items-center gap-1">
+    <item.icon className="mr-1 h-4 w-4" />
+    <img src={algorandLogo} alt="Algorand Logo" className="inline-block h-4 w-4 align-middle mr-1" />
+    <span>Verify with Algorand</span>
+  </span>
+) : (
+  <>
+    <item.icon className="mr-2 h-4 w-4" /> {item.title}
+  </>
+)}
                     </Button>
                   ))}
                 </div>
@@ -862,7 +873,14 @@ const renderCardBack = (item) => {
                   >
                     <div className="flex flex-col items-center text-center">
                       <item.icon className="w-20 h-20 mb-6 opacity-80" />
-                      <h2 className="text-4xl font-bold mb-2">{item.title}</h2>
+                      {item.id === 'verify_algorand' ? (
+  <span className="flex items-center justify-center gap-2 mb-2">
+    <img src={algorandLogo} alt="Algorand Logo" className="inline-block h-7 w-7 align-middle" />
+    <span className="text-4xl font-bold">Verify with Algorand</span>
+  </span>
+) : (
+  <h2 className="text-4xl font-bold mb-2">{item.title}</h2>
+)}
                       <p className="text-sm opacity-70 leading-relaxed">{item.description}</p>
                     </div>
                     {isTopCard && !isFlipped && (
