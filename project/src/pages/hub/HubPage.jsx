@@ -11,11 +11,12 @@ import {
 } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck } from 'lucide-react';
+import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck, Mail as Envelope } from 'lucide-react';
 import algorandMark from '@/assets/algorand_logo_mark_white.png';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
 import QuickMessageModal, { QuickMessagePanel } from '@/components/hub/QuickMessageModal';
+import AutoDismissModal from '@/components/ui/AutoDismissModal';
 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
@@ -96,12 +97,28 @@ const employerMenuItems = [
 const HubPage = () => {
   // ...all state declarations...
 
-  // Send quick message, close all dialogs, and show toast
+  // Quick message sent modal state
+  const [autoDismissModalOpen, setAutoDismissModalOpen] = useState(false);
+  const [autoDismissModalContent, setAutoDismissModalContent] = useState({ title: '', message: '' });
+
+  // Send quick message, close all dialogs, and show modal
   const handleSendQuickMessage = (msg) => {
     const recipient = quickMessageRecipient || selectedMatch;
-    toast({ title: `Message Sent to ${recipient?.name || recipient?.company || 'Match'}!`, description: `\u2709\ufe0f ${msg}` });
+    setAutoDismissModalContent({
+      title: 'Message Sent!',
+      message: `Your quick message has been sent to ${recipient?.name || recipient?.company || 'Match'}.`
+    });
+    setAutoDismissModalOpen(true);
     setDialogMode('details');
     setSelectedMatch(null); // Close dialog
+    setQuickMessageRecipient(null);
+  };
+
+  // Handle auto-dismiss modal close
+  const handleAutoDismissModalClose = () => {
+    setAutoDismissModalOpen(false);
+    setDialogMode('details');
+    setSelectedMatch(null);
     setQuickMessageRecipient(null);
   };
 
@@ -352,6 +369,15 @@ const renderCardBack = (item) => {
           console.log('Dialog opened:', { selectedMatch, dialogMode });
         }
       }}>
+        {/* Confirmation Modal */}
+        <AutoDismissModal
+          open={autoDismissModalOpen}
+          onClose={handleAutoDismissModalClose}
+          title={autoDismissModalContent.title}
+          message={autoDismissModalContent.message}
+          duration={2500}
+          icon={<Envelope className="w-6 h-6 text-white" />}
+        />
         <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
           {dialogMode === 'details' && (
             <>
