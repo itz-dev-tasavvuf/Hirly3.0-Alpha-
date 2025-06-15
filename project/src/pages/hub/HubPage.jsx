@@ -19,6 +19,16 @@ import Orb from '@/components/Orb';
 import AI_Prompt from '@/components/AI_Prompt';
 
 
+// Dashboard metrics config
+const dashboardMetrics = [
+  { label: "Applicants", value: 128, icon: <Users className="w-5 h-5 text-cyan-400" /> },
+  { label: "Matches", value: 37, icon: <UserCheck className="w-5 h-5 text-green-400" /> },
+  { label: "Interviews", value: 14, icon: <MessageSquare className="w-5 h-5 text-yellow-400" /> },
+  { label: "Offers", value: 5, icon: <Award className="w-5 h-5 text-purple-400" /> },
+  { label: "Hires", value: 3, icon: <Briefcase className="w-5 h-5 text-pink-400" /> },
+  { label: "Avg. Time to Fill", value: "21d", icon: <Clock className="w-5 h-5 text-orange-400" /> },
+];
+
 // AnimatedMetric component for dashboard
 const AnimatedMetric = ({ label, value, icon, delay }) => {
   const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
@@ -88,6 +98,7 @@ const HubPage = () => {
   const [swipeAppOpen, setSwipeAppOpen] = useState(false);
   const [swipeAppContentType, setSwipeAppContentType] = useState(null); 
   const [modalContent, setModalContent] = useState({ title: '', description: '' });
+  const [selectedMetric, setSelectedMetric] = useState(null);
   const [aiCoachOpen, setAiCoachOpen] = useState(false);
   
   // Job form state
@@ -389,13 +400,16 @@ const renderCardBack = (item) => {
             <h2 className="text-2xl font-bold mb-2 text-center text-white">Dashboard</h2>
             <p className="text-center text-sm mb-6 text-white/80">Your hiring metrics at a glance</p>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              {/* Animated stats */}
-              <AnimatedMetric label="Applicants" value={128} icon={<Users className="w-5 h-5 text-cyan-400" />} delay={0.1} />
-              <AnimatedMetric label="Matches" value={37} icon={<UserCheck className="w-5 h-5 text-green-400" />} delay={0.2} />
-              <AnimatedMetric label="Interviews" value={14} icon={<MessageSquare className="w-5 h-5 text-yellow-400" />} delay={0.3} />
-              <AnimatedMetric label="Offers" value={5} icon={<Award className="w-5 h-5 text-purple-400" />} delay={0.4} />
-              <AnimatedMetric label="Hires" value={3} icon={<Briefcase className="w-5 h-5 text-pink-400" />} delay={0.5} />
-              <AnimatedMetric label="Avg. Time to Fill" value="21d" icon={<Clock className="w-5 h-5 text-orange-400" />} delay={0.6} />
+              {/* Animated stats - now clickable */}
+              {dashboardMetrics.map((metric, i) => (
+                <button
+                  key={metric.label}
+                  className="focus:outline-none"
+                  onClick={() => setSelectedMetric(metric)}
+                >
+                  <AnimatedMetric {...metric} delay={0.1 + i * 0.1} />
+                </button>
+              ))}
             </div>
             {/* Diversity bar */}
             <div className="mb-6">
@@ -686,8 +700,40 @@ const renderCardBack = (item) => {
 
   if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
 
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] p-4 overflow-hidden relative" onClick={handleBackgroundClick}>
+      {/* Metric Detail Overlay */}
+      {selectedMetric && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 30 }}
+            transition={{ duration: 0.3 }}
+            className="glass-effect rounded-2xl shadow-2xl w-full max-w-md p-8 relative text-white"
+          >
+            <button onClick={() => setSelectedMetric(null)} className="absolute top-4 right-4 text-white/80 hover:text-white text-xl">
+              <X className="w-6 h-6" />
+            </button>
+            <div className="flex flex-col items-center mb-6">
+              <div className="mb-2">{selectedMetric.icon}</div>
+              <div className="text-4xl font-bold mb-1">{selectedMetric.value}</div>
+              <div className="text-lg font-semibold mb-2 gradient-text">{selectedMetric.label}</div>
+            </div>
+            <div className="text-center text-white/90 text-base">
+              {/* Dummy detailed info for each metric */}
+              {selectedMetric.label === 'Applicants' && <span>128 applicants have applied to your open positions this month. View trends, sources, and applicant quality here.</span>}
+              {selectedMetric.label === 'Matches' && <span>37 candidate matches found based on your job requirements and preferences. Click for more details on match scoring.</span>}
+              {selectedMetric.label === 'Interviews' && <span>14 interviews scheduled. Track interview progress, feedback, and outcomes here.</span>}
+              {selectedMetric.label === 'Offers' && <span>5 offers made. See offer acceptance rates and negotiation insights.</span>}
+              {selectedMetric.label === 'Hires' && <span>3 new hires. Review onboarding progress and retention analytics.</span>}
+              {selectedMetric.label === 'Avg. Time to Fill' && <span>Average time to fill a position is 21 days. See breakdown by department or role.</span>}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       <AnimatePresence>
         <motion.header 
           className="absolute top-0 left-0 right-0 p-6 flex justify-center items-center z-20"
