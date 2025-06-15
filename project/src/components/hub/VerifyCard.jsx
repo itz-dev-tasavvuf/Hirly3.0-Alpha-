@@ -90,18 +90,27 @@ export default function VerifyCard() {
         </form>
       </div>
       {result && (
-        <div className="mt-6 p-4 rounded-lg bg-green-900/70 text-white flex flex-col items-center">
-          <CheckCircle className="text-green-400 mb-2" size={40} />
-          <div className="font-semibold text-lg">Verified on Algorand!</div>
-          <div className="mt-2 text-sm break-all">TxID: {result.txId}</div>
-          <a
-            href={`https://testnet.peraexplorer.com/tx/${result.txId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 underline text-green-300 hover:text-green-200"
-          >
-            View on Pera Explorer
-          </a>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-green-900/90 rounded-xl p-8 shadow-lg text-white flex flex-col items-center relative max-w-xs w-full">
+            <button
+              className="absolute top-2 right-2 text-green-200 hover:text-white text-2xl font-bold focus:outline-none"
+              onClick={() => setResult(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <CheckCircle className="text-green-400 mb-2" size={40} />
+            <div className="font-semibold text-lg">Verified on Algorand!</div>
+            <div className="mt-2 text-sm break-all">TxID: {result.txId}</div>
+            <a
+              href={`https://testnet.explorer.perawallet.app/tx/${result.txId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 underline text-green-300 hover:text-green-200"
+            >
+              View on Pera Explorer
+            </a>
+          </div>
         </div>
       )}
       {error && (
