@@ -69,6 +69,7 @@ const AnimatedMetric = ({ label, value, icon, delay }) => {
 
 const candidateMenuItems = [
   { id: 'jobs', title: 'Jobs', icon: Briefcase, description: "Browse job opportunities", gradient: "from-green-500 to-teal-500", action: 'openSwipeJobs' },
+  { id: 'matches', title: 'Matches', icon: UserCheck, description: "Your matches with jobs", gradient: "from-green-400 to-blue-400" },
   { id: 'messages', title: 'Messages', icon: MessageSquare, description: "Chat with recruiters", gradient: "from-indigo-500 to-purple-500", action: 'openMessagesModal' },
   { id: 'profile', title: 'Profile', icon: User, description: "View and edit your profile", gradient: "from-purple-600 to-pink-600" },
   { id: 'verify_algorand', title: 'Verify with Algorand', icon: Shield, description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
@@ -78,6 +79,7 @@ const candidateMenuItems = [
 
 const employerMenuItems = [
   { id: 'candidates', title: 'Candidates', icon: UserSearchIcon, description: "Browse candidate profiles", gradient: "from-green-500 to-teal-500", action: 'openSwipeCandidates' },
+  { id: 'matches', title: 'Matches', icon: UserCheck, description: "Your matches with candidates", gradient: "from-green-400 to-blue-400" },
   { id: 'messages', title: 'Messages', icon: MessageSquare, description: "Chat with candidates", gradient: "from-indigo-500 to-purple-500", action: 'openMessagesModal' },
   { id: 'dashboard', title: 'Dashboard', icon: BarChart3, description: "View hiring metrics", gradient: "from-blue-500 to-cyan-500" },
   { id: 'upload_jobs', title: 'Upload Jobs', icon: PlusSquare, description: "Add new job postings", gradient: "from-yellow-500 to-orange-500" },
@@ -95,6 +97,7 @@ const HubPage = () => {
   // Fake match state
   const [hasFakeMatch, setHasFakeMatch] = useState(false);
   const [fakeMatchData, setFakeMatchData] = useState(null);
+  const [matches, setMatches] = useState([]);
   const [swipeCount, setSwipeCount] = useState(0);
   const navigate = useNavigate();
   const [userType, setUserType] = useState(null);
@@ -210,6 +213,7 @@ const HubPage = () => {
         }
         setFakeMatchData(match);
         setHasFakeMatch(true);
+        setMatches(prev => [...prev, match]);
         toast({
           title: "It's a match! 🎉",
           description: userType === 'candidate' ? `You matched with ${match.company}!` : `You matched with ${match.name}!`,
@@ -331,7 +335,39 @@ const handleAlgorandVerificationSubmit = (e, type) => {
 };
 
 const renderCardBack = (item) => {
-    if (item.id === 'profile') {
+    if (item.id === 'matches') {
+    // Render the matches list
+    return (
+      <div className="w-full h-full p-6 flex flex-col justify-between text-white">
+        <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+          <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
+          {matches.length === 0 ? (
+            <p className="text-center text-white/70">No matches yet. Swipe to match with jobs or candidates!</p>
+          ) : (
+            <ul className="space-y-2">
+              {matches.map((match, idx) => (
+                <li key={idx} className="bg-white/10 rounded-lg p-3 flex flex-col">
+                  {userType === 'candidate' ? (
+                    <>
+                      <span className="font-bold text-lg">{match.title} @ {match.company}</span>
+                      <span className="text-xs text-white/70">{match.location} • {match.jobType}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-bold text-lg">{match.name}</span>
+                      <span className="text-xs text-white/70">{match.title} • {match.location}</span>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (item.id === 'profile') {
       return (
         <div className="w-full h-full p-6 flex flex-col justify-between text-white">
           <div className="flex flex-col items-center text-center">
