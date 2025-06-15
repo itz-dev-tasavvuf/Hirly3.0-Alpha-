@@ -15,9 +15,23 @@ const getMatchColor = (percentage) => {
   return { bg: 'bg-red-500/10', border: 'border-red-500', text: 'text-red-500' };
 };
 
-const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dragX }) => {
+const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dragX, onCollapse }) => {
   const cardType = userType === 'candidate' ? 'job' : 'candidate';
-  
+
+  const cardRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!expanded) return;
+    const handleClickOutside = (e) => {
+      if (cardRef.current && !cardRef.current.contains(e.target)) {
+        if (onCollapse) onCollapse();
+        setExpanded(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [expanded, onCollapse, setExpanded]);
+
   const opacity = useTransform(dragX, [-150, 0, 150], [0.5, 1, 0.5]);
   const scale = useTransform(dragX, [-200, 0, 200], [0.8, 1, 0.8]);
   const rotateVal = useTransform(dragX, [-200, 0, 200], [-25, 0, 25], { clamp: false });
@@ -139,6 +153,7 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
 
   return (
     <motion.div
+      ref={cardRef}
       className={cn(
         "w-[340px] h-[480px] rounded-2xl shadow-2xl cursor-grab overflow-hidden relative",
         "backdrop-blur-md border-2 text-white",

@@ -333,7 +333,10 @@ const renderCardBack = (item) => {
       </div>
 
       {/* Match Details Dialog */}
-      <Dialog open={!!selectedMatch} onOpenChange={open => { if (!open) setSelectedMatch(null); }}>
+      <Dialog open={!!selectedMatch} onOpenChange={open => {
+        // Only close if the dialog itself is closed, not when opening QuickMessageModal
+        if (!open && selectedMatch !== null) setSelectedMatch(null);
+      }}>
         <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
           <DialogHeader>
   <div className="flex items-center gap-4 mb-2">
@@ -385,8 +388,8 @@ const renderCardBack = (item) => {
     onClick={() => {
       setQuickMessageRecipient(selectedMatch);
       setQuickMessageModalOpen(true);
-      setSelectedMatch(null);
-      setFlippedCardId(null);
+      // Do NOT setSelectedMatch(null) here; keep dialog open while QuickMessageModal is open
+      // Do NOT setFlippedCardId(null) here; leave the card open
     }}
     className="bg-green-600 hover:bg-green-700 mr-2"
   >
@@ -413,12 +416,14 @@ const renderCardBack = (item) => {
   return (
     <>
       {/* ...existing JSX... */}
-      <QuickMessageModal
-        isOpen={quickMessageModalOpen}
-        onClose={() => { setQuickMessageModalOpen(false); setQuickMessageRecipient(null); }}
-        userType={userType}
-        onSend={handleSendQuickMessage}
-      />
+      {quickMessageModalOpen && (
+        <QuickMessageModal
+          isOpen={quickMessageModalOpen}
+          onClose={() => { setQuickMessageModalOpen(false); setQuickMessageRecipient(null); }}
+          userType={userType}
+          onSend={handleSendQuickMessage}
+        />
+      )}
       {/* ...existing JSX... */}
     </>
   );
