@@ -136,10 +136,19 @@ const HubPage = () => {
     });
   };
 
-  const handleCardSwipe = (swipedItem) => {
-    setCards(prev => [swipedItem, ...prev.slice(0, -1)]);
+  // Swiping left advances, swiping right rewinds
+  const handleCardSwipe = (direction) => {
+    setCards(prev => {
+      if (direction === 'left') {
+        // Move first to last (advance)
+        return [...prev.slice(1), prev[0]];
+      } else if (direction === 'right') {
+        // Move last to first (rewind)
+        return [prev[prev.length - 1], ...prev.slice(0, prev.length - 1)];
+      }
+      return prev;
+    });
     x.set(0);
-    // Removed toast notification on card swipe
   };
 
   const handleLogout = () => {
@@ -664,7 +673,11 @@ const renderCardBack = (item) => {
                 dragConstraints={{ left: 0, right: 0, top:0, bottom:0 }}
                 onDragEnd={(_event, info) => {
                   if (isTopCard && !isFlipped && Math.abs(info.offset.x) > 100) {
-                    handleCardSwipe(item);
+                    if (info.offset.x < 0) {
+                      handleCardSwipe('left'); // advance
+                    } else {
+                      handleCardSwipe('right'); // rewind
+                    }
                   } else if (isTopCard) {
                     x.set(0); 
                   }
