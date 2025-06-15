@@ -22,9 +22,14 @@ function truncate(str, len) {
 
 app.post('/api/algorand/verify', async (req, res) => {
   try {
-    // Take all form fields and pack into a JSON string for the note
-    const { ...fields } = req.body;
-    const noteObj = { ...fields, verifiedAt: new Date().toISOString() };
+    // Hash and salt all user data before storing on-chain
+    // Only the hash, salt, and verifiedAt are stored in the note (no raw PII)
+    const crypto = require('crypto');
+    const { fullName = '', email = '', role = '', company = '', extra = '' } = req.body;
+    const salt = crypto.randomBytes(16).toString('hex');
+    const dataToHash = `${fullName}|${email}|${role}|${company}|${extra}|${salt}`;
+    const hash = crypto.createHash('sha256').update(dataToHash).digest('hex');
+    const noteObj = { hash, salt, verifiedAt: new Date().toISOString() };
     let noteStr = JSON.stringify(noteObj);
     // Algorand note field max is 1000 bytes; truncate if needed
     noteStr = truncate(noteStr, 950);
