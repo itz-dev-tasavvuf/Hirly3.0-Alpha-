@@ -69,23 +69,15 @@ const CallToAction = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              className="flex justify-center mb-12"
             >
               <Button
-                onClick={handleTryDemo}
+                onClick={() => window.location.href = '/signup'}
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-6 rounded-2xl text-lg glow-effect transform hover:scale-105 transition-all duration-300"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-14 py-7 rounded-2xl text-xl glow-effect transform hover:scale-105 transition-all duration-300 shadow-lg"
               >
-                Try the Demo
-                <ArrowRight className="ml-3 w-6 h-6" />
-              </Button>
-              <Button
-                onClick={handleTryDemo}
-                variant="outline"
-                size="lg"
-                className="border-2 border-purple-500/50 text-purple-300 hover:bg-purple-500/20 px-12 py-6 rounded-2xl text-lg font-semibold"
-              >
-                Learn More
+                Get Started
+                <ArrowRight className="ml-4 w-7 h-7" />
               </Button>
             </motion.div>
 

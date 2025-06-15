@@ -95,10 +95,8 @@ const EmployerOnboarding = () => {
       title: 'Company Profile Created!',
       description: 'Welcome to Hirly! You can now start posting jobs and find candidates.',
     });
-    handleNext();
-    setTimeout(() => {
-        navigate('/'); 
-    }, 3000);
+    sessionStorage.setItem('onboardingComplete', 'true');
+    navigate('/hub');
   };
   
   const renderStep = () => {

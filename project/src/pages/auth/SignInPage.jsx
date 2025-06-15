@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { ArrowLeft, KeyRound, Mail } from 'lucide-react';
 import { GoogleIcon, AppleIcon } from '@/components/icons';
 
 const SignInPage = () => {
+  const navigate = useNavigate();
   const handleSocialLogin = (provider) => {
     toast({
       title: `Sign in with ${provider}`,
@@ -19,10 +20,14 @@ const SignInPage = () => {
 
   const handleSignIn = (e) => {
     e.preventDefault();
+    // Simulate sign-in success
+    // In a real app, replace this with actual authentication logic
+    sessionStorage.setItem('userType', 'candidate'); // or 'employer' if you want to support both
     toast({
-        title: "Signing in...",
-        description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
+      title: 'Signed in!',
+      description: 'Welcome back. Redirecting...'
     });
+    navigate('/hub');
   };
 
   return (

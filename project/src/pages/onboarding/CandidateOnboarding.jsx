@@ -94,10 +94,8 @@ const CandidateOnboarding = () => {
       title: 'Profile Created!',
       description: 'Welcome to Hirly! You will be redirected to the dashboard.',
     });
-    handleNext();
-    setTimeout(() => {
-        navigate('/'); 
-    }, 3000);
+    sessionStorage.setItem('onboardingComplete', 'true');
+    navigate('/hub');
   };
   
   const renderStep = () => {

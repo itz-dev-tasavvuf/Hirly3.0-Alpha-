@@ -65,28 +65,20 @@ const HeroSection = () => {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-            >
-              <Button
-                onClick={handleTryDemo}
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-4 rounded-xl glow-effect"
-              >
-                Try the Demo
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button
-                onClick={handleHowItWorks}
-                variant="outline"
-                size="lg"
-                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20 px-8 py-4 rounded-xl"
-              >
-                How It Works
-              </Button>
-            </motion.div>
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.5 }}
+  className="flex justify-center lg:justify-start"
+>
+  <Button
+    onClick={() => window.location.href = '/signup'}
+    size="lg"
+    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-10 py-5 rounded-2xl glow-effect text-xl shadow-lg"
+  >
+    Get Started
+    <ArrowRight className="ml-3 w-6 h-6" />
+  </Button>
+</motion.div>
           </motion.div>
 
           {/* Right Content - Animated Card Stack */}
