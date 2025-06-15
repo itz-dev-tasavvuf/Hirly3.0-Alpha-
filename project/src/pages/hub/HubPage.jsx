@@ -95,8 +95,6 @@ const HubPage = () => {
   console.log('HubPage userEmail:', sessionStorage.getItem('userEmail'));
 
   // Fake match state
-  const [hasFakeMatch, setHasFakeMatch] = useState(false);
-  const [fakeMatchData, setFakeMatchData] = useState(null);
   const [matches, setMatches] = useState([]);
   const [swipeCount, setSwipeCount] = useState(0);
   const navigate = useNavigate();
@@ -199,34 +197,11 @@ const HubPage = () => {
 
   // Swiping left advances, swiping right rewinds
   const handleCardSwipe = (direction) => {
-    setSwipeCount((prev) => {
-      const next = prev + 1;
-      // Only trigger once
-      if (!hasFakeMatch && next === 3) {
-        let match;
-        if (userType === 'candidate') {
-          // Pick a random job
-          match = mockJobListings[Math.floor(Math.random() * mockJobListings.length)];
-        } else {
-          // Pick a random candidate
-          match = mockCandidateProfiles[Math.floor(Math.random() * mockCandidateProfiles.length)];
-        }
-        setFakeMatchData(match);
-        setHasFakeMatch(true);
-        setMatches(prev => [...prev, match]);
-        toast({
-          title: "It's a match! 🎉",
-          description: userType === 'candidate' ? `You matched with ${match.company}!` : `You matched with ${match.name}!`,
-        });
-      }
-      return next;
-    });
+    setSwipeCount((prev) => prev + 1);
     setCards(prev => {
       if (direction === 'left') {
-        // Move first to last (advance)
         return [...prev.slice(1), prev[0]];
       } else if (direction === 'right') {
-        // Move last to first (rewind)
         return [prev[prev.length - 1], ...prev.slice(0, prev.length - 1)];
       }
       return prev;
@@ -342,15 +317,15 @@ const renderCardBack = (item) => {
         <div className="overflow-y-auto invisible-scrollbar h-[370px]">
           <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
           {matches.length === 0 ? (
-            <p className="text-center text-white/70">No matches yet. Swipe to match with jobs or candidates!</p>
+            <p className="text-center text-white/70">No matches... Yet!</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
               {matches.map((match, idx) => (
-                <li key={idx} className="bg-white/10 rounded-lg p-3 flex flex-col">
+                <li key={idx} className="px-4 py-3 flex flex-col hover:bg-white/10 transition">
                   {userType === 'candidate' ? (
                     <>
                       <span className="font-bold text-lg">{match.title} @ {match.company}</span>
-                      <span className="text-xs text-white/70">{match.location} • {match.jobType}</span>
+                      <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
                     </>
                   ) : (
                     <>
@@ -1005,6 +980,15 @@ const renderCardBack = (item) => {
             contentType={swipeAppContentType}
             candidateProfiles={mockCandidateProfiles}
             jobListings={mockJobListings}
+            onMatch={item => {
+              setMatches(prev => [...prev, item]);
+              toast({
+                title: "It's a match! 🎉",
+                description: userType === 'candidate'
+                  ? `You matched with ${item.company || item.title || ''}!`
+                  : `You matched with ${item.name || item.title || ''}!`,
+              });
+            }}
           />
         )}
       </AnimatePresence>

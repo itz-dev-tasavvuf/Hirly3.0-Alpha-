@@ -178,7 +178,7 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
   );
 };
 
-const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollapse }) => {
+const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollapse, onMatch }) => {
   const [stack, setStack] = useState(
     items.slice(0, 5).map(item => ({...item, matchPercentage: generateMatchPercentage() }))
   );
@@ -203,6 +203,7 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
     if (direction === 'right') {
       setInterested(prev => [...prev, dismissedItem]);
       toast({ title: "Interested!", description: `You liked ${dismissedItem.name || dismissedItem.title}`, variant: "default" });
+      if (onMatch) onMatch(dismissedItem);
     } else {
       setRejected(prev => [...prev, dismissedItem]);
       toast({ title: "Passed", description: `You passed on ${dismissedItem.name || dismissedItem.title}`, variant: "destructive" });
@@ -348,7 +349,7 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
 };
 
 
-const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], jobListings = [] }) => {
+const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], jobListings = [], onMatch }) => {
   const itemsToSwipe = useMemo(() => 
     (contentType === 'jobs' ? jobListings : candidateProfiles).map(item => ({
       ...item,
@@ -377,7 +378,8 @@ const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], j
           items={itemsToSwipe}
           userType={userType}
           onSwipeEnd={handleSwipeEnd}
-          onCollapse={onCollapse} 
+          onCollapse={onCollapse}
+          onMatch={onMatch}
         />
       </div>
     </motion.div>
