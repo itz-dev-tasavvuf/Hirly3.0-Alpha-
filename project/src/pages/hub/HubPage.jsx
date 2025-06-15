@@ -106,6 +106,7 @@ const HubPage = () => {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false); // New state for navigation menu
   const [genericModalOpen, setGenericModalOpen] = useState(false);
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
+  const [prefilledMessageRecipient, setPrefilledMessageRecipient] = useState(null); // NEW: for prefill
   const [swipeAppOpen, setSwipeAppOpen] = useState(false);
   const [swipeAppContentType, setSwipeAppContentType] = useState(null); 
   const [modalContent, setModalContent] = useState({ title: '', description: '' });
@@ -408,6 +409,7 @@ const renderCardBack = (item) => {
 <DialogFooter>
   <Button
     onClick={() => {
+      setPrefilledMessageRecipient(selectedMatch); // NEW: pass recipient
       setMessagesModalOpen(true);
       setSelectedMatch(null);
       setFlippedCardId(null);
@@ -1050,8 +1052,12 @@ const renderCardBack = (item) => {
 
       <MessagesModal 
         isOpen={messagesModalOpen} 
-        onClose={() => setMessagesModalOpen(false)} 
+        onClose={() => {
+          setMessagesModalOpen(false);
+          setPrefilledMessageRecipient(null); // Clear prefill on close
+        }}
         userType={userType} 
+        prefilledRecipient={prefilledMessageRecipient}
       />
 
       <AnimatePresence>

@@ -396,7 +396,7 @@ const ZoomCalendarModal = ({ isOpen, onClose, contact }) => {
   );
 };
 
-const MessagesModal = ({ isOpen, onClose, userType }) => {
+const MessagesModal = ({ isOpen, onClose, userType, prefilledRecipient }) => {
   const [conversations, setConversations] = useState(userType === 'candidate' ? mockCandidateConversations : mockEmployerConversations);
   const [activeConversationId, setActiveConversationId] = useState(conversations[0]?.id);
   const [searchTerm, setSearchTerm] = useState('');
@@ -406,6 +406,45 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
   const [calendarModalOpen, setCalendarModalOpen] = useState(false); // New state for calendar modal
   const [isComposingNewMessage, setIsComposingNewMessage] = useState(false);
   const [newMessageRecipient, setNewMessageRecipient] = useState(null);
+
+  // State for the "To" input value
+  const [toInputValue, setToInputValue] = useState('');
+
+  // Prefill recipient when prop changes
+  useEffect(() => {
+    if (prefilledRecipient && isOpen) {
+      // If coming from a job card, synthesize an HR rep name and company for the To field
+      let repName = prefilledRecipient.hrRepName || '';
+      let company = prefilledRecipient.company || '';
+      // If no HR rep name, create a fake one
+      if (!repName) {
+        // Use a simple pattern for fake HR names
+        repName = 'Jamie Rivera';
+      }
+      const displayName = company ? `${repName} (${company})` : repName;
+      setIsComposingNewMessage(true);
+      setNewMessageRecipient({
+        id: null,
+        name: repName,
+        role: 'HR Manager',
+        avatarUrl: '',
+        company,
+        jobTitle: ''
+      });
+      setToInputValue(displayName);
+      setMessageInput('');
+      setCurrentMessages([]);
+    } else if (!prefilledRecipient && isOpen) {
+      setToInputValue('');
+    }
+  }, [prefilledRecipient, isOpen]);
+
+  // Keep toInputValue in sync if newMessageRecipient changes by manual selection
+  useEffect(() => {
+    if (newMessageRecipient && !prefilledRecipient) {
+      setToInputValue(newMessageRecipient.name + (newMessageRecipient.company ? ` (${newMessageRecipient.company})` : ''));
+    }
+  }, [newMessageRecipient, prefilledRecipient]);
 
   const messagesEndRef = useRef(null);
 
@@ -608,8 +647,8 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
                 !showConversationList ? "flex" : "hidden md:flex"
               )}>
                 {isComposingNewMessage ? (
-  <>
-    <div className="p-4 border-b border-white/10 flex items-center justify-between">
+  <div className="flex flex-col h-full">
+    <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#1A1A2E]">
       <div className="flex items-center">
         <Avatar className="h-10 w-10 mr-3">
           {newMessageRecipient ? (
@@ -620,10 +659,10 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
         </Avatar>
         <div>
           <h3 className="font-semibold">
-            {newMessageRecipient ? newMessageRecipient.name : 'Select recipient'}
+            {newMessageRecipient ? newMessageRecipient.name : 'New Message'}
           </h3>
           <p className="text-xs text-gray-400">
-            {newMessageRecipient ? newMessageRecipient.role : ''}
+            {newMessageRecipient ? newMessageRecipient.role : 'Start a new conversation'}
           </p>
         </div>
       </div>
@@ -631,39 +670,62 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
         <X size={20} />
       </Button>
     </div>
-    <div className="p-6">
-      <label className="block mb-2 text-sm font-medium text-gray-300">To:</label>
-      <select
-        className="w-full p-2 rounded bg-slate-700 text-white mb-4"
-        value={newMessageRecipient ? newMessageRecipient.id : ''}
-        onChange={e => {
-          const selected = recipientsNotInConversation.find(r => r.id === e.target.value);
-          setNewMessageRecipient(selected || null);
-        }}
-      >
-        <option value="">Select a recipient...</option>
-        {recipientsNotInConversation.map(r => (
-          <option key={r.id} value={r.id}>{r.name} ({r.role})</option>
-        ))}
-      </select>
-      <Input
-        type="text"
-        placeholder="Type your message..."
-        value={messageInput}
-        onChange={e => setMessageInput(e.target.value)}
-        onKeyPress={e => e.key === 'Enter' && newMessageRecipient && handleSendMessage()}
-        className="mb-4 bg-slate-700 border-slate-600 placeholder-gray-400 focus:ring-purple-500"
-        disabled={!newMessageRecipient}
-      />
-      <Button
-        onClick={handleSendMessage}
-        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold w-full"
-        disabled={!newMessageRecipient || !messageInput.trim()}
-      >
-        <Send size={18} className="mr-2" />Send
-      </Button>
+    <div className="flex-1 flex flex-col justify-center px-6 pb-0 pt-8 bg-[#1A1A2E]">
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-300">To:</label>
+        <div className="relative">
+          <input
+            type="text"
+            className="w-full p-3 pr-8 rounded-lg bg-slate-700 border border-white/10 text-white focus:ring-purple-500 appearance-none"
+            placeholder="Type a name..."
+            value={newMessageRecipient ? newMessageRecipient.name + (newMessageRecipient.company ? ` (${newMessageRecipient.company})` : '') : toInputValue}
+            onChange={e => {
+              const input = e.target.value;
+              setToInputValue(input);
+              // Try to match a recipient by name (case-insensitive, ignoring company in parens)
+              const match = recipientsNotInConversation.find(r => {
+                const label = r.name + (r.company ? ` (${r.company})` : '');
+                return label.toLowerCase() === input.toLowerCase();
+              });
+              if (match) {
+                setNewMessageRecipient(match);
+              } else {
+                setNewMessageRecipient(input.trim() ? { id: null, name: input.trim(), role: '', avatarUrl: '', company: '', jobTitle: '' } : null);
+              }
+            }}
+            list="recipient-suggestions"
+            autoComplete="off"
+          />
+          <datalist id="recipient-suggestions">
+            {recipientsNotInConversation.map(r => (
+              <option key={r.id} value={r.name + (r.company ? ` (${r.company})` : '')}>{r.role}</option>
+            ))}
+          </datalist>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Input
+          type="text"
+          placeholder="Type your message..."
+          value={messageInput}
+          onChange={e => setMessageInput(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && newMessageRecipient && handleSendMessage()}
+          className="bg-slate-700 border-slate-600 placeholder-gray-400 focus:ring-purple-500 text-white rounded-lg px-4 py-3"
+          disabled={!newMessageRecipient}
+        />
+        <Button
+          onClick={handleSendMessage}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-semibold w-full rounded-lg py-3"
+          disabled={!newMessageRecipient || !messageInput.trim()}
+        >
+          <Send size={18} className="mr-2" />Send
+        </Button>
+      </div>
     </div>
-  </>
+  </div>
 ) : (
   activeConversation ? (
     <>
