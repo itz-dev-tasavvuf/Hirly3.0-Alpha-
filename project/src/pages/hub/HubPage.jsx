@@ -581,9 +581,13 @@ const renderCardBack = (item) => {
     return null;
   };
 
+  // Card ref to detect outside clicks
+  const cardStackRef = React.useRef(null);
   // Handle clicking outside flipped card to collapse
-  const handleBackgroundClick = () => {
-    if (flippedCardId) {
+  const handleBackgroundClick = (e) => {
+    if (!flippedCardId) return;
+    // Only flip back if click is outside the card stack
+    if (cardStackRef.current && !cardStackRef.current.contains(e.target)) {
       setFlippedCardId(null);
     }
   };
@@ -644,7 +648,7 @@ const renderCardBack = (item) => {
         </motion.header>
       </AnimatePresence>
 
-      <div className="relative w-[320px] h-[450px] flex items-center justify-center" style={{ perspective: '1000px' }}>
+      <div ref={cardStackRef} className="relative w-[320px] h-[450px] flex items-center justify-center" style={{ perspective: '1000px' }}>
         <AnimatePresence initial={false}>
           {memoizedCards.map((item, index) => {
             const isTopCard = index === memoizedCards.length - 1;
@@ -670,8 +674,12 @@ const renderCardBack = (item) => {
                   }
                 }}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  if (isTopCard) handleCardClick(item, false); // Pass fromNavMenu = false
+                  // Only allow flipping (handleCardClick) if clicking the front face and not already flipped
+                  if (!isFlipped && isTopCard) {
+                    e.stopPropagation();
+                    handleCardClick(item, false);
+                  }
+                  // Do not trigger flip if already flipped (back face)
                 }}
                 animate={{ 
                   scale: 1 - (memoizedCards.length - 1 - index) * 0.05, 
