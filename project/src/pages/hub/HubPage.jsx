@@ -159,7 +159,7 @@ const HubPage = () => {
     }
 
     // Handle flippable cards (profile, settings, company, upload_jobs, verify_algorand, dashboard)
-    if (item.id === 'profile' || item.id === 'settings' || item.id === 'company' || item.id === 'upload_jobs' || item.id === 'verify_algorand' || item.id === 'dashboard') {
+    if (item.id === 'profile' || item.id === 'settings' || item.id === 'company' || item.id === 'upload_jobs' || item.id === 'verify_algorand' || item.id === 'dashboard' || item.id === 'matches') {
       if (fromNavMenu) {
         // When coming from nav menu, bring card to top and flip it
         bringCardToTop(item.id);
@@ -311,36 +311,40 @@ const handleAlgorandVerificationSubmit = (e, type) => {
 
 const renderCardBack = (item) => {
     if (item.id === 'matches') {
-    // Render the matches list
-    return (
-      <div className="w-full h-full p-6 flex flex-col justify-between text-white">
-        <div className="overflow-y-auto invisible-scrollbar h-[370px]">
-          <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
-          {matches.length === 0 ? (
-            <p className="text-center text-white/70">No matches... Yet!</p>
-          ) : (
-            <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
-              {matches.map((match, idx) => (
-                <li key={idx} className="px-4 py-3 flex flex-col hover:bg-white/10 transition">
-                  {userType === 'candidate' ? (
-                    <>
-                      <span className="font-bold text-lg">{match.title} @ {match.company}</span>
-                      <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-bold text-lg">{match.name}</span>
-                      <span className="text-xs text-white/70">{match.title} • {match.location}</span>
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+  // Only render the Matches card BACK face here (the stack handles the 3D flip)
+  return (
+    <div className="relative w-full h-full p-6 flex flex-col justify-between text-white bg-gradient-to-br from-green-500/60 to-blue-700/60 rounded-2xl shadow-xl">
+      <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+        <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
+        {matches.length > 0 && (
+          <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
+            {matches.map((match, idx) => (
+              <li key={idx} className="px-4 py-3 flex flex-col hover:bg-white/10 transition">
+                {userType === 'candidate' ? (
+                  <>
+                    <span className="font-bold text-lg">{match.title} @ {match.company}</span>
+                    <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-bold text-lg">{match.name}</span>
+                    <span className="text-xs text-white/70">{match.title} • {match.location}</span>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-    );
-  }
+      <div className="mt-4 flex justify-center">
+        <button
+          className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
+          onClick={e => { e.stopPropagation(); setFlippedCardId(null); }}
+        >Back</button>
+      </div>
+    </div>
+  );
+}
 
   if (item.id === 'profile') {
       return (
