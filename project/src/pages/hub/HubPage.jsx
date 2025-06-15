@@ -890,7 +890,7 @@ const renderCardBack = (item) => {
                     className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden`}
                   >
                     <div className="flex flex-col items-center text-center">
-                      <item.icon className="w-20 h-20 mb-6 opacity-80" />
+                      <item.icon className="w-24 h-24 mb-6 opacity-90" />
                       {item.id === 'verify_algorand' ? (
   <span className="text-4xl font-bold mb-2">Verify with Algorand</span>
 ) : (
