@@ -57,7 +57,7 @@ export default function VerifyCard() {
             onChange={handleChange}
             placeholder="Full Name"
             required
-            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-gray-400 focus:outline-none"
+            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-white focus:outline-none"
           />
           <input
             name="email"
@@ -66,28 +66,28 @@ export default function VerifyCard() {
             onChange={handleChange}
             placeholder="Email"
             required
-            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-gray-400 focus:outline-none"
+            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-white focus:outline-none"
           />
           <input
             name="role"
             value={form.role}
             onChange={handleChange}
             placeholder="Role (e.g. Software Engineer)"
-            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-gray-400 focus:outline-none"
+            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-white focus:outline-none"
           />
           <input
             name="company"
             value={form.company}
             onChange={handleChange}
             placeholder="Company (optional)"
-            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-gray-400 focus:outline-none"
+            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-white focus:outline-none"
           />
           <textarea
             name="extra"
             value={form.extra}
             onChange={handleChange}
             placeholder="Extra Info (optional)"
-            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-gray-400 focus:outline-none"
+            className="w-full px-3 py-2 rounded bg-white/10 text-white placeholder-white focus:outline-none"
           />
           <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
             {loading ? 'Verifying...' : 'Verify Me On-Chain'}

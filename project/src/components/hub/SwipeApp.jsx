@@ -201,9 +201,11 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
     setLastDismissed({ item: dismissedItem, direction });
 
     if (direction === 'right') {
-      setInterested(prev => [...prev, dismissedItem]);
       toast({ title: "Interested!", description: `You liked ${dismissedItem.name || dismissedItem.title}`, variant: "default" });
-      if (onMatch) onMatch(dismissedItem);
+      if (Math.random() < 0.33) {
+        setInterested(prev => [...prev, dismissedItem]);
+        if (onMatch) onMatch(dismissedItem);
+      }
     } else {
       setRejected(prev => [...prev, dismissedItem]);
       toast({ title: "Passed", description: `You passed on ${dismissedItem.name || dismissedItem.title}`, variant: "destructive" });
