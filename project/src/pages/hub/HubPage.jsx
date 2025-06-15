@@ -15,6 +15,8 @@ import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserChec
 import algorandMark from '@/assets/algorand_logo_mark_white.png';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
+import QuickMessageModal from '@/components/hub/QuickMessageModal';
+
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
 import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
@@ -105,6 +107,9 @@ const HubPage = () => {
   const [menuItems, setMenuItems]  = useState([]);
   const [cards, setCards] = useState([]);
   const [flippedCardId, setFlippedCardId] = useState(null);
+  // Quick Message modal state
+  const [quickMessageModalOpen, setQuickMessageModalOpen] = useState(false);
+  const [quickMessageRecipient, setQuickMessageRecipient] = useState(null);
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false); // New state for navigation menu
   const [genericModalOpen, setGenericModalOpen] = useState(false);
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
@@ -378,8 +383,8 @@ const renderCardBack = (item) => {
 <DialogFooter>
   <Button
     onClick={() => {
-      setPrefilledMessageRecipient(selectedMatch); // NEW: pass recipient
-      setMessagesModalOpen(true);
+      setQuickMessageRecipient(selectedMatch);
+      setQuickMessageModalOpen(true);
       setSelectedMatch(null);
       setFlippedCardId(null);
     }}
@@ -392,6 +397,30 @@ const renderCardBack = (item) => {
         </DialogContent>
       </Dialog>
     </div>
+  );
+  // Quick Message Modal integration
+  const handleSendQuickMessage = (msg) => {
+    toast({ title: "Message Sent!", description: `\u2709\ufe0f ${msg}` });
+    setQuickMessageModalOpen(false);
+    setQuickMessageRecipient(null);
+  };
+
+  // ...rest of HubPage logic...
+
+  // MAIN RETURN (ensure only one return in the component)
+  if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
+
+  return (
+    <>
+      {/* ...existing JSX... */}
+      <QuickMessageModal
+        isOpen={quickMessageModalOpen}
+        onClose={() => { setQuickMessageModalOpen(false); setQuickMessageRecipient(null); }}
+        userType={userType}
+        onSend={handleSendQuickMessage}
+      />
+      {/* ...existing JSX... */}
+    </>
   );
 }
 
