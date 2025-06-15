@@ -22,6 +22,7 @@ const candidateMenuItems = [
   { id: 'jobs', title: 'Jobs', icon: Briefcase, description: "Browse job opportunities", gradient: "from-green-500 to-teal-500", action: 'openSwipeJobs' },
   { id: 'messages', title: 'Messages', icon: MessageSquare, description: "Chat with recruiters", gradient: "from-indigo-500 to-purple-500", action: 'openMessagesModal' },
   { id: 'profile', title: 'Profile', icon: User, description: "View and edit your profile", gradient: "from-purple-600 to-pink-600" },
+  { id: 'verify_algorand', title: 'Verify with Algorand', icon: Shield, description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
   { id: 'settings', title: 'Settings', icon: Settings, description: "Adjust your preferences", gradient: "from-orange-500 to-red-500" },
   { id: 'coach', title: 'AI Coach', icon: Bot, description: "AI-powered career coaching", gradient: "from-blue-500 to-cyan-500", action: 'openAICoach' },
 ];
@@ -32,6 +33,7 @@ const employerMenuItems = [
   { id: 'dashboard', title: 'Dashboard', icon: BarChart3, description: "View hiring metrics", gradient: "from-blue-500 to-cyan-500" },
   { id: 'upload_jobs', title: 'Upload Jobs', icon: PlusSquare, description: "Add new job postings", gradient: "from-yellow-500 to-orange-500" },
   { id: 'company', title: 'Company', icon: Building, description: "Edit company profile", gradient: "from-purple-600 to-pink-600" },
+  { id: 'verify_algorand', title: 'Verify with Algorand', icon: Shield, description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
   { id: 'settings', title: 'Settings', icon: Settings, description: "Adjust preferences", gradient: "from-orange-500 to-red-500" },
   { id: 'coach', title: 'AI Coach', icon: Bot, description: "AI-powered hiring coaching", gradient: "from-cyan-500 to-blue-600", action: 'openAICoach' },
 ];
