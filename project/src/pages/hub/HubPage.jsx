@@ -323,23 +323,28 @@ const renderCardBack = (item) => {
     {matches.map((match, idx) => (
       <li
         key={idx}
-        className="px-4 py-3 flex flex-col hover:bg-white/10 transition cursor-pointer"
-        onClick={e => {
-          e.stopPropagation();
-          setSelectedMatch(match);
-        }}
+        className="px-4 py-3 flex flex-col sm:flex-row sm:items-center hover:bg-white/10 transition cursor-pointer group"
       >
-        {userType === 'candidate' ? (
-          <>
-            <span className="font-bold text-lg">{match.title} @ {match.company}</span>
-            <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
-          </>
-        ) : (
-          <>
-            <span className="font-bold text-lg">{match.name}</span>
-            <span className="text-xs text-white/70">{match.title} • {match.location}</span>
-          </>
-        )}
+        <div
+          className="flex-1"
+          onClick={e => {
+            e.stopPropagation();
+            setSelectedMatch(match);
+          }}
+        >
+          {userType === 'candidate' ? (
+            <>
+              <span className="font-bold text-lg">{match.title} @ {match.company}</span>
+              <span className="block text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
+            </>
+          ) : (
+            <>
+              <span className="font-bold text-lg">{match.name}</span>
+              <span className="block text-xs text-white/70">{match.title} • {match.location}</span>
+            </>
+          )}
+        </div>
+
       </li>
     ))}
   </ul>
@@ -356,35 +361,63 @@ const renderCardBack = (item) => {
       <Dialog open={!!selectedMatch} onOpenChange={open => { if (!open) setSelectedMatch(null); }}>
         <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-2xl gradient-text">
-              {userType === 'candidate'
-                ? `${selectedMatch?.title} @ ${selectedMatch?.company}`
-                : selectedMatch?.name}
-            </DialogTitle>
-            <DialogDescription className="text-gray-300">
-              {userType === 'candidate'
-                ? `${selectedMatch?.location} • ${selectedMatch?.jobType || selectedMatch?.type}`
-                : `${selectedMatch?.title} • ${selectedMatch?.location}`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            {userType === 'candidate' ? (
-              <>
-                <div className="mb-2"><span className="font-semibold">Job Description:</span> {selectedMatch?.description || 'No description.'}</div>
-                <div className="mb-2"><span className="font-semibold">Requirements:</span> {selectedMatch?.requirements || 'N/A'}</div>
-                <div className="mb-2"><span className="font-semibold">Salary:</span> {selectedMatch?.salaryMin && selectedMatch?.salaryMax ? `$${selectedMatch.salaryMin} - $${selectedMatch.salaryMax}` : 'N/A'}</div>
-              </>
-            ) : (
-              <>
-                <div className="mb-2"><span className="font-semibold">Skills:</span> {selectedMatch?.skills || 'N/A'}</div>
-                <div className="mb-2"><span className="font-semibold">Experience:</span> {selectedMatch?.experience || 'N/A'}</div>
-                <div className="mb-2"><span className="font-semibold">Bio:</span> {selectedMatch?.bio || 'N/A'}</div>
-              </>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setSelectedMatch(null)} className="bg-purple-600 hover:bg-purple-700">Close</Button>
-          </DialogFooter>
+  <div className="flex items-center gap-4 mb-2">
+    <Avatar className="w-14 h-14">
+      <AvatarImage
+        src={userType === 'candidate'
+          ? (selectedMatch?.logo || `https://avatar.vercel.sh/${selectedMatch?.company || 'job'}.png`)
+          : (selectedMatch?.avatar || `https://avatar.vercel.sh/${selectedMatch?.name || 'candidate'}.png`)
+        }
+        alt={userType === 'candidate' ? selectedMatch?.company : selectedMatch?.name}
+      />
+      <AvatarFallback>
+        {userType === 'candidate'
+          ? (selectedMatch?.company?.[0] || 'J')
+          : (selectedMatch?.name?.split(' ').map(n => n[0]).join('') || 'C')}
+      </AvatarFallback>
+    </Avatar>
+    <div>
+      <DialogTitle className="text-2xl gradient-text">
+        {userType === 'candidate'
+          ? `${selectedMatch?.title} @ ${selectedMatch?.company}`
+          : selectedMatch?.name}
+      </DialogTitle>
+      <DialogDescription className="text-gray-300">
+        {userType === 'candidate'
+          ? `${selectedMatch?.location} • ${selectedMatch?.jobType || selectedMatch?.type}`
+          : `${selectedMatch?.title} • ${selectedMatch?.location}`}
+      </DialogDescription>
+    </div>
+  </div>
+</DialogHeader>
+<div className="py-4">
+  {userType === 'candidate' ? (
+    <>
+      <div className="mb-2"><span className="font-semibold">Job Description:</span> {selectedMatch?.description || 'No description.'}</div>
+      <div className="mb-2"><span className="font-semibold">Requirements:</span> {selectedMatch?.requirements || 'N/A'}</div>
+      <div className="mb-2"><span className="font-semibold">Salary:</span> {selectedMatch?.salaryMin && selectedMatch?.salaryMax ? `$${selectedMatch.salaryMin} - $${selectedMatch.salaryMax}` : 'N/A'}</div>
+    </>
+  ) : (
+    <>
+      <div className="mb-2"><span className="font-semibold">Skills:</span> {selectedMatch?.skills || 'N/A'}</div>
+      <div className="mb-2"><span className="font-semibold">Experience:</span> {selectedMatch?.experience || 'N/A'}</div>
+      <div className="mb-2"><span className="font-semibold">Bio:</span> {selectedMatch?.bio || 'N/A'}</div>
+    </>
+  )}
+</div>
+<DialogFooter>
+  <Button
+    onClick={() => {
+      setMessagesModalOpen(true);
+      setSelectedMatch(null);
+      setFlippedCardId(null);
+    }}
+    className="bg-green-600 hover:bg-green-700 mr-2"
+  >
+    Message
+  </Button>
+  <Button onClick={() => setSelectedMatch(null)} className="bg-purple-600 hover:bg-purple-700">Close</Button>
+</DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
