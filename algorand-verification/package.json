@@ -1,0 +1,13 @@
+{
+  "name": "algorand-verification",
+  "version": "1.0.0",
+  "description": "Algorand on-chain verification for Hirly (TestNet)",
+  "main": "index.js",
+  "scripts": {
+    "verify": "node index.js"
+  },
+  "dependencies": {
+    "algosdk": "^2.7.0",
+    "dotenv": "^16.0.0"
+  }
+}
