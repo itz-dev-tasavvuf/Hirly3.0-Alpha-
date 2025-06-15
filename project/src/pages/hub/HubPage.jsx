@@ -111,6 +111,8 @@ const HubPage = () => {
   const [modalContent, setModalContent] = useState({ title: '', description: '' });
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [aiCoachOpen, setAiCoachOpen] = useState(false);
+  // For match details popup
+  const [selectedMatch, setSelectedMatch] = useState(null);
   
   // Job form state
   const [jobForm, setJobForm] = useState({
@@ -317,24 +319,31 @@ const renderCardBack = (item) => {
       <div className="overflow-y-auto invisible-scrollbar h-[370px]">
         <h2 className="text-2xl font-bold mb-4 text-center text-white">Your Matches</h2>
         {matches.length > 0 && (
-          <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
-            {matches.map((match, idx) => (
-              <li key={idx} className="px-4 py-3 flex flex-col hover:bg-white/10 transition">
-                {userType === 'candidate' ? (
-                  <>
-                    <span className="font-bold text-lg">{match.title} @ {match.company}</span>
-                    <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="font-bold text-lg">{match.name}</span>
-                    <span className="text-xs text-white/70">{match.title} • {match.location}</span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
+  <ul className="divide-y divide-white/10 rounded-lg border border-white/10 overflow-hidden bg-white/5">
+    {matches.map((match, idx) => (
+      <li
+        key={idx}
+        className="px-4 py-3 flex flex-col hover:bg-white/10 transition cursor-pointer"
+        onClick={e => {
+          e.stopPropagation();
+          setSelectedMatch(match);
+        }}
+      >
+        {userType === 'candidate' ? (
+          <>
+            <span className="font-bold text-lg">{match.title} @ {match.company}</span>
+            <span className="text-xs text-white/70">{match.location} • {match.jobType || match.type}</span>
+          </>
+        ) : (
+          <>
+            <span className="font-bold text-lg">{match.name}</span>
+            <span className="text-xs text-white/70">{match.title} • {match.location}</span>
+          </>
         )}
+      </li>
+    ))}
+  </ul>
+)}
       </div>
       <div className="mt-4 flex justify-center">
         <button
@@ -342,6 +351,42 @@ const renderCardBack = (item) => {
           onClick={e => { e.stopPropagation(); setFlippedCardId(null); }}
         >Back</button>
       </div>
+
+      {/* Match Details Dialog */}
+      <Dialog open={!!selectedMatch} onOpenChange={open => { if (!open) setSelectedMatch(null); }}>
+        <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl gradient-text">
+              {userType === 'candidate'
+                ? `${selectedMatch?.title} @ ${selectedMatch?.company}`
+                : selectedMatch?.name}
+            </DialogTitle>
+            <DialogDescription className="text-gray-300">
+              {userType === 'candidate'
+                ? `${selectedMatch?.location} • ${selectedMatch?.jobType || selectedMatch?.type}`
+                : `${selectedMatch?.title} • ${selectedMatch?.location}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {userType === 'candidate' ? (
+              <>
+                <div className="mb-2"><span className="font-semibold">Job Description:</span> {selectedMatch?.description || 'No description.'}</div>
+                <div className="mb-2"><span className="font-semibold">Requirements:</span> {selectedMatch?.requirements || 'N/A'}</div>
+                <div className="mb-2"><span className="font-semibold">Salary:</span> {selectedMatch?.salaryMin && selectedMatch?.salaryMax ? `$${selectedMatch.salaryMin} - $${selectedMatch.salaryMax}` : 'N/A'}</div>
+              </>
+            ) : (
+              <>
+                <div className="mb-2"><span className="font-semibold">Skills:</span> {selectedMatch?.skills || 'N/A'}</div>
+                <div className="mb-2"><span className="font-semibold">Experience:</span> {selectedMatch?.experience || 'N/A'}</div>
+                <div className="mb-2"><span className="font-semibold">Bio:</span> {selectedMatch?.bio || 'N/A'}</div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setSelectedMatch(null)} className="bg-purple-600 hover:bg-purple-700">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
