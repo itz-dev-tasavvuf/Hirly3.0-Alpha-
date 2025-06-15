@@ -132,7 +132,7 @@ export default function AI_Prompt() {
                 value={value}
                 placeholder="Let's practice and get you interview ready!"
                 className={cn(
-                  "w-full rounded-xl rounded-b-none px-4 py-3 bg-white/30 dark:bg-white/20 border-none dark:text-white text-black placeholder:text-black/80 dark:placeholder:text-white/80 resize-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  "w-full rounded-xl rounded-b-none px-4 py-3 bg-white/30 dark:bg-white/20 border-none text-white dark:text-white placeholder:text-white/80 dark:placeholder:text-white/80 resize-none focus-visible:ring-0 focus-visible:ring-offset-0",
                   "min-h-[72px]",
                 )}
                 ref={textareaRef}
@@ -151,7 +151,7 @@ export default function AI_Prompt() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="flex items-center gap-1 h-8 pl-1 pr-2 text-xs rounded-md dark:text-white text-black hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
+                        className="flex items-center gap-1 h-8 pl-1 pr-2 text-xs rounded-md text-white hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
                       >
                         <AnimatePresence mode="wait">
                           <motion.div

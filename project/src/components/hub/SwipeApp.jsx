@@ -318,14 +318,16 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
 
       {/* Stack completion state */}
       {stack.length === 0 && (
-        <div className="text-center p-8 glass-effect rounded-xl mx-auto mt-8" onClick={handleCardAreaClick}>
-          <CheckCircle size={64} className="mx-auto text-green-400 mb-4" />
-          <h3 className="text-2xl font-bold text-white mb-2">All Swiped!</h3>
-          <p className="text-gray-300 mb-1">Interested: {interested.length}</p>
-          <p className="text-gray-300 mb-4">Rejected: {rejected.length}</p>
-          <Button onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-            <RefreshCw size={18} className="mr-2" /> Reset Stack
-          </Button>
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+          <div className="text-center p-8 glass-effect rounded-xl" onClick={handleCardAreaClick}>
+            <CheckCircle size={64} className="mx-auto text-green-400 mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2">All Swiped!</h3>
+            <p className="text-gray-300 mb-1">Interested: {interested.length}</p>
+            <p className="text-gray-300 mb-4">Rejected: {rejected.length}</p>
+            <Button onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              <RefreshCw size={18} className="mr-2" /> Reset Stack
+            </Button>
+          </div>
         </div>
       )}
 
