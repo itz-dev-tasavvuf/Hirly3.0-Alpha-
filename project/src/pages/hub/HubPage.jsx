@@ -147,7 +147,7 @@ const HubPage = () => {
   const handleLogout = () => {
     sessionStorage.removeItem('userType');
     sessionStorage.removeItem('userEmail');
-    navigate('/hub-auth');
+    navigate('/');
     toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
   };
 
@@ -488,11 +488,23 @@ const HubPage = () => {
             </PopoverTrigger>
             <PopoverContent className="w-80 glass-effect border-white/20 text-white p-4">
               <div className="grid gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Navigation Menu</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Quick access to all features.
-                  </p>
+                <div className="mb-4">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="glass-effect border-white/20 text-white hover:bg-white/20 px-4 py-2 w-full flex items-center justify-between">
+                        <span className="flex items-center">
+                          {userType === 'candidate' ? <UserSearchIcon className="mr-2 h-5 w-5"/> : <Briefcase className="mr-2 h-5 w-5"/>}
+                          {userEmail} ({userType})
+                        </span>
+                        <ChevronDown className="ml-2 h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-56 glass-effect border-white/20 text-white p-2">
+                      <Button variant="ghost" onClick={handleLogout} className="w-full justify-start hover:bg-red-500/30 text-red-400 hover:text-red-300">
+                        <LogOut className="mr-2 h-4 w-4" /> Logout
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid gap-2">
                   {menuItems.map(item => (
@@ -606,28 +618,6 @@ const HubPage = () => {
         </AnimatePresence>
       </div>
       
-      <motion.div 
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
-      >
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="glass-effect border-white/20 text-white hover:bg-white/20 px-6 py-3 text-base">
-              {userType === 'candidate' ? <UserSearchIcon className="mr-2 h-5 w-5"/> : <Briefcase className="mr-2 h-5 w-5"/>}
-              {userEmail} ({userType})
-              <ChevronDown className="ml-2 h-5 w-5" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56 glass-effect border-white/20 text-white p-2">
-            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start hover:bg-red-500/30 text-red-400 hover:text-red-300">
-              <LogOut className="mr-2 h-4 w-4" /> Logout
-            </Button>
-          </PopoverContent>
-        </Popover>
-      </motion.div>
-
       <Dialog open={genericModalOpen} onOpenChange={setGenericModalOpen}>
         <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
           <DialogHeader>
