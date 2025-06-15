@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, CheckCircle, Zap } from 'lucide-react';
+import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 
 const BlockchainSection = () => {
   const features = [
@@ -40,16 +41,16 @@ const BlockchainSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <div className="flex items-center mb-6">
-              <img  alt="Algorand logo" className="w-8 h-8 mr-3" src="https://images.unsplash.com/photo-1639327380086-f13b8fef4211" />
-              <span className="text-green-400 font-semibold text-lg">Powered by Algorand</span>
-            </div>
-
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Blockchain-Verified
               <br />
               <span className="gradient-text">Trust & Security</span>
             </h2>
+
+            <div className="flex items-center mb-6">
+              <span className="text-green-400 font-semibold text-lg mr-2">Powered by</span>
+              <img src={algorandFullLogoWhite} alt="Algorand" className="h-8 w-auto" />
+            </div>
 
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
               We use blockchain to verify identities and job posts. No more fake listings or bots. 
