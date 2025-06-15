@@ -11,13 +11,13 @@ import SignUpPage from '@/pages/auth/SignUpPage';
 import CandidateOnboarding from '@/pages/onboarding/CandidateOnboarding';
 import EmployerOnboarding from '@/pages/onboarding/EmployerOnboarding';
 import HubPage from '@/pages/hub/HubPage';
-import HubAuthPage from '@/pages/hub/HubAuthPage';
+
 
 function App() {
   const ProtectedRoute = ({ children }) => {
     const userType = sessionStorage.getItem('userType');
     if (!userType) {
-      return <Navigate to="/hub-auth" replace />;
+      return <Navigate to="/login" replace />;
     }
     return children;
   };
@@ -34,7 +34,7 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/onboarding/candidate" element={<CandidateOnboarding />} />
         <Route path="/onboarding/employer" element={<EmployerOnboarding />} />
-        <Route path="/hub-auth" element={<HubAuthPage />} />
+
         <Route 
           path="/hub" 
           element={
