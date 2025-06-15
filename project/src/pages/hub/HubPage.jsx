@@ -16,6 +16,7 @@ import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
 import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAppData';
 import Orb from '@/components/Orb';
+import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '@/components/AI_Prompt';
 
 
@@ -702,7 +703,7 @@ const renderCardBack = (item) => {
 
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] p-4 overflow-hidden relative" onClick={handleBackgroundClick}>
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] p-4 overflow-hidden relative" onClick={selectedMetric ? undefined : handleBackgroundClick}>
       {/* Metric Detail Overlay */}
       {selectedMetric && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60">
@@ -721,6 +722,8 @@ const renderCardBack = (item) => {
               <div className="text-4xl font-bold mb-1">{selectedMetric.value}</div>
               <div className="text-lg font-semibold mb-2 gradient-text">{selectedMetric.label}</div>
             </div>
+            {/* Chart for metric */}
+            <MetricDetailChart label={selectedMetric.label} />
             <div className="text-center text-white/90 text-base">
               {/* Dummy detailed info for each metric */}
               {selectedMetric.label === 'Applicants' && <span>128 applicants have applied to your open positions this month. View trends, sources, and applicant quality here.</span>}
@@ -735,6 +738,7 @@ const renderCardBack = (item) => {
       )}
 
       <AnimatePresence>
+// ... (rest of the code remains the same)
         <motion.header 
           className="absolute top-0 left-0 right-0 p-6 flex justify-center items-center z-20"
           initial={{ y: -100, opacity: 0 }}
