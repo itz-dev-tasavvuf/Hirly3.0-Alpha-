@@ -19,6 +19,7 @@ import Orb from '@/components/Orb';
 import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '@/components/AI_Prompt';
+import VerifyCard from '@/components/hub/VerifyCard';
 
 
 // Dashboard metrics config
@@ -274,44 +275,7 @@ const HubPage = () => {
     setFlippedCardId(null);
   };
 
-  const [candidateAlgorandForm, setCandidateAlgorandForm] = useState({
-  fullName: '',
-  skills: '',
-  experience: '',
-  profileUrl: '',
-});
-const [employerAlgorandForm, setEmployerAlgorandForm] = useState({
-  companyName: '',
-  website: '',
-  email: '',
-  description: '',
-});
-
-const handleAlgorandFormChange = (field, value, type) => {
-  if (type === 'candidate') {
-    setCandidateAlgorandForm(prev => ({ ...prev, [field]: value }));
-  } else {
-    setEmployerAlgorandForm(prev => ({ ...prev, [field]: value }));
-  }
-};
-
-const handleAlgorandVerificationSubmit = (e, type) => {
-  e.preventDefault();
-  toast({
-    title: type === 'candidate' ? 'Verification Submitted!' : 'Company Verification Submitted!',
-    description: type === 'candidate'
-      ? `${candidateAlgorandForm.fullName} will be verified on-chain.`
-      : `${employerAlgorandForm.companyName} will be verified on-chain.`,
-  });
-  // Reset form
-  if (type === 'candidate') {
-    setCandidateAlgorandForm({ fullName: '', skills: '', experience: '', profileUrl: '' });
-  } else {
-    setEmployerAlgorandForm({ companyName: '', website: '', email: '', description: '' });
-  }
-  setFlippedCardId(null);
-};
-
+  
 const renderCardBack = (item) => {
     if (item.id === 'matches') {
   // Only render the Matches card BACK face here (the stack handles the 3D flip)
@@ -702,83 +666,8 @@ const renderCardBack = (item) => {
     }
 
     if (item.id === 'verify_algorand') {
-      // Show different forms for candidate vs employer
-      if (userType === 'candidate') {
-        return (
-          <div className="w-full h-full p-6 flex flex-col justify-between text-white">
-            <div className="overflow-y-auto invisible-scrollbar h-[370px]">
-              <h2 className="text-2xl font-bold mb-4 text-center text-white"><span className="inline-flex items-center">Verify with <img src={algorandFullLogoWhite} alt="Algorand full logo" className="h-7 ml-2 align-middle" /></span></h2>
-              <form className="space-y-4" onSubmit={e => handleAlgorandVerificationSubmit(e, 'candidate')}>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Full Name</label>
-                  <input type="text" name="fullName" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    value={candidateAlgorandForm.fullName}
-                    onChange={e => handleAlgorandFormChange('fullName', e.target.value, 'candidate')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Main Skills</label>
-                  <input type="text" name="skills" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    placeholder="e.g. React, Figma, TypeScript"
-                    value={candidateAlgorandForm.skills}
-                    onChange={e => handleAlgorandFormChange('skills', e.target.value, 'candidate')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Years of Experience</label>
-                  <input type="number" name="experience" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    value={candidateAlgorandForm.experience}
-                    onChange={e => handleAlgorandFormChange('experience', e.target.value, 'candidate')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Portfolio or LinkedIn</label>
-                  <input type="url" name="profileUrl" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70"
-                    value={candidateAlgorandForm.profileUrl}
-                    onChange={e => handleAlgorandFormChange('profileUrl', e.target.value, 'candidate')} />
-                </div>
-                <Button type="submit" className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm">
-                  Verify Me On-Chain
-                </Button>
-              </form>
-            </div>
-          </div>
-        );
-      } else {
-        return (
-          <div className="w-full h-full p-6 flex flex-col justify-between text-white">
-            <div className="overflow-y-auto invisible-scrollbar h-[370px]">
-              <h2 className="text-2xl font-bold mb-4 text-center text-white">Company Verification</h2>
-              <form className="space-y-4" onSubmit={e => handleAlgorandVerificationSubmit(e, 'employer')}>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Company Name</label>
-                  <input type="text" name="companyName" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    value={employerAlgorandForm.companyName}
-                    onChange={e => handleAlgorandFormChange('companyName', e.target.value, 'employer')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Company Website</label>
-                  <input type="url" name="website" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    value={employerAlgorandForm.website}
-                    onChange={e => handleAlgorandFormChange('website', e.target.value, 'employer')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Contact Email</label>
-                  <input type="email" name="email" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70" required
-                    value={employerAlgorandForm.email}
-                    onChange={e => handleAlgorandFormChange('email', e.target.value, 'employer')} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">Description</label>
-                  <textarea name="description" className="w-full rounded-md bg-white/10 border border-white/20 text-white px-3 py-2 placeholder-white/70 resize-none" rows={3}
-                    value={employerAlgorandForm.description}
-                    onChange={e => handleAlgorandFormChange('description', e.target.value, 'employer')} />
-                </div>
-                <Button type="submit" className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-green-500 hover:from-cyan-600 hover:to-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm">
-                  Verify My Company
-                </Button>
-              </form>
-            </div>
-          </div>
-        );
-      }
+      // Unified on-chain verification card using VerifyCard component
+      return <VerifyCard />;
     }
 
     if (item.id === 'settings') {
