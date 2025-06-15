@@ -29,6 +29,7 @@ app.post('/api/algorand/verify', async (req, res) => {
     // Algorand note field max is 1000 bytes; truncate if needed
     noteStr = truncate(noteStr, 950);
     const params = await algodClient.getTransactionParams().do();
+    console.log('Algod params:', params);
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: centralAccount.addr,
       to: centralAccount.addr,
@@ -40,7 +41,11 @@ app.post('/api/algorand/verify', async (req, res) => {
     const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
     // Wait for confirmation
     let confirmed = false;
-    let round = params.firstRoundValid;
+    let round = (params.firstRoundValid || params['firstRoundValid'] || params['firstRound'] || params['lastRound'] || 0);
+    if (typeof round !== 'number' || isNaN(round) || round === 0) {
+      round = (await algodClient.status().do())['last-round'] || 1;
+    }
+    console.log('Initial round:', round);
     while (!confirmed) {
       const pending = await algodClient.pendingTransactionInformation(txId).do();
       if (pending['confirmed-round'] && pending['confirmed-round'] > 0) {
