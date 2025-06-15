@@ -397,13 +397,15 @@ const ZoomCalendarModal = ({ isOpen, onClose, contact }) => {
 };
 
 const MessagesModal = ({ isOpen, onClose, userType }) => {
-  const conversations = userType === 'candidate' ? mockCandidateConversations : mockEmployerConversations;
+  const [conversations, setConversations] = useState(userType === 'candidate' ? mockCandidateConversations : mockEmployerConversations);
   const [activeConversationId, setActiveConversationId] = useState(conversations[0]?.id);
   const [searchTerm, setSearchTerm] = useState('');
   const [messageInput, setMessageInput] = useState('');
   const [currentMessages, setCurrentMessages] = useState([]);
   const [showConversationList, setShowConversationList] = useState(true); // For mobile view
   const [calendarModalOpen, setCalendarModalOpen] = useState(false); // New state for calendar modal
+  const [isComposingNewMessage, setIsComposingNewMessage] = useState(false);
+  const [newMessageRecipient, setNewMessageRecipient] = useState(null);
 
   const messagesEndRef = useRef(null);
 
@@ -441,6 +443,10 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
     c.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // For new message, get all possible recipients not already in conversations
+  const allPossibleRecipients = userType === 'candidate' ? mockEmployerConversations : mockCandidateConversations;
+  const recipientsNotInConversation = allPossibleRecipients.filter(r => !conversations.find(c => c.id === r.id));
+
   const handleSendMessage = () => {
     if (messageInput.trim() === '') return;
     const newMessage = {
@@ -450,14 +456,35 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setCurrentMessages(prev => [...prev, newMessage]);
-    // This would ideally update the main conversations array and persist
-    const updatedConversations = conversations.map(convo => {
-      if (convo.id === activeConversationId) {
-        return { ...convo, messages: [...convo.messages, newMessage], lastMessage: messageInput, timestamp: newMessage.time };
-      }
-      return convo;
-    });
-    // setConversations(updatedConversations); // If managing state directly
+    if (isComposingNewMessage && newMessageRecipient) {
+      // Create new conversation
+      const newConvo = {
+        id: newMessageRecipient.id,
+        name: newMessageRecipient.name,
+        role: newMessageRecipient.role,
+        avatarUrl: newMessageRecipient.avatarUrl,
+        lastMessage: messageInput,
+        timestamp: newMessage.time,
+        unread: 0,
+        messages: [newMessage],
+        jobTitle: newMessageRecipient.jobTitle,
+        company: newMessageRecipient.company,
+      };
+      setConversations(prev => [newConvo, ...prev]);
+      setActiveConversationId(newConvo.id);
+      setIsComposingNewMessage(false);
+      setShowConversationList(false);
+      setNewMessageRecipient(null);
+    } else {
+      // Existing conversation
+      const updatedConversations = conversations.map(convo => {
+        if (convo.id === activeConversationId) {
+          return { ...convo, messages: [...convo.messages, newMessage], lastMessage: messageInput, timestamp: newMessage.time };
+        }
+        return convo;
+      });
+      setConversations(updatedConversations);
+    }
     setMessageInput('');
     toast({ title: "Message Sent!", description: "🚧 Backend for messages not implemented." });
   };
@@ -520,7 +547,12 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
               >
                 <div className="p-4 border-b border-white/10 hidden md:flex items-center justify-between">
                    <h2 className="text-xl font-bold gradient-text">Messages</h2>
-                   <Button variant="ghost" size="icon" onClick={() => toast({title: "Feature not implemented"})} className="text-white hover:bg-white/20 w-9 h-9">
+                   <Button variant="ghost" size="icon" onClick={() => {
+  setIsComposingNewMessage(true);
+  setNewMessageRecipient(null);
+  setMessageInput('');
+  setCurrentMessages([]);
+}} className="text-white hover:bg-white/20 w-9 h-9">
                       <Edit3 size={18} />
                    </Button>
                 </div>
@@ -575,84 +607,141 @@ const MessagesModal = ({ isOpen, onClose, userType }) => {
                 "flex-1 flex-col bg-[#1A1A2E] md:flex",
                 !showConversationList ? "flex" : "hidden md:flex"
               )}>
-                {activeConversation ? (
-                  <>
-                    <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                      <div className="flex items-center">
-                         <Avatar className="h-10 w-10 mr-3">
-                           <AvatarImage src={activeConversation.avatarUrl} alt={activeConversation.name} />
-                           <AvatarFallback>{activeConversation.name.substring(0,1)}</AvatarFallback>
-                         </Avatar>
-                         <div>
-                           <h3 className="font-semibold">{activeConversation.name}</h3>
-                           <p className="text-xs text-gray-400">{activeConversation.role}</p>
-                         </div>
-                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" className="text-purple-400 hover:bg-white/10 hover:text-purple-300" onClick={() => toast({title: "View Profile Clicked"})}>
-                           <Eye size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">View Profile</span>
-                        </Button>
-                        { userType === 'candidate' && (
-                            <>
-                                <Button variant="ghost" size="sm" className="text-green-400 hover:bg-white/10 hover:text-green-300" onClick={() => toast({title: "View Job Clicked"})}>
-                                    <Briefcase size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">View Job</span>
-                                </Button>
-                                <Button variant="ghost" size="sm" className="text-blue-400 hover:bg-white/10 hover:text-blue-300" onClick={handleScheduleClick}>
-                                    <Calendar size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">Schedule</span>
-                                </Button>
-                            </>
-                        )}
-                        { userType === 'employer' && (
-                            <Button variant="ghost" size="sm" className="text-yellow-400 hover:bg-white/10 hover:text-yellow-300" onClick={() => toast({title: "Send Job Details Clicked"})}>
-                                <Briefcase size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">Job Details</span>
-                            </Button>
-                        )}
-                        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 w-9 h-9 hidden md:inline-flex">
-                            <X size={20} />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                      {currentMessages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[70%] p-3 rounded-xl shadow ${msg.sender === 'me' ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' : 'bg-slate-700 text-gray-200'}`}>
-                            <p className="text-sm">{msg.text}</p>
-                            <p className="text-xs mt-1 ${msg.sender === 'me' ? 'text-purple-200' : 'text-gray-400'} text-right">{msg.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                      <div ref={messagesEndRef} />
-                    </div>
-
-                    <div className="p-4 border-t border-white/10">
-                       {/* Typing indicator could go here */}
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={() => toast({title: "Attach file clicked"})}>
-                           <Paperclip size={20} />
-                        </Button>
-                        <Input
-                          type="text"
-                          placeholder="Type a message..."
-                          value={messageInput}
-                          onChange={(e) => setMessageInput(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          className="flex-1 bg-slate-700 border-slate-600 placeholder-gray-400 focus:ring-purple-500"
-                        />
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={() => toast({title: "Emoji clicked"})}>
-                           <Smile size={20} />
-                        </Button>
-                        <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold">
-                          <Send size={18} className="mr-0 md:mr-2" /> <span className="hidden md:inline">Send</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-gray-400">
-                    <p>Select a conversation to start chatting.</p>
-                  </div>
-                )}
+                {isComposingNewMessage ? (
+  <>
+    <div className="p-4 border-b border-white/10 flex items-center justify-between">
+      <div className="flex items-center">
+        <Avatar className="h-10 w-10 mr-3">
+          {newMessageRecipient ? (
+            <AvatarImage src={newMessageRecipient.avatarUrl} alt={newMessageRecipient.name} />
+          ) : (
+            <AvatarFallback>?</AvatarFallback>
+          )}
+        </Avatar>
+        <div>
+          <h3 className="font-semibold">
+            {newMessageRecipient ? newMessageRecipient.name : 'Select recipient'}
+          </h3>
+          <p className="text-xs text-gray-400">
+            {newMessageRecipient ? newMessageRecipient.role : ''}
+          </p>
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" onClick={() => setIsComposingNewMessage(false)} className="text-white hover:bg-white/20 w-9 h-9">
+        <X size={20} />
+      </Button>
+    </div>
+    <div className="p-6">
+      <label className="block mb-2 text-sm font-medium text-gray-300">To:</label>
+      <select
+        className="w-full p-2 rounded bg-slate-700 text-white mb-4"
+        value={newMessageRecipient ? newMessageRecipient.id : ''}
+        onChange={e => {
+          const selected = recipientsNotInConversation.find(r => r.id === e.target.value);
+          setNewMessageRecipient(selected || null);
+        }}
+      >
+        <option value="">Select a recipient...</option>
+        {recipientsNotInConversation.map(r => (
+          <option key={r.id} value={r.id}>{r.name} ({r.role})</option>
+        ))}
+      </select>
+      <Input
+        type="text"
+        placeholder="Type your message..."
+        value={messageInput}
+        onChange={e => setMessageInput(e.target.value)}
+        onKeyPress={e => e.key === 'Enter' && newMessageRecipient && handleSendMessage()}
+        className="mb-4 bg-slate-700 border-slate-600 placeholder-gray-400 focus:ring-purple-500"
+        disabled={!newMessageRecipient}
+      />
+      <Button
+        onClick={handleSendMessage}
+        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold w-full"
+        disabled={!newMessageRecipient || !messageInput.trim()}
+      >
+        <Send size={18} className="mr-2" />Send
+      </Button>
+    </div>
+  </>
+) : (
+  activeConversation ? (
+    <>
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center">
+          <Avatar className="h-10 w-10 mr-3">
+            <AvatarImage src={activeConversation.avatarUrl} alt={activeConversation.name} />
+            <AvatarFallback>{activeConversation.name.substring(0,1)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="font-semibold">{activeConversation.name}</h3>
+            <p className="text-xs text-gray-400">{activeConversation.role}</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="sm" className="text-purple-400 hover:bg-white/10 hover:text-purple-300" onClick={() => toast({title: "View Profile Clicked"})}>
+            <Eye size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">View Profile</span>
+          </Button>
+          { userType === 'candidate' && (
+            <>
+              <Button variant="ghost" size="sm" className="text-green-400 hover:bg-white/10 hover:text-green-300" onClick={() => toast({title: "View Job Clicked"})}>
+                <Briefcase size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">View Job</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="text-blue-400 hover:bg-white/10 hover:text-blue-300" onClick={handleScheduleClick}>
+                <Calendar size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">Schedule</span>
+              </Button>
+            </>
+          )}
+          { userType === 'employer' && (
+            <Button variant="ghost" size="sm" className="text-yellow-400 hover:bg-white/10 hover:text-yellow-300" onClick={() => toast({title: "Send Job Details Clicked"})}>
+              <Briefcase size={16} className="mr-1 md:mr-2"/> <span className="hidden md:inline">Job Details</span>
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 w-9 h-9 hidden md:inline-flex">
+            <X size={20} />
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {currentMessages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[70%] p-3 rounded-xl shadow ${msg.sender === 'me' ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' : 'bg-slate-700 text-gray-200'}`}>
+              <p className="text-sm">{msg.text}</p>
+              <p className={`text-xs mt-1 ${msg.sender === 'me' ? 'text-purple-200' : 'text-gray-400'} text-right`}>{msg.time}</p>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <div className="p-4 border-t border-white/10">
+        {/* Typing indicator could go here */}
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={() => toast({title: "Attach file clicked"})}>
+            <Paperclip size={20} />
+          </Button>
+          <Input
+            type="text"
+            placeholder="Type a message..."
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            className="flex-1 bg-slate-700 border-slate-600 placeholder-gray-400 focus:ring-purple-500"
+          />
+          <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={() => toast({title: "Emoji clicked"})}>
+            <Smile size={20} />
+          </Button>
+          <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold">
+            <Send size={18} className="mr-0 md:mr-2" /> <span className="hidden md:inline">Send</span>
+          </Button>
+        </div>
+      </div>
+    </>
+  ) : (
+    <div className="flex-1 flex items-center justify-center text-gray-400">
+      <p>Select a conversation to start chatting.</p>
+    </div>
+  )
+)}
               </div>
             </div>
           </motion.div>
