@@ -11,6 +11,7 @@ import { GoogleIcon } from '@/components/icons';
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const [userType, setUserType] = React.useState('candidate');
   const handleSocialLogin = (provider) => {
     toast({
       title: `Sign in with ${provider}`,
@@ -22,10 +23,10 @@ const SignInPage = () => {
     e.preventDefault();
     // Simulate sign-in success
     // In a real app, replace this with actual authentication logic
-    sessionStorage.setItem('userType', 'candidate'); // or 'employer' if you want to support both
+    sessionStorage.setItem('userType', userType); // candidate or employer
     toast({
       title: 'Signed in!',
-      description: 'Welcome back. Redirecting...'
+      description: `Welcome back, ${userType === 'candidate' ? 'Candidate' : 'Employer'}. Redirecting...`
     });
     navigate('/hub');
   };
@@ -53,6 +54,23 @@ const SignInPage = () => {
             <CardDescription className="text-gray-300">Sign in to continue your journey.</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* User type toggle */}
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                type="button"
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 ${userType === 'candidate' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
+                onClick={() => setUserType('candidate')}
+              >
+                Candidate
+              </button>
+              <button
+                type="button"
+                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 ${userType === 'employer' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
+                onClick={() => setUserType('employer')}
+              >
+                Employer
+              </button>
+            </div>
             <form onSubmit={handleSignIn} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-300">Email or Username</Label>
