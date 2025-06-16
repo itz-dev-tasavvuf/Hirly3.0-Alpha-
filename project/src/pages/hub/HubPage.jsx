@@ -742,22 +742,6 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
               />
             </div>
-            {/* Main Post Job button at bottom */}
-            <div className="flex justify-end mt-8">
-              <Button
-                type="submit"
-                variant="primary"
-                className="bg-cyan-700 hover:bg-cyan-800 text-white px-6 py-2 rounded-lg font-semibold text-lg shadow-lg"
-                disabled={isPostingToAlgorand || !jobForm.title || !jobForm.description}
-                aria-busy={isPostingToAlgorand}
-              >
-                {isPostingToAlgorand ? (
-                  <span className="flex items-center"><span className="loader mr-2"></span>Posting to Algorand...</span>
-                ) : (
-                  <>Post Job</>
-                )}
-              </Button>
-            </div>
             <div className="space-y-2">
               <Label className="text-white text-sm">Job Title</Label>
               <Input
@@ -1094,39 +1078,24 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 }}
                 transition={{ 
                   type: "spring", 
-                  stiffness: 300, 
-                  damping: 30,
                 }}
-                whileHover={isTopCard ? { scale: 1.03, y: (memoizedCards.length - 1 - index) * -10 -5 } : {}}
               >
                 {/* 3D Card Container */}
-                <motion.div 
+                <motion.div
                   className="relative w-full h-full"
-                  style={{ 
-                    transformStyle: 'preserve-3d',
-                  }}
-                  animate={{
-                    rotateY: isFlipped ? 180 : 0
-                  }}
-                  transition={{ 
-                    duration: 0.6,
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 25
-                  }}
+                  style={{ transformStyle: 'preserve-3d' }}
+                  animate={{ rotateY: isFlipped ? 180 : 0 }}
+                  transition={{ duration: 0.6, type: "spring", stiffness: 200, damping: 25 }}
                 >
-                  
                   {/* Front Face */}
-                  <div 
-                    className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden`}
-                  >
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden`}>
                     <div className="flex flex-col items-center text-center">
                       <item.icon className="w-24 h-24 mb-6 opacity-90" />
                       {item.id === 'verify_algorand' ? (
-  <span className="text-4xl font-bold mb-2">Verify with Algorand</span>
-) : (
-  <h2 className="text-4xl font-bold mb-2">{item.title}</h2>
-)}
+                        <span className="text-4xl font-bold mb-2">Verify with Algorand</span>
+                      ) : (
+                        <h2 className="text-4xl font-bold mb-2">{item.title}</h2>
+                      )}
                       <p className="text-sm opacity-70 leading-relaxed">{item.description}</p>
                     </div>
                     {isTopCard && !isFlipped && (
@@ -1139,13 +1108,10 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                       </div>
                     )}
                   </div>
-
                   {/* Back Face */}
                   <div 
                     className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} overflow-hidden backface-hidden`}
-                    style={{ 
-                      transform: 'rotateY(180deg)',
-                    }}
+                    style={{ transform: 'rotateY(180deg)' }}
                   >
                     {renderCardBack(item)}
                   </div>
