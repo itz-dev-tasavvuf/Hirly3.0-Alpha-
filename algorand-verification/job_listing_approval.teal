@@ -1,0 +1,36 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l4
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l3
+err
+main_l3:
+txn TypeEnum
+int appl
+==
+global LatestTimestamp
+byte "exp"
+app_global_get
+>
+&&
+return
+main_l4:
+byte "title"
+txna ApplicationArgs 0
+app_global_put
+byte "desc"
+txna ApplicationArgs 1
+app_global_put
+byte "company"
+txna ApplicationArgs 2
+app_global_put
+byte "exp"
+txna ApplicationArgs 3
+btoi
+app_global_put
+int 1
+return
