@@ -650,7 +650,7 @@ const renderCardBack = (item) => {
                 value={jobForm.title}
                 onChange={(e) => handleJobFormChange('title', e.target.value)}
                 placeholder="e.g. Senior Frontend Developer"
-                className="bg-white/10 border-white/20 text-white placeholder-white/50 text-sm h-9"
+                className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
                 required
               />
             </div>
@@ -662,7 +662,7 @@ const renderCardBack = (item) => {
                   value={jobForm.location}
                   onChange={(e) => handleJobFormChange('location', e.target.value)}
                   placeholder="San Francisco, CA"
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50 text-sm h-9"
+                  className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
                   required
                 />
               </div>
@@ -671,7 +671,7 @@ const renderCardBack = (item) => {
                 <select
                   value={jobForm.jobType}
                   onChange={(e) => handleJobFormChange('jobType', e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white text-sm h-9"
+                  className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
                 >
                   <option value="Full-time" className="bg-slate-800">Full-time</option>
                   <option value="Part-time" className="bg-slate-800">Part-time</option>
@@ -701,7 +701,7 @@ const renderCardBack = (item) => {
                   value={jobForm.salaryMin}
                   onChange={(e) => handleJobFormChange('salaryMin', e.target.value)}
                   placeholder="80000"
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50 text-sm h-9"
+                  className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
                 />
               </div>
               <div className="space-y-2">
@@ -711,7 +711,7 @@ const renderCardBack = (item) => {
                   value={jobForm.salaryMax}
                   onChange={(e) => handleJobFormChange('salaryMax', e.target.value)}
                   placeholder="120000"
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50 text-sm h-9"
+                  className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
                 />
               </div>
             </div>
@@ -723,7 +723,7 @@ const renderCardBack = (item) => {
                 onChange={(e) => handleJobFormChange('description', e.target.value)}
                 placeholder="Describe the role, responsibilities, and what you're looking for..."
                 rows={3}
-                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white/50 text-sm resize-none"
+                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm resize-none"
                 required
               />
             </div>
@@ -735,7 +735,7 @@ const renderCardBack = (item) => {
                 onChange={(e) => handleJobFormChange('requirements', e.target.value)}
                 placeholder="React, TypeScript, 3+ years experience..."
                 rows={2}
-                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white/50 text-sm resize-none"
+                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm resize-none"
                 required
               />
             </div>
@@ -747,7 +747,7 @@ const renderCardBack = (item) => {
                 onChange={(e) => handleJobFormChange('benefits', e.target.value)}
                 placeholder="Health insurance, 401k, flexible hours..."
                 rows={2}
-                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white/50 text-sm resize-none"
+                className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm resize-none"
               />
             </div>
 
