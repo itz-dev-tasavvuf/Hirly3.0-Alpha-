@@ -175,7 +175,8 @@ const HubPage = () => {
     salaryMax: '',
     description: '',
     requirements: '',
-    benefits: ''
+    benefits: '',
+    expiration: '' // New expiration field
   });
   
   useEffect(() => {
@@ -751,6 +752,17 @@ const renderCardBack = (item) => {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label className="text-white text-sm">Expiration Date</Label>
+              <Input
+                type="date"
+                value={jobForm.expiration}
+                onChange={(e) => handleJobFormChange('expiration', e.target.value)}
+                placeholder="Expiration Date"
+                className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
+                required
+              />
+            </div>
             <div className="pt-4 pb-6">
               <Button
                 type="submit"
