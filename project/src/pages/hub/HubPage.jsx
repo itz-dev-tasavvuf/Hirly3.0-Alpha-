@@ -166,6 +166,8 @@ const HubPage = () => {
   const [menuItems, setMenuItems]  = useState([]);
   const [cards, setCards] = useState([]);
   const [flippedCardId, setFlippedCardId] = useState(null);
+// State to track if the Expiration Date modal is open
+const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
   // Quick Message modal state
   const [quickMessageModalOpen, setQuickMessageModalOpen] = useState(false);
   const [quickMessageRecipient, setQuickMessageRecipient] = useState(null);
@@ -224,6 +226,8 @@ const HubPage = () => {
   };
 
   const handleCardClick = (item, fromNavMenu = false) => {
+  // Prevent flipping if expiration modal is open
+  if (isExpirationModalOpen) return;
     // Close navigation menu when any item is clicked from nav menu
     if (fromNavMenu) {
       setIsNavMenuOpen(false);
@@ -339,7 +343,8 @@ const HubPage = () => {
       requirements: '',
       benefits: ''
     });
-    setFlippedCardId(null);
+    // Prevent flipping if expiration modal is open
+if (!isExpirationModalOpen) setFlippedCardId(null);
   };
 
   
@@ -389,7 +394,8 @@ const renderCardBack = (item) => {
       <div className="mt-4 flex justify-center">
         <button
           className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20"
-          onClick={e => { e.stopPropagation(); setFlippedCardId(null); }}
+          onClick={e => { e.stopPropagation(); // Prevent flipping if expiration modal is open
+if (!isExpirationModalOpen) setFlippedCardId(null); }}
         >Back</button>
       </div>
 
@@ -781,6 +787,8 @@ const renderCardBack = (item) => {
     withPortal
     portalId="expiration-date-modal"
     customInput={<CustomInput placeholder="Expiration Date" />}
+    onCalendarOpen={() => setIsExpirationModalOpen(true)}
+    onCalendarClose={() => setIsExpirationModalOpen(false)}
   />
 </div>
             <div className="pt-4 pb-6">
@@ -842,10 +850,12 @@ const renderCardBack = (item) => {
   const cardStackRef = React.useRef(null);
   // Handle clicking outside flipped card to collapse
   const handleBackgroundClick = (e) => {
-    if (!flippedCardId) return;
+    // Prevent flipping back if expiration modal is open
+    if (!flippedCardId || isExpirationModalOpen) return;
     // Only flip back if click is outside the card stack
     if (cardStackRef.current && !cardStackRef.current.contains(e.target)) {
-      setFlippedCardId(null);
+      // Prevent flipping if expiration modal is open
+      if (!isExpirationModalOpen) setFlippedCardId(null);
     }
   };
 
