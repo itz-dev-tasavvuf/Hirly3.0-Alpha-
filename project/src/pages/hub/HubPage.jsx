@@ -36,6 +36,20 @@ const dashboardMetrics = [
   { label: "Avg. Time to Fill", value: "21d", icon: <Clock className="w-5 h-5 text-orange-400" /> },
 ];
 
+// Fun mock company profile for the demo
+const mockCompanyProfile = {
+  name: 'Hirly, Inc',
+  industry: 'AI Recruiting & Talent Innovation',
+  employees: '42',
+  founded: '2023',
+  activeJobs: 7,
+  candidatesHired: 15,
+  responseRate: '99.9%',
+  avgTimeToHire: '3d',
+  tagline: 'We match top talent with next-gen teams 🚀',
+  description: 'Hirly, Inc is on a mission to revolutionize hiring with AI and human touch. We connect innovators with opportunities that matter. Proudly building the future of work.'
+};
+
 // AnimatedMetric component for dashboard
 const AnimatedMetric = ({ label, value, icon, delay }) => {
   const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
@@ -275,7 +289,7 @@ const HubPage = () => {
   };
 
   const mockCompanyProfile = {
-    name: "InnovateTech Solutions",
+    name: "Hirly, Inc",
     industry: "Technology",
     founded: "2018",
     employees: "50-100",
@@ -519,41 +533,53 @@ const renderCardBack = (item) => {
     if (item.id === 'company') {
       return (
         <div className="w-full h-full p-6 flex flex-col justify-between text-white">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 bg-white/20 rounded-lg flex items-center justify-center mb-4 border-2 border-white/20">
-              <Building className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold mb-1 text-white">{mockCompanyProfile.name}</h2>
-            <p className="text-sm opacity-70 mb-4 text-white/80">{mockCompanyProfile.industry}</p>
-            
-            <div className="space-y-3 w-full">
-              <div className="flex items-center justify-center">
-                <Users className="w-4 h-4 mr-2 opacity-60 text-white" />
-                <span className="text-sm text-white">{mockCompanyProfile.employees} employees</span>
+          <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-white/20 rounded-lg flex items-center justify-center mb-4 border-2 border-white/20">
+                <Building className="w-10 h-10 text-white" />
               </div>
-              <div className="flex items-center justify-center">
-                <Award className="w-4 h-4 mr-2 opacity-60 text-white" />
-                <span className="text-sm text-white">Founded {mockCompanyProfile.founded}</span>
+              <h2 className="text-2xl font-bold mb-1 text-white">{mockCompanyProfile.name}</h2>
+              <p className="text-sm opacity-70 mb-4 text-white/80">{mockCompanyProfile.industry}</p>
+              <div className="space-y-3 w-full">
+                <div className="flex items-center justify-center">
+                  <MapPin className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">{mockCompanyProfile.founded}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Users className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">{mockCompanyProfile.employees}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">Active Jobs: {mockCompanyProfile.activeJobs}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Award className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">Candidates Hired: {mockCompanyProfile.candidatesHired}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <BarChart3 className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">Response Rate: {mockCompanyProfile.responseRate}</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <Clock className="w-4 h-4 mr-2 opacity-60 text-white" />
+                  <span className="text-sm text-white">Avg. Time to Hire: {mockCompanyProfile.avgTimeToHire}</span>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 text-center mt-4">
-            <div className="bg-white/10 rounded-lg p-2">
-              <p className="text-lg font-bold text-white">{mockCompanyProfile.activeJobs}</p>
-              <p className="text-xs opacity-60 text-white/70">Active Jobs</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-2">
-              <p className="text-lg font-bold text-white">{mockCompanyProfile.candidatesHired}</p>
-              <p className="text-xs opacity-60 text-white/70">Hired</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-2">
-              <p className="text-lg font-bold text-white">{mockCompanyProfile.responseRate}</p>
-              <p className="text-xs opacity-60 text-white/70">Response Rate</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-2">
-              <p className="text-lg font-bold text-white">{mockCompanyProfile.avgTimeToHire}</p>
-              <p className="text-xs opacity-60 text-white/70">Time to Hire</p>
+            <div className="grid grid-cols-3 gap-2 text-center mt-4">
+              <div className="bg-white/10 rounded-lg p-2">
+                <p className="text-lg font-bold text-white">{mockCompanyProfile.activeJobs}</p>
+                <p className="text-xs opacity-60 text-white/70">Active Jobs</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-2">
+                <p className="text-lg font-bold text-white">{mockCompanyProfile.candidatesHired}</p>
+                <p className="text-xs opacity-60 text-white/70">Hired</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-2">
+                <p className="text-lg font-bold text-white">{mockCompanyProfile.avgTimeToHire}</p>
+                <p className="text-xs opacity-60 text-white/70">Avg. Time</p>
+              </div>
             </div>
           </div>
         </div>
