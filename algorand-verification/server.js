@@ -12,10 +12,11 @@ const fs = require('fs').promises;
 // Deploy a job listing smart contract to Algorand
 app.post('/api/algorand/deployJobListing', async (req, res) => {
   try {
-    const { title, desc, company, expiration } = req.body;
-    if (!title || !desc || !company || !expiration) {
-      return res.status(400).json({ error: 'Missing job info (title, desc, company, expiration)' });
+    const { title, description, company = '', expiration } = req.body;
+    if (!title || !description || !expiration) {
+      return res.status(400).json({ error: 'Missing job info (title, description, expiration)' });
     }
+    const desc = description;
     // 1. Read TEAL files
     const approvalTeal = await fs.readFile('job_listing_approval.teal', 'utf8');
     const clearTeal = await fs.readFile('job_listing_clear.teal', 'utf8');

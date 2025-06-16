@@ -126,6 +126,11 @@ const employerMenuItems = [
 ];
 
 const HubPage = () => {
+  const [isPostingToAlgorand, setIsPostingToAlgorand] = useState(false);
+  const [algorandTxResult, setAlgorandTxResult] = useState(null);
+  // Add expiration date state
+  const [expirationDate, setExpirationDate] = useState(null);
+
   // ...all state declarations...
 
   // Quick message sent modal state
@@ -344,7 +349,63 @@ const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
       benefits: ''
     });
     // Prevent flipping if expiration modal is open
-if (!isExpirationModalOpen) setFlippedCardId(null);
+    if (!isExpirationModalOpen) setFlippedCardId(null);
+  };
+
+  // Algorand integration: Post and Verify
+  const handlePostAndVerify = async () => {
+    setIsPostingToAlgorand(true);
+    setAlgorandTxResult(null);
+    try {
+      // Collect job form data and expiration
+      const jobData = {
+        title: jobForm.title,
+        description: jobForm.description,
+        company: mockCompanyProfile.name || '',
+        expiration: expirationDate ? Math.floor(expirationDate.getTime() / 1000) : Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 // default: 30 days
+      };
+      const response = await fetch('/api/algorand/deployJobListing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobData)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Algorand deployment failed');
+      setAlgorandTxResult(data);
+      toast({
+        title: 'Job Posted On-Chain! ✅',
+        description: (
+          <span>
+            App ID: <b>{data.appId}</b><br />
+            Tx ID: <b>{data.txId}</b><br />
+            <a href={`https://testnet.explorer.perawallet.app/application/${data.appId}`} target="_blank" rel="noopener noreferrer" className="underline text-cyan-300">View on Pera Explorer</a>
+          </span>
+        ),
+        duration: 12000
+      });
+      // Reset form
+      setJobForm({
+        title: '',
+        location: '',
+        jobType: 'Full-time',
+        workSetup: 'Hybrid',
+        salaryMin: '',
+        salaryMax: '',
+        description: '',
+        requirements: '',
+        benefits: ''
+      });
+      setExpirationDate(null);
+      if (!isExpirationModalOpen) setFlippedCardId(null);
+    } catch (err) {
+      toast({
+        title: 'Algorand Posting Failed',
+        description: err.message || 'Could not post job to Algorand.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPostingToAlgorand(false);
+    }
   };
 
   
@@ -667,7 +728,36 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
       return (
         <div className="w-full h-full p-6 overflow-hidden">
           <h2 className="text-2xl font-bold mb-4 text-center text-white">Post a Job</h2>
-          <form onSubmit={handleJobFormSubmit} className="overflow-y-auto invisible-scrollbar h-[300px] space-y-4">
+          <form onSubmit={e => { e.preventDefault(); handlePostAndVerify(); }} className="overflow-y-auto invisible-scrollbar h-[300px] space-y-4">
+            {/* Expiration Date Picker */}
+            <div className="space-y-2">
+              <Label className="text-white text-sm">Expiration Date</Label>
+              <DatePicker
+                selected={expirationDate}
+                onChange={date => setExpirationDate(date)}
+                minDate={new Date()}
+                customInput={<CustomInput />}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select expiration date"
+                className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
+              />
+            </div>
+            {/* Main Post Job button at bottom */}
+            <div className="flex justify-end mt-8">
+              <Button
+                type="submit"
+                variant="primary"
+                className="bg-cyan-700 hover:bg-cyan-800 text-white px-6 py-2 rounded-lg font-semibold text-lg shadow-lg"
+                disabled={isPostingToAlgorand || !jobForm.title || !jobForm.description}
+                aria-busy={isPostingToAlgorand}
+              >
+                {isPostingToAlgorand ? (
+                  <span className="flex items-center"><span className="loader mr-2"></span>Posting to Algorand...</span>
+                ) : (
+                  <>Post Job</>
+                )}
+              </Button>
+            </div>
             <div className="space-y-2">
               <Label className="text-white text-sm">Job Title</Label>
               <Input
