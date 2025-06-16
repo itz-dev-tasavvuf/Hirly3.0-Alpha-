@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import DatePicker from 'react-datepicker';
 import { forwardRef } from 'react';
@@ -867,12 +868,33 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
 </div>
             <div className="pt-4 pb-6">
               <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Post Job
-              </Button>
+  type="submit"
+  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm flex items-center justify-center relative"
+  disabled={isPostingToAlgorand}
+>
+  {isPostingToAlgorand ? (
+    <>
+      <span className="absolute left-4 flex items-center">
+        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      </span>
+      <span className="ml-6">Posting to Algorand...</span>
+    </>
+  ) : (
+    <>
+      <Upload className="w-4 h-4 mr-2" />
+      Post Job
+    </>
+  )}
+</Button>
+{isPostingToAlgorand && (
+  <div className="w-full mt-2">
+    <Progress value={70} />
+  </div>
+)}
+
             </div>
           </form>
         </div>
