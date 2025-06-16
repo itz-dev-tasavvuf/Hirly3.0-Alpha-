@@ -850,22 +850,6 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               />
             </div>
 
-            <div className="space-y-2">
-  <Label className="text-white text-sm">Expiration Date</Label>
-  <DatePicker
-    selected={jobForm.expiration ? new Date(jobForm.expiration) : null}
-    onChange={date => handleJobFormChange('expiration', date ? date.toISOString().split('T')[0] : '')}
-    calendarClassName="glass-calendar"
-    placeholderText="Expiration Date"
-    dateFormat="yyyy-MM-dd"
-    required
-    withPortal
-    portalId="expiration-date-modal"
-    customInput={<CustomInput placeholder="Expiration Date" />}
-    onCalendarOpen={() => setIsExpirationModalOpen(true)}
-    onCalendarClose={() => setIsExpirationModalOpen(false)}
-  />
-</div>
             <div className="pt-4 pb-6">
               <Button
   type="submit"
