@@ -3,6 +3,23 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from 'react-datepicker';
+import { forwardRef } from 'react';
+
+// Custom input for DatePicker to always use the custom calendar modal
+const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+  <input
+    ref={ref}
+    onClick={onClick}
+    value={value || ''}
+    readOnly
+    placeholder={placeholder}
+    className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9 w-full rounded-md px-3 py-2"
+  />
+));
+
+import 'react-datepicker/dist/react-datepicker.css';
+import '../../glass-calendar.css';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
@@ -753,16 +770,19 @@ const renderCardBack = (item) => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white text-sm">Expiration Date</Label>
-              <Input
-                type="date"
-                value={jobForm.expiration}
-                onChange={(e) => handleJobFormChange('expiration', e.target.value)}
-                placeholder="Expiration Date"
-                className="bg-white/10 border-white/20 text-white placeholder-white placeholder-opacity-100 placeholder-white/90 text-sm h-9"
-                required
-              />
-            </div>
+  <Label className="text-white text-sm">Expiration Date</Label>
+  <DatePicker
+    selected={jobForm.expiration ? new Date(jobForm.expiration) : null}
+    onChange={date => handleJobFormChange('expiration', date ? date.toISOString().split('T')[0] : '')}
+    calendarClassName="glass-calendar"
+    placeholderText="Expiration Date"
+    dateFormat="yyyy-MM-dd"
+    required
+    withPortal
+    portalId="expiration-date-modal"
+    customInput={<CustomInput placeholder="Expiration Date" />}
+  />
+</div>
             <div className="pt-4 pb-6">
               <Button
                 type="submit"
