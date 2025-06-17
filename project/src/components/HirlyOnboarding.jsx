@@ -407,7 +407,7 @@ const HirlyOnboarding = () => {
       <div className="max-w-lg mx-auto min-h-[80vh] max-h-[90vh] h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden glassmorphic-onboarding">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
-          <h1 className="text-2xl font-bold">Welcome to Hirly! 🚀</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 text-transparent bg-clip-text drop-shadow">Hirly</h1>
           <p className="text-purple-100 mt-1">Let's get you set up for success</p>
         </div>
 

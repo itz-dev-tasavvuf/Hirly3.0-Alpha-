@@ -112,9 +112,9 @@ const SignInPage = () => {
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-400">
-              Don't have an account?{' '}
-              <Link to="/signup" className="font-semibold text-purple-400 hover:text-purple-300">
+            <p className="mt-6 text-center text-gray-400 text-sm">
+              Don&apos;t have an account?{' '}
+              <Link to="/onboarding" className="text-pink-400 hover:underline font-semibold">
                 Sign Up
               </Link>
             </p>

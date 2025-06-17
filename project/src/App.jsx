@@ -31,7 +31,7 @@ function App() {
         </Route>
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/onboarding/:userType" element={<OnboardingPage />} />
+        <Route path="/onboarding/*" element={<OnboardingPage />} />
 
         <Route 
           path="/hub" 
