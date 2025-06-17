@@ -411,10 +411,6 @@ const HirlyOnboarding = () => {
           <p className="text-purple-100 mt-1">Let's get you set up for success</p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="p-6 pb-0">
-          <ProgressBar />
-        </div>
 
         {/* Chat Messages (scrollable) */}
         <div className="flex-1 overflow-y-auto scrollbar-none p-6">
@@ -481,7 +477,12 @@ const HirlyOnboarding = () => {
             <ProfileSummary profile={userProfile} />
             <button
               className="mt-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl text-lg shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all"
-              onClick={() => navigate('/hub')}
+              onClick={() => {
+                if (userProfile.userType) {
+                  sessionStorage.setItem('userType', userProfile.userType.toLowerCase());
+                }
+                navigate('/hub');
+              }}
             >
               Get Started!
             </button>
