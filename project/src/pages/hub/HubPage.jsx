@@ -127,10 +127,16 @@ const employerMenuItems = [
 ];
 
 const HubPage = () => {
-  const [isPostingToAlgorand, setIsPostingToAlgorand] = useState(false);
+  // ...existing state declarations...
+  // (all state variables must be declared above)
+
+  // ...rest of state declarations and logic...
+
   const [algorandTxResult, setAlgorandTxResult] = useState(null);
   // Add expiration date state
   const [expirationDate, setExpirationDate] = useState(null);
+  // Algorand posting state
+  const [isPostingToAlgorand, setIsPostingToAlgorand] = useState(false);
 
   // ...all state declarations...
 
@@ -303,6 +309,50 @@ const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
       randomRotation: (Math.random() - 0.5) * 16
     }));
   }, [cards]);
+
+  // Keyboard navigation for main menu cards
+  useEffect(() => {
+    // Only enable if no modal, swipe app, or AI coach is open
+    if (
+      swipeAppOpen ||
+      aiCoachOpen ||
+      genericModalOpen ||
+      messagesModalOpen ||
+      quickMessageModalOpen ||
+      autoDismissModalOpen ||
+      isExpirationModalOpen
+    ) {
+      return;
+    }
+    const handleKeyDown = (e) => {
+      if (!cards.length) return;
+      const isFlipped = flippedCardId === cards[cards.length - 1]?.id;
+      if (e.key === 'ArrowLeft') {
+        if (!isFlipped) {
+          handleCardSwipe('left');
+          toast({ title: 'Card Swiped Left', description: `Moved to next card.` });
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (!isFlipped) {
+          handleCardSwipe('right');
+          toast({ title: 'Card Swiped Right', description: `Moved to previous card.` });
+        }
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        // Flip/unflip the top card
+        if (!isFlipped) {
+          handleCardClick(cards[cards.length - 1], false);
+          toast({ title: 'Card Flipped', description: `Opened ${cards[cards.length - 1]?.title}` });
+        } else {
+          setFlippedCardId(null);
+          toast({ title: 'Card Unflipped', description: `Closed card.` });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cards, flippedCardId, swipeAppOpen, aiCoachOpen, genericModalOpen, messagesModalOpen, quickMessageModalOpen, autoDismissModalOpen, isExpirationModalOpen]);
 
   // Mock data for profile/company back content
   const mockCandidateProfile = {
@@ -557,6 +607,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   // ...rest of HubPage logic...
 
   // MAIN RETURN (ensure only one return in the component)
+  // (Keyboard navigation: visually indicate focus on card stack for accessibility)
   if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
 
   return (

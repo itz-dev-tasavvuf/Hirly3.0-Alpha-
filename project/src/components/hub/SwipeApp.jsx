@@ -194,6 +194,9 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
 };
 
 const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollapse, onMatch }) => {
+  // Keyboard navigation state
+  const [keyboardActive, setKeyboardActive] = useState(true);
+
   const [stack, setStack] = useState(
     items.slice(0, 5).map(item => ({...item, matchPercentage: generateMatchPercentage() }))
   );
@@ -269,6 +272,22 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
       if(onSwipeEnd) onSwipeEnd({ interested, rejected });
     }
   }, [stack, interested, rejected, items.length, onSwipeEnd]);
+
+  // Keyboard navigation for swiping
+  useEffect(() => {
+    if (!keyboardActive || expanded || stack.length === 0) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        handleSwipe('left');
+        toast({ title: 'Passed (Keyboard)', description: 'You passed using the left arrow key.', variant: 'destructive' });
+      } else if (e.key === 'ArrowRight') {
+        handleSwipe('right');
+        toast({ title: 'Interested (Keyboard)', description: 'You liked using the right arrow key.', variant: 'default' });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [keyboardActive, expanded, stack.length]);
   
   const staticMotionValue = useMotionValue(0);
 

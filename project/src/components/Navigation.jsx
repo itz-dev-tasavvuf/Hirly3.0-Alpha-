@@ -9,6 +9,8 @@ import { toast } from '@/components/ui/use-toast';
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuRefs = [React.useRef(), React.useRef(), React.useRef()]; // About, Pricing, Sign In
+  const [focusedIdx, setFocusedIdx] = useState(-1);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +19,36 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Keyboard navigation for main menu
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isMobileMenuOpen) return; // Don't interfere with mobile
+      if (![37,38,39,40,32].includes(e.keyCode)) return; // Only arrow keys, space
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+      if (focusedIdx === -1 && (e.key === 'ArrowRight' || e.key === 'ArrowDown')) {
+        setFocusedIdx(0);
+        menuRefs[0].current && menuRefs[0].current.focus();
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        const next = (focusedIdx + 1) % menuRefs.length;
+        setFocusedIdx(next);
+        menuRefs[next].current && menuRefs[next].current.focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        const prev = (focusedIdx - 1 + menuRefs.length) % menuRefs.length;
+        setFocusedIdx(prev);
+        menuRefs[prev].current && menuRefs[prev].current.focus();
+      } else if (e.key === ' ' || e.key === 'Spacebar') {
+        if (focusedIdx !== -1 && menuRefs[focusedIdx].current) {
+          menuRefs[focusedIdx].current.click();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [focusedIdx, isMobileMenuOpen]);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -38,13 +70,13 @@ const Navigation = () => {
           </motion.div>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/about" className="text-gray-300 hover:text-white transition-colors">
+            <Link to="/about" ref={menuRefs[0]} tabIndex={0} className="text-gray-300 hover:text-white transition-colors">
               About
             </Link>
-            <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">
+            <Link to="/pricing" ref={menuRefs[1]} tabIndex={0} className="text-gray-300 hover:text-white transition-colors">
               Pricing
             </Link>
-            <Link to="/login">
+            <Link to="/login" ref={menuRefs[2]} tabIndex={0}>
               <Button 
                 variant="outline" 
                 className="border-pink-500/50 text-pink-300 hover:bg-pink-500/20"
