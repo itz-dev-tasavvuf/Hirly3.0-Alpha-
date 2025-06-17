@@ -3,8 +3,11 @@ import {
   User, Building2, MapPin, DollarSign, 
   Briefcase, Star, CheckCircle, Clock 
 } from "lucide-react";
+import ProfileSummary from "./onboarding/ProfileSummary";
 
 const HirlyOnboarding = () => {
+  // Modal state for profile summary
+  const [showProfileModal, setShowProfileModal] = useState(false);
   // Main state variables
   const [messages, setMessages] = useState([]);
   const [step, setStep] = useState(0);
@@ -13,6 +16,7 @@ const HirlyOnboarding = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [currentOptions, setCurrentOptions] = useState([]);
   const [steps, setSteps] = useState(() => getStepConfig(undefined)); // Only declaration of steps, do not redeclare below
+  const [textInputValue, setTextInputValue] = useState("");
   
   const chatEndRef = useRef(null);
 
@@ -28,9 +32,15 @@ const HirlyOnboarding = () => {
       {
         id: 'userType',
         type: 'option',
-        text: "First things first - are you looking to find your next opportunity or hire amazing talent?",
+        text: "Are you looking to find your next opportunity or hire amazing talent?",
         options: ["🎯 I'm looking for jobs (Candidate)", "🏢 I'm hiring talent (Employer)"],
         key: 'userType'
+      },
+      {
+        id: 'askName',
+        type: 'text',
+        text: "Great, tell us your name?",
+        key: 'name',
       }
     ];
 
@@ -185,11 +195,16 @@ const HirlyOnboarding = () => {
   useEffect(() => {
     if (step >= steps.length) {
       setIsComplete(true);
+      setShowProfileModal(true); // Show modal when complete
       setCurrentOptions([]);
       setShowTyping(false);
       return;
     }
     const current = steps[step];
+    if (current.type === 'text') {
+      setShowTyping(false);
+      return; // Wait for user to submit text input
+    }
     if (current.type === 'bot') {
       setShowTyping(true);
       setCurrentOptions([]);
@@ -220,25 +235,28 @@ const HirlyOnboarding = () => {
     }
   }, [step, steps]);
 
-  // When userType is selected, reset flow to avoid duplicate greetings and ensure options are shown
+  // Only clear options when entering a text step (prevents flicker)
+  useEffect(() => {
+    if (steps[step] && steps[step].type === 'text') {
+      setCurrentOptions([]);
+    }
+  }, [step, steps]);
+
+  // When userType is selected, advance to askName (name input) step
   useEffect(() => {
     if (!userProfile.userType) return;
     // Build new steps array for chosen userType
     const newSteps = getStepConfig(userProfile.userType);
     setSteps(newSteps);
-    // Rebuild messages to include greeting, userType question, and user answer
-    setMessages([
-      { type: 'bot', text: newSteps[0].text },
-      { type: 'bot', text: newSteps[1].text },
-      { type: 'user', text: userProfile.userType === 'Candidate' ? " I'm looking for jobs (Candidate)" : " I'm hiring talent (Employer)" }
-    ]);
-    setStep(2); // Start at first candidate/employer-specific question
+    // Only update step and options, do NOT reset messages (preserve chat history)
+    setStep(2); // Step 2 is askName (name input)
     setCurrentOptions([]);
     setIsComplete(false);
     setShowTyping(false);
+    setTextInputValue("");
   }, [userProfile.userType]);
 
-
+  // When userType is selected, reset flow to avoid duplicate greetings and ensure options are shown
   // Option selection handler
   const handleOptionSelect = (selectedOption) => {
     setMessages(prev => [...prev, { type: 'user', text: selectedOption }]);
@@ -256,10 +274,22 @@ const HirlyOnboarding = () => {
       });
     }
     
-    setTimeout(() => {
-      setCurrentOptions([]);
-      setStep(s => s + 1);
-    }, 300 + Math.random() * 200);
+    // Only increment step if NOT userType step
+    if (!(current.key === 'userType')) {
+      setTimeout(() => setStep(s => s + 1), 300 + Math.random() * 200);
+    }
+  };
+
+  // Handle text input submit for name step
+  const handleTextInputSubmit = (e) => {
+    e.preventDefault();
+    const current = steps[step];
+    if (current.type === 'text' && current.key === 'name' && textInputValue.trim()) {
+      setMessages(prev => ([...prev, { type: 'user', text: textInputValue.trim() }]));
+      setUserProfile(prev => ({ ...prev, name: textInputValue.trim() }));
+      setTextInputValue("");
+      setTimeout(() => setStep(s => s + 1), 200); // Small delay for realism
+    }
   };
 
   // Auto-scroll to bottom
@@ -268,18 +298,11 @@ const HirlyOnboarding = () => {
   }, [messages, showTyping]);
 
   // Save profile function (ready for API integration)
-  const handleSaveProfile = async () => {
-    try {
-      console.log('Profile to save:', userProfile);
-      // Future API call:
-      // const response = await fetch('/api/onboarding/profile', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(userProfile)
-      // });
-    } catch (error) {
-      console.error('Error saving profile:', error);
-    }
+  const handleSaveProfile = () => {
+    // Simulate save
+    setTimeout(() => {
+      setIsComplete(true);
+    }, 800);
   };
 
   // Components
@@ -378,107 +401,86 @@ const HirlyOnboarding = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto min-h-[80vh] max-h-[90vh] h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden glassmorphic-onboarding">
-
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
-        <h1 className="text-2xl font-bold">Welcome to Hirly! 🚀</h1>
-        <p className="text-purple-100 mt-1">Let's get you set up for success</p>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="p-6 pb-0">
-        <ProgressBar />
-      </div>
-
-      {/* Chat Messages */}
-      <div className="p-6 flex-1 overflow-y-auto scrollbar-none">
-        {messages.map((message, index) => (
-          message.type === 'bot' ? (
-            <HirlyBotMessage key={index} text={message.text} />
-          ) : (
-            <UserMessage key={index} text={message.text} />
-          )
-        ))}
-        
-        {showTyping && <HirlyBotMessage isTyping={true} />}
-        
-        {/* Current Options */}
-        {currentOptions.length > 0 && (
-          <div className="mt-4">
-            {currentOptions.map((option, index) => (
-              <ChatOption
-                key={index}
-                option={option}
-                onClick={handleOptionSelect}
-                disabled={showTyping}
-              />
-            ))}
-          </div>
-        )}
-        
-        <div ref={chatEndRef} />
-      </div>
-
-      {/* Profile Summary - only show at end */}
-      {isComplete && (
-        <div className="px-6 pb-2">
-          <ProfileSummary />
+    <>
+      <div className="max-w-lg mx-auto min-h-[80vh] max-h-[90vh] h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden glassmorphic-onboarding">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
+          <h1 className="text-2xl font-bold">Welcome to Hirly! 🚀</h1>
+          <p className="text-purple-100 mt-1">Let's get you set up for success</p>
         </div>
-      )}
 
-      {/* Completion Actions */}
-      {isComplete && (
-        <div className="p-6 pt-0">
-          <div className="flex space-x-3">
+        {/* Progress Bar */}
+        <div className="p-6 pb-0">
+          <ProgressBar />
+        </div>
+
+        {/* Chat Messages (scrollable) */}
+        <div className="flex-1 overflow-y-auto scrollbar-none p-6">
+          {messages.map((message, index) => (
+            message.type === 'bot' ? (
+              <HirlyBotMessage key={index} text={message.text} />
+            ) : (
+              <UserMessage key={index} text={message.text} />
+            )
+          ))}
+          {showTyping && <HirlyBotMessage isTyping={true} />}
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* Answer Section (fixed, independently scrollable if needed, invisible scrollbar) */}
+        <div className="bg-gradient-to-b from-purple-900/60 to-purple-800/20 backdrop-blur-lg p-6 border-t border-white/10 scrollbar-none" style={{ minHeight: '90px', maxHeight: '220px', overflowY: 'auto' }}>
+          {steps[step] && steps[step].type === 'text' && !isComplete && (
+            <div>
+              <div className="mb-2 text-white font-medium">
+                {steps[step].text}
+              </div>
+              <form className="flex gap-2" onSubmit={handleTextInputSubmit} autoComplete="off">
+                <input
+                  type="text"
+                  className="flex-1 rounded-lg border border-purple-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white/80 text-gray-900 placeholder-gray-400"
+                  placeholder="Enter your name..."
+                  value={textInputValue}
+                  onChange={e => setTextInputValue(e.target.value)}
+                  disabled={showTyping}
+                  required
+                  maxLength={32}
+                />
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:from-purple-400 hover:to-pink-400 disabled:opacity-60"
+                  disabled={showTyping || !textInputValue.trim()}
+                >Continue</button>
+              </form>
+            </div>
+          )}
+          {currentOptions.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {currentOptions.map((option, index) => (
+                <ChatOption
+                  key={index}
+                  option={option}
+                  onClick={handleOptionSelect}
+                  disabled={showTyping}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Profile Summary Modal - show at end */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative">
             <button
-              onClick={handleSaveProfile}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              Save Profile & Continue
-            </button>
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+              onClick={() => setShowProfileModal(false)}
+              aria-label="Close"
+            >×</button>
+            <ProfileSummary profile={userProfile} />
           </div>
         </div>
       )}
-
-      {/* Custom Styles */}
-      <style jsx>{`
-        /* Glassmorphic window styles */
-        .glassmorphic-onboarding {
-          background: rgba(255,255,255,0.20);
-          border: 1.5px solid rgba(180,100,255,0.18);
-          box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
-          backdrop-filter: blur(18px) saturate(1.2);
-          -webkit-backdrop-filter: blur(18px) saturate(1.2);
-        }
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .scrollbar-none::-webkit-scrollbar {
-          display: none;
-        }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .scrollbar-none {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slideInRight {
-          animation: slideInRight 0.3s ease-out;
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 
