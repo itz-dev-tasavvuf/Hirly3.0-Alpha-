@@ -4,10 +4,12 @@ import {
   Briefcase, Star, CheckCircle, Clock 
 } from "lucide-react";
 import ProfileSummary from "./onboarding/ProfileSummary";
+import { useNavigate } from "react-router-dom";
 
 const HirlyOnboarding = () => {
   // Modal state for profile summary
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const navigate = useNavigate();
   // Main state variables
   const [messages, setMessages] = useState([]);
   const [step, setStep] = useState(0);
@@ -477,9 +479,25 @@ const HirlyOnboarding = () => {
               aria-label="Close"
             >×</button>
             <ProfileSummary profile={userProfile} />
+            <button
+              className="mt-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl text-lg shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all"
+              onClick={() => navigate('/hub')}
+            >
+              Get Started!
+            </button>
           </div>
         </div>
       )}
+      {/* Custom Styles for invisible scrollbars */}
+      <style jsx>{`
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none;    /* Firefox */
+        }
+      `}</style>
     </>
   );
 };
