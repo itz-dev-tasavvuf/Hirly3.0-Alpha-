@@ -330,21 +330,17 @@ const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
       if (e.key === 'ArrowLeft') {
         if (!isFlipped) {
           handleCardSwipe('left');
-          toast({ title: 'Card Swiped Left', description: `Moved to next card.` });
         }
       } else if (e.key === 'ArrowRight') {
         if (!isFlipped) {
           handleCardSwipe('right');
-          toast({ title: 'Card Swiped Right', description: `Moved to previous card.` });
         }
       } else if (e.key === 'Enter' || e.key === ' ') {
         // Flip/unflip the top card
         if (!isFlipped) {
           handleCardClick(cards[cards.length - 1], false);
-          toast({ title: 'Card Flipped', description: `Opened ${cards[cards.length - 1]?.title}` });
         } else {
           setFlippedCardId(null);
-          toast({ title: 'Card Unflipped', description: `Closed card.` });
         }
       }
     };
