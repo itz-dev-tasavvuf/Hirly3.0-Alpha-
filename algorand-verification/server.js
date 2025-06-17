@@ -53,7 +53,7 @@ app.post('/api/algorand/deployJobListing', async (req, res) => {
       clearProgram: clearProg,
       suggestedParams: params,
       numGlobalInts: 1,
-      numGlobalByteSlices: 3,
+      numGlobalByteSlices: 4,
       numLocalInts: 0,
       numLocalByteSlices: 0,
       appArgs

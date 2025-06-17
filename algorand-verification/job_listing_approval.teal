@@ -22,6 +22,9 @@ main_l4:
 byte "title"
 txna ApplicationArgs 0
 app_global_put
+byte "name"
+txna ApplicationArgs 0
+app_global_put
 byte "desc"
 txna ApplicationArgs 1
 app_global_put
