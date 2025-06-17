@@ -8,8 +8,7 @@ import PricingPage from '@/pages/PricingPage';
 import AboutPage from '@/pages/AboutPage';
 import SignInPage from '@/pages/auth/SignInPage';
 import SignUpPage from '@/pages/auth/SignUpPage';
-import CandidateOnboarding from '@/pages/onboarding/CandidateOnboarding';
-import EmployerOnboarding from '@/pages/onboarding/EmployerOnboarding';
+import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
 
 
@@ -32,8 +31,7 @@ function App() {
         </Route>
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/onboarding/candidate" element={<CandidateOnboarding />} />
-        <Route path="/onboarding/employer" element={<EmployerOnboarding />} />
+        <Route path="/onboarding/:userType" element={<OnboardingPage />} />
 
         <Route 
           path="/hub" 
