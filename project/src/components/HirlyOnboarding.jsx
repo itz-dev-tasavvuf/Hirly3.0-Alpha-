@@ -7,10 +7,14 @@ import ProfileSummary from "./onboarding/ProfileSummary";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../hide-scrollbar.css";
+import { saveProfileToSupabase } from "../utils/saveProfileToSupabase";
+import { supabase } from "../supabaseClient";
 
 const HirlyOnboarding = () => {
   // Modal state for profile summary
   const [showProfileModal, setShowProfileModal] = useState(false);
+  // Password visibility toggle
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   // Main state variables
   const [messages, setMessages] = useState([]);
@@ -32,6 +36,22 @@ const HirlyOnboarding = () => {
         type: 'bot',
         text: "Hey there! I'm Heidi, your friendly AI guide at Hirly! 🎉 I'm here to help you set up your profile so you can start connecting with the perfect matches. Ready to dive in?",
         delay: 1200
+      },
+      {
+        id: 'askEmail',
+        type: 'text',
+        text: "Let's start by setting up your account. What's your email address?",
+        key: 'email',
+        inputType: 'email',
+        required: true,
+      },
+      {
+        id: 'askPassword',
+        type: 'text',
+        text: "Great! Please choose a password.",
+        key: 'password',
+        inputType: 'password',
+        required: true,
       },
       {
         id: 'userType',
@@ -273,7 +293,9 @@ const HirlyOnboarding = () => {
     const newSteps = getStepConfig(userProfile.userType);
     setSteps(newSteps);
     // Only update step and options, do NOT reset messages (preserve chat history)
-    setStep(2); // Step 2 is askName (name input)
+    // Find the index of 'askName' step to jump to after userType selection
+    const nameStepIdx = newSteps.findIndex(s => s.key === 'name');
+    setStep(nameStepIdx !== -1 ? nameStepIdx : 0);
     setCurrentOptions([]);
     setIsComplete(false);
     setShowTyping(false);
@@ -304,13 +326,13 @@ const HirlyOnboarding = () => {
     }
   };
 
-  // Handle text input submit for name step
+  // Handle text input submit for all text input steps
   const handleTextInputSubmit = (e) => {
     e.preventDefault();
     const current = steps[step];
-    if (current.type === 'text' && current.key === 'name' && textInputValue.trim()) {
+    if (current.type === 'text' && current.key && textInputValue.trim()) {
       setMessages(prev => ([...prev, { type: 'user', text: textInputValue.trim() }]));
-      setUserProfile(prev => ({ ...prev, name: textInputValue.trim() }));
+      setUserProfile(prev => ({ ...prev, [current.key]: textInputValue.trim() }));
       setTextInputValue("");
       setTimeout(() => setStep(s => s + 1), 200); // Small delay for realism
     }
@@ -321,12 +343,36 @@ const HirlyOnboarding = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, showTyping]);
 
-  // Save profile function (ready for API integration)
-  const handleSaveProfile = () => {
-    // Simulate save
-    setTimeout(() => {
+  // Save profile to Supabase (with Supabase Auth signup)
+  const handleSaveProfile = async () => {
+    // 1. Sign up user with Supabase Auth using collected email and password
+  console.log("Signing up with profile:", userProfile);
+    if (!userProfile.email || !userProfile.password) {
+      alert('Email and password are required.');
+      return;
+    }
+    // Sign up user
+    const { data, error: signupError } = await supabase.auth.signUp({
+      email: userProfile.email,
+      password: userProfile.password
+    });
+    if (signupError) {
+      alert('Error creating account: ' + signupError.message);
+      return;
+    }
+
+    // 2. Save profile to Supabase (convert File objects to null or placeholder for now)
+    const profileData = {
+      ...userProfile,
+      profilePicUrl: userProfile.profilePic && typeof userProfile.profilePic === 'string' ? userProfile.profilePic : null,
+      resumeUrl: userProfile.resume && typeof userProfile.resume === 'string' ? userProfile.resume : null,
+    };
+    const { error } = await saveProfileToSupabase(profileData);
+    if (error) {
+      alert('Error saving profile: ' + error.message);
+    } else {
       setIsComplete(true);
-    }, 800);
+    }
   };
 
   // Components
@@ -349,13 +395,21 @@ const HirlyOnboarding = () => {
     </div>
   );
 
-  const UserMessage = ({ text }) => (
-    <div className="flex justify-end mb-4 animate-slideInRight">
-      <div className="bg-gray-800 text-white p-4 rounded-2xl rounded-tr-sm max-w-xs">
-        <p>{text}</p>
+  const UserMessage = ({ text, stepIndex }) => {
+    // Find the step key for this message
+    let key = null;
+    if (typeof stepIndex === 'number' && steps[stepIndex] && steps[stepIndex].key) {
+      key = steps[stepIndex].key;
+    }
+    const isPassword = key === 'password';
+    return (
+      <div className="flex justify-end mb-4 animate-slideInRight">
+        <div className="bg-gray-800 text-white p-4 rounded-2xl rounded-tr-sm max-w-xs">
+          <p>{isPassword ? '••••••••' : text}</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const ChatOption = ({ option, onClick, disabled }) => (
     <button
@@ -405,7 +459,7 @@ const HirlyOnboarding = () => {
           message.type === 'bot' ? (
             <HirlyBotMessage key={index} text={message.text} />
           ) : (
-            <UserMessage key={index} text={message.text} />
+            <UserMessage key={index} text={message.text} stepIndex={index} />
           )
         ))}
         {showTyping && <HirlyBotMessage isTyping={true} />}
@@ -420,16 +474,31 @@ const HirlyOnboarding = () => {
               {steps[step].text}
             </div>
             <form className="flex gap-2" onSubmit={handleTextInputSubmit} autoComplete="off">
-              <input
-                type="text"
-                className="flex-1 rounded-lg border border-purple-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white/80 text-gray-900 placeholder-gray-400"
-                placeholder="Enter your name..."
-                value={textInputValue}
-                onChange={e => setTextInputValue(e.target.value)}
-                disabled={showTyping}
-                required
-                maxLength={32}
-              />
+              <div className="relative w-full">
+                <input
+                  type={steps[step].inputType === "password" && !showPassword ? "password" : "text"}
+                  className="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-pink-500 bg-gray-50 text-gray-900 placeholder-gray-400"
+                  placeholder={steps[step].inputType === "password" ? "Create a password..." : "Type your answer..."}
+                  value={textInputValue}
+                  onChange={e => setTextInputValue(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleTextInputSubmit(e)}
+                  autoFocus
+                />
+                {steps[step].inputType === "password" && (
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                    onClick={() => setShowPassword(p => !p)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.973 9.973 0 012.042-3.368M6.36 6.36A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.973 9.973 0 01-4.043 5.197M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 6L6 6" /></svg>
+                    )}
+                  </button>
+                )}
+              </div>
               <button
                 type="submit"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:from-purple-400 hover:to-pink-400 disabled:opacity-60"
@@ -438,8 +507,7 @@ const HirlyOnboarding = () => {
             </form>
           </div>
         )}
-        {/* File upload step (profilePic or resume), only for candidates */}
-        {steps[step] && steps[step].type === 'file' && !isComplete && userProfile.userType === 'Candidate' && (
+        {steps[step] && steps[step].type === 'file' && !isComplete && (
           <div>
             <div className="mb-2 text-white font-medium">
               {steps[step].text}
