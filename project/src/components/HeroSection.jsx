@@ -1,11 +1,14 @@
 import React from 'react';
+import { useAuth } from './AuthProvider';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 
 const HeroSection = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const handleTryDemo = () => {
     toast({
       title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
@@ -56,20 +59,31 @@ const HeroSection = () => {
             </motion.p>
 
             <motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.5 }}
-  className="flex justify-center lg:justify-start"
->
-  <Button
-    onClick={() => window.location.href = '/onboarding'}
-    size="lg"
-    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-10 py-5 rounded-2xl glow-effect text-xl shadow-lg"
-  >
-    Get Started
-    <ArrowRight className="ml-3 w-6 h-6" />
-  </Button>
-</motion.div>
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            >
+              {/* Get Started Button - Always visible */}
+              <Button
+                onClick={() => window.location.href = '/onboarding'}
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-10 py-5 rounded-2xl glow-effect text-xl shadow-lg"
+              >
+                Get Started
+                <ArrowRight className="ml-3 w-6 h-6" />
+              </Button>
+              <Button
+                onClick={() => user ? navigate('/hub') : navigate('/login')}
+                size="lg"
+                variant="outline"
+                className="text-white border-white/30 hover:bg-white/10 hover:text-white font-semibold px-8 py-5 rounded-2xl text-xl shadow-lg backdrop-blur-sm transition-all duration-300"
+              >
+                {user ? 'Welcome Back' : 'Sign In'}
+                {!user && <LogIn className="ml-3 w-5 h-5" />}
+              </Button>
+            </motion.div>
+
           </motion.div>
 
           {/* Right Content - Animated Card Stack */}

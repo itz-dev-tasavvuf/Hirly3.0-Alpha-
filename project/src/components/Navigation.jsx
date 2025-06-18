@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from './AuthProvider';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -76,14 +77,7 @@ const Navigation = () => {
             <Link to="/pricing" ref={menuRefs[1]} tabIndex={0} className="text-gray-300 hover:text-white transition-colors">
               Pricing
             </Link>
-            <Link to="/login" ref={menuRefs[2]} tabIndex={0}>
-              <Button 
-                variant="outline" 
-                className="border-pink-500/50 text-pink-300 hover:bg-pink-500/20"
-              >
-                Sign In
-              </Button>
-            </Link>
+            <AuthNavButton ref={menuRefs[2]} />
           </div>
 
           <div className="md:hidden">
@@ -134,5 +128,33 @@ const Navigation = () => {
     </motion.nav>
   );
 };
+
+// AuthNavButton shows Sign In or Welcome Back depending on auth state
+const AuthNavButton = React.forwardRef((props, ref) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) {
+    return (
+      <Button
+        onClick={() => window.location.href = '/hub'}
+        variant="outline"
+        className="border-green-500/50 text-green-200 hover:bg-green-500/20"
+        ref={ref}
+      >
+        Welcome Back
+      </Button>
+    );
+  }
+  return (
+    <Button
+      onClick={() => window.location.href = '/login'}
+      variant="outline"
+      className="border-pink-500/50 text-pink-300 hover:bg-pink-500/20"
+      ref={ref}
+    >
+      Sign In
+    </Button>
+  );
+});
 
 export default Navigation;
