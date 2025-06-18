@@ -44,6 +44,16 @@ const HirlyOnboarding = () => {
         type: 'text',
         text: "Great, tell us your name?",
         key: 'name',
+      },
+      // New: Profile picture upload (candidate only)
+      {
+        id: 'profilePic',
+        type: 'file',
+        text: "Want to add a profile picture? (Optional)",
+        key: 'profilePic',
+        accept: 'image/*',
+        skip: true,
+        candidateOnly: true
       }
     ];
 
@@ -98,6 +108,16 @@ const HirlyOnboarding = () => {
           "🤔 Not sure yet"
         ],
         key: 'salaryRange'
+      },
+      // New: Resume upload (candidate only)
+      {
+        id: 'resumeUpload',
+        type: 'file',
+        text: "Upload your resume to help us match you better! (Optional)",
+        key: 'resume',
+        accept: '.pdf,.doc,.docx',
+        skip: true,
+        candidateOnly: true
       }
     ];
 
@@ -414,6 +434,35 @@ const HirlyOnboarding = () => {
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:from-purple-400 hover:to-pink-400 disabled:opacity-60"
                 disabled={showTyping || !textInputValue.trim()}
               >Continue</button>
+            </form>
+          </div>
+        )}
+        {/* File upload step (profilePic or resume), only for candidates */}
+        {steps[step] && steps[step].type === 'file' && !isComplete && userProfile.userType === 'Candidate' && (
+          <div>
+            <div className="mb-2 text-white font-medium">
+              {steps[step].text}
+            </div>
+            <form className="flex flex-col gap-3 items-start" onSubmit={e => e.preventDefault()}>
+              <input
+                type="file"
+                accept={steps[step].accept}
+                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setUserProfile(prev => ({ ...prev, [steps[step].key]: file }));
+                  }
+                  setTimeout(() => setStep(s => s + 1), 300);
+                }}
+                disabled={showTyping}
+              />
+              <button
+                type="button"
+                className="mt-1 text-sm text-purple-400 underline hover:text-pink-400"
+                onClick={() => setStep(s => s + 1)}
+                disabled={showTyping}
+              >Skip</button>
             </form>
           </div>
         )}
