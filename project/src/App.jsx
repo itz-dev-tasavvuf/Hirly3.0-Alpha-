@@ -10,19 +10,20 @@ import SignInPage from '@/pages/auth/SignInPage';
 import SignUpPage from '@/pages/auth/SignUpPage';
 import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
+import { AuthProvider, useAuth } from './components/AuthProvider';
 
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null; // or a loading spinner
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
 function App() {
-  const ProtectedRoute = ({ children }) => {
-    const userType = sessionStorage.getItem('userType');
-    if (!userType) {
-      return <Navigate to="/login" replace />;
-    }
-    return children;
-  };
-
   return (
-    <>
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
@@ -32,7 +33,6 @@ function App() {
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/onboarding/*" element={<OnboardingPage />} />
-
         <Route 
           path="/hub" 
           element={
@@ -43,8 +43,9 @@ function App() {
         />
       </Routes>
       <Toaster />
-    </>
+    </AuthProvider>
   );
 }
 
 export default App;
+
