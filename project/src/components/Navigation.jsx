@@ -129,32 +129,16 @@ const Navigation = () => {
   );
 };
 
-// AuthNavButton shows Sign In or Welcome Back depending on auth state
-const AuthNavButton = React.forwardRef((props, ref) => {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) {
-    return (
-      <Button
-        onClick={() => window.location.href = '/hub'}
-        variant="outline"
-        className="border-green-500/50 text-green-200 hover:bg-green-500/20"
-        ref={ref}
-      >
-        Welcome Back
-      </Button>
-    );
-  }
-  return (
-    <Button
-      onClick={() => window.location.href = '/login'}
-      variant="outline"
-      className="border-pink-500/50 text-pink-300 hover:bg-pink-500/20"
-      ref={ref}
-    >
-      Sign In
-    </Button>
-  );
-});
+// Simple sign in button
+const AuthNavButton = React.forwardRef((props, ref) => (
+  <Button
+    onClick={() => window.location.href = '/login'}
+    variant="outline"
+    className="border-pink-500/50 text-pink-300 hover:bg-pink-500/20"
+    ref={ref}
+  >
+    Sign in/Continue
+  </Button>
+));
 
 export default Navigation;

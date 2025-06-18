@@ -1,14 +1,10 @@
 import React from 'react';
-import { useAuth } from './AuthProvider';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, LogIn } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const HeroSection = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const handleTryDemo = () => {
     toast({
       title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
@@ -72,15 +68,6 @@ const HeroSection = () => {
               >
                 Get Started
                 <ArrowRight className="ml-3 w-6 h-6" />
-              </Button>
-              <Button
-                onClick={() => user ? navigate('/hub') : navigate('/login')}
-                size="lg"
-                variant="outline"
-                className="text-white border-white/30 hover:bg-white/10 hover:text-white font-semibold px-8 py-5 rounded-2xl text-xl shadow-lg backdrop-blur-sm transition-all duration-300"
-              >
-                {user ? 'Welcome Back' : 'Sign In'}
-                {!user && <LogIn className="ml-3 w-5 h-5" />}
               </Button>
             </motion.div>
 
