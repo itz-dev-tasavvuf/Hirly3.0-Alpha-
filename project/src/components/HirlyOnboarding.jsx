@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import ProfileSummary from "./onboarding/ProfileSummary";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const HirlyOnboarding = () => {
   // Modal state for profile summary
@@ -260,7 +261,7 @@ const HirlyOnboarding = () => {
 
   // When userType is selected, reset flow to avoid duplicate greetings and ensure options are shown
   // Option selection handler
-  const handleOptionSelect = (selectedOption) => {
+  const handleOptionClick = (selectedOption) => {
     setMessages(prev => [...prev, { type: 'user', text: selectedOption }]);
     
     const current = steps[step];
@@ -363,111 +364,76 @@ const HirlyOnboarding = () => {
     );
   };
 
-  const ProfileSummary = () => {
-    if (Object.keys(userProfile).length === 0) return null;
-
-    const getIcon = (key) => {
-      const icons = {
-        userType: userProfile.userType === 'Candidate' ? User : Building2,
-        roles: Briefcase,
-        hiringRoles: Briefcase,
-        experience: Star,
-        workLocation: MapPin,
-        salaryRange: DollarSign,
-        companySize: Building2,
-        urgency: Clock,
-        budget: DollarSign
-      };
-      return icons[key] || CheckCircle;
-    };
-
-    return (
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl mb-4">
-        <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-          <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-          Your Profile
-        </h3>
-        <div className="space-y-2">
-          {Object.entries(userProfile).map(([key, value]) => {
-            const IconComponent = getIcon(key);
-            return (
-              <div key={key} className="flex items-center space-x-2 text-sm">
-                <IconComponent className="w-4 h-4 text-purple-600" />
-                <span className="text-gray-700">{value}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <>
-      <div className="max-w-lg mx-auto min-h-[80vh] max-h-[90vh] h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden glassmorphic-onboarding">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 text-transparent bg-clip-text drop-shadow">Hirly</h1>
-          <p className="text-purple-100 mt-1">Let's get you set up for success</p>
-        </div>
-
-
-        {/* Chat Messages (scrollable) */}
-        <div className="flex-1 overflow-y-auto scrollbar-none p-6">
-          {messages.map((message, index) => (
-            message.type === 'bot' ? (
-              <HirlyBotMessage key={index} text={message.text} />
-            ) : (
-              <UserMessage key={index} text={message.text} />
-            )
-          ))}
-          {showTyping && <HirlyBotMessage isTyping={true} />}
-          <div ref={chatEndRef} />
-        </div>
-
-        {/* Answer Section (fixed, independently scrollable if needed, invisible scrollbar) */}
-        <div className="bg-gradient-to-b from-purple-900/60 to-purple-800/20 backdrop-blur-lg p-6 border-t border-white/10 scrollbar-none" style={{ minHeight: '90px', maxHeight: '220px', overflowY: 'auto' }}>
-          {steps[step] && steps[step].type === 'text' && !isComplete && (
-            <div>
-              <div className="mb-2 text-white font-medium">
-                {steps[step].text}
-              </div>
-              <form className="flex gap-2" onSubmit={handleTextInputSubmit} autoComplete="off">
-                <input
-                  type="text"
-                  className="flex-1 rounded-lg border border-purple-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white/80 text-gray-900 placeholder-gray-400"
-                  placeholder="Enter your name..."
-                  value={textInputValue}
-                  onChange={e => setTextInputValue(e.target.value)}
-                  disabled={showTyping}
-                  required
-                  maxLength={32}
-                />
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:from-purple-400 hover:to-pink-400 disabled:opacity-60"
-                  disabled={showTyping || !textInputValue.trim()}
-                >Continue</button>
-              </form>
-            </div>
-          )}
-          {currentOptions.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {currentOptions.map((option, index) => (
-                <ChatOption
-                  key={index}
-                  option={option}
-                  onClick={handleOptionSelect}
-                  disabled={showTyping}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="max-w-lg mx-auto min-h-[80vh] max-h-[90vh] h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden glassmorphic-onboarding"
+    >
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 text-transparent bg-clip-text drop-shadow">Hirly</h1>
+        <p className="text-purple-100 mt-1">Let's get you set up for success</p>
       </div>
+
+
+      {/* Chat Messages (scrollable) */}
+      <div className="flex-1 overflow-y-auto scrollbar-none p-6">
+        {messages.map((message, index) => (
+          message.type === 'bot' ? (
+            <HirlyBotMessage key={index} text={message.text} />
+          ) : (
+            <UserMessage key={index} text={message.text} />
+          )
+        ))}
+        {showTyping && <HirlyBotMessage isTyping={true} />}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Answer Section (fixed, independently scrollable if needed, invisible scrollbar) */}
+      <div className="bg-gradient-to-b from-purple-900/60 to-purple-800/20 backdrop-blur-lg p-6 border-t border-white/10 scrollbar-none" style={{ minHeight: '90px', maxHeight: '220px', overflowY: 'auto' }}>
+        {steps[step] && steps[step].type === 'text' && !isComplete && (
+          <div>
+            <div className="mb-2 text-white font-medium">
+              {steps[step].text}
+            </div>
+            <form className="flex gap-2" onSubmit={handleTextInputSubmit} autoComplete="off">
+              <input
+                type="text"
+                className="flex-1 rounded-lg border border-purple-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white/80 text-gray-900 placeholder-gray-400"
+                placeholder="Enter your name..."
+                value={textInputValue}
+                onChange={e => setTextInputValue(e.target.value)}
+                disabled={showTyping}
+                required
+                maxLength={32}
+              />
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:from-purple-400 hover:to-pink-400 disabled:opacity-60"
+                disabled={showTyping || !textInputValue.trim()}
+              >Continue</button>
+            </form>
+          </div>
+        )}
+        {currentOptions.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {currentOptions.map((option, index) => (
+              <ChatOption
+                key={index}
+                option={option}
+                onClick={handleOptionClick}
+                disabled={showTyping}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Profile Summary Modal - show at end */}
       {showProfileModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm absolute">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold"
@@ -476,8 +442,10 @@ const HirlyOnboarding = () => {
             >×</button>
             <ProfileSummary profile={userProfile} />
             <button
-              className="mt-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl text-lg shadow-lg hover:from-purple-500 hover:to-pink-500 transition-all"
+              className="mt-6 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:scale-105 transform transition-all"
               onClick={() => {
+                sessionStorage.setItem('userType', userProfile.userType);
+                setShowProfileModal(false);
                 if (userProfile.userType) {
                   sessionStorage.setItem('userType', userProfile.userType.toLowerCase());
                 }
@@ -489,18 +457,7 @@ const HirlyOnboarding = () => {
           </div>
         </div>
       )}
-      {/* Custom Styles for invisible scrollbars */}
-      <style jsx>{`
-        .scrollbar-none::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-none {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none;    /* Firefox */
-        }
-      `}</style>
-    </>
+    </motion.div>
   );
-};
-
+}
 export default HirlyOnboarding;
