@@ -11,6 +11,9 @@ import { saveProfileToSupabase } from "../utils/saveProfileToSupabase";
 import { supabase } from "../supabaseClient";
 
 const HirlyOnboarding = () => {
+  // ...existing state
+  const [signupLoading, setSignupLoading] = useState(false);
+  const [signupError, setSignupError] = useState(null);
   // Modal state for profile summary
   const [showProfileModal, setShowProfileModal] = useState(false);
   // Password visibility toggle
@@ -560,18 +563,31 @@ const HirlyOnboarding = () => {
             >×</button>
             <ProfileSummary profile={userProfile} />
             <button
-              className="mt-6 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:scale-105 transform transition-all"
-              onClick={() => {
-                sessionStorage.setItem('userType', userProfile.userType);
-                setShowProfileModal(false);
-                if (userProfile.userType) {
-                  sessionStorage.setItem('userType', userProfile.userType.toLowerCase());
+              className={`mt-6 w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:scale-105 transform transition-all ${signupLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+              onClick={async () => {
+                setSignupError(null);
+                setSignupLoading(true);
+                try {
+                  await handleSaveProfile();
+                  sessionStorage.setItem('userType', userProfile.userType);
+                  setShowProfileModal(false);
+                  if (userProfile.userType) {
+                    sessionStorage.setItem('userType', userProfile.userType.toLowerCase());
+                  }
+                  navigate('/hub');
+                } catch (err) {
+                  setSignupError(err?.message || 'Signup failed.');
+                } finally {
+                  setSignupLoading(false);
                 }
-                navigate('/hub');
               }}
+              disabled={signupLoading}
             >
-              Get Started!
+              {signupLoading ? 'Signing up...' : 'Get Started!'}
             </button>
+            {signupError && (
+              <div className="mt-2 text-red-500 text-center text-sm font-semibold">{signupError}</div>
+            )}
           </div>
         </div>
       )}
