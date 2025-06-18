@@ -82,7 +82,7 @@ const SignInPage = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-gray-300">Password</Label>
-                  <Link to="#" onClick={() => handleSocialLogin('Forgot Password')} className="text-sm text-purple-400 hover:text-purple-300">
+                  <Link to="/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">
                     Forgot password?
                   </Link>
                 </div>

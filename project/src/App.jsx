@@ -8,6 +8,8 @@ import PricingPage from '@/pages/PricingPage';
 import AboutPage from '@/pages/AboutPage';
 import SignInPage from '@/pages/auth/SignInPage';
 import SignUpPage from '@/pages/auth/SignUpPage';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
+import UpdatePassword from '@/pages/auth/UpdatePassword';
 import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
 import { AuthProvider, useAuth } from './components/AuthProvider';
@@ -32,6 +34,8 @@ function App() {
         </Route>
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/onboarding/*" element={<OnboardingPage />} />
         <Route 
           path="/hub" 
