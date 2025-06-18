@@ -14,6 +14,9 @@ const HirlyOnboarding = () => {
   // ...existing state
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupError, setSignupError] = useState(null);
+
+
+
   // Modal state for profile summary
   const [showProfileModal, setShowProfileModal] = useState(false);
   // Password visibility toggle
@@ -329,11 +332,34 @@ const HirlyOnboarding = () => {
     }
   };
 
+  // Helper to check if email exists via backend
+  const checkEmailExists = async (email) => {
+    try {
+      const res = await fetch('http://localhost:5001/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      return data.exists;
+    } catch (err) {
+      return false; // Fail open (treat as not existing)
+    }
+  };
+
   // Handle text input submit for all text input steps
-  const handleTextInputSubmit = (e) => {
+  const handleTextInputSubmit = async (e) => {
     e.preventDefault();
     const current = steps[step];
     if (current.type === 'text' && current.key && textInputValue.trim()) {
+      if (current.key === 'email') {
+        const exists = await checkEmailExists(textInputValue.trim());
+        if (exists) {
+          pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
+          setTextInputValue('');
+          return;
+        }
+      }
       setMessages(prev => ([...prev, { type: 'user', text: textInputValue.trim() }]));
       setUserProfile(prev => ({ ...prev, [current.key]: textInputValue.trim() }));
       setTextInputValue("");
@@ -341,15 +367,21 @@ const HirlyOnboarding = () => {
     }
   };
 
+
   // Auto-scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, showTyping]);
 
+  // Helper to push a bot message
+  const pushBotMessage = (text, isHtml = false) => {
+    setMessages(prev => [...prev, { type: 'bot', text, isHtml }]);
+  };
+
   // Save profile to Supabase (with Supabase Auth signup)
   const handleSaveProfile = async () => {
     // 1. Sign up user with Supabase Auth using collected email and password
-  console.log("Signing up with profile:", userProfile);
+    console.log("Signing up with profile:", userProfile);
     if (!userProfile.email || !userProfile.password) {
       alert('Email and password are required.');
       return;
@@ -360,7 +392,15 @@ const HirlyOnboarding = () => {
       password: userProfile.password
     });
     if (signupError) {
-      alert('Error creating account: ' + signupError.message);
+      // Handle duplicate email gracefully
+      if (signupError.message && signupError.message.toLowerCase().includes('already registered')) {
+        setShowProfileModal(false);
+        pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
+        // Optionally, reset step to email step:
+        // setStep(steps.findIndex(s => s.key === 'email'));
+        return;
+      }
+      setSignupError('Error creating account: ' + signupError.message);
       return;
     }
 
@@ -372,27 +412,22 @@ const HirlyOnboarding = () => {
     };
     const { error } = await saveProfileToSupabase(profileData);
     if (error) {
-      alert('Error saving profile: ' + error.message);
+      setSignupError('Error saving profile: ' + error.message);
     } else {
       setIsComplete(true);
     }
   };
 
   // Components
-  const HirlyBotMessage = ({ text, isTyping = false }) => (
-    <div className="flex items-start space-x-3 mb-4 animate-fadeIn">
-      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-        <span className="text-white text-sm font-bold">H</span>
-      </div>
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-2xl rounded-tl-sm max-w-xs">
+  const HirlyBotMessage = ({ text, isTyping, isHtml }) => (
+    <div className="flex mb-4 animate-slideInLeft">
+      <div className="bg-gradient-to-r from-purple-700 to-pink-600 text-white p-4 rounded-2xl rounded-tl-sm max-w-xs">
         {isTyping ? (
-          <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-          </div>
+          <span className="animate-pulse">Heidi is typing...</span>
+        ) : isHtml ? (
+          <span dangerouslySetInnerHTML={{ __html: text }} />
         ) : (
-          <p className="text-gray-700">{text}</p>
+          <span>{text}</span>
         )}
       </div>
     </div>
@@ -460,7 +495,7 @@ const HirlyOnboarding = () => {
       <div className="flex-1 overflow-y-auto hide-scrollbar p-6">
         {messages.map((message, index) => (
           message.type === 'bot' ? (
-            <HirlyBotMessage key={index} text={message.text} />
+            <HirlyBotMessage key={index} text={message.text} isHtml={message.isHtml} />
           ) : (
             <UserMessage key={index} text={message.text} stepIndex={index} />
           )
