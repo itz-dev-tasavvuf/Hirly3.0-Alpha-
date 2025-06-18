@@ -6,6 +6,7 @@ import {
 import ProfileSummary from "./onboarding/ProfileSummary";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import "../hide-scrollbar.css";
 
 const HirlyOnboarding = () => {
   // Modal state for profile summary
@@ -399,7 +400,7 @@ const HirlyOnboarding = () => {
 
 
       {/* Chat Messages (scrollable) */}
-      <div className="flex-1 overflow-y-auto scrollbar-none p-6">
+      <div className="flex-1 overflow-y-auto hide-scrollbar p-6">
         {messages.map((message, index) => (
           message.type === 'bot' ? (
             <HirlyBotMessage key={index} text={message.text} />
@@ -412,7 +413,7 @@ const HirlyOnboarding = () => {
       </div>
 
       {/* Answer Section (fixed, independently scrollable if needed, invisible scrollbar) */}
-      <div className="bg-gradient-to-b from-purple-900/60 to-purple-800/20 backdrop-blur-lg p-6 border-t border-white/10 scrollbar-none" style={{ minHeight: '90px', maxHeight: '220px', overflowY: 'auto' }}>
+      <div className="bg-gradient-to-b from-purple-900/60 to-purple-800/20 backdrop-blur-lg p-6 border-t border-white/10 hide-scrollbar" style={{ minHeight: '90px', maxHeight: '220px', overflowY: 'auto' }}>
         {steps[step] && steps[step].type === 'text' && !isComplete && (
           <div>
             <div className="mb-2 text-white font-medium">
