@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from '@/components/ui/use-toast';
 import { ArrowLeft, KeyRound, Mail } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons';
+import { supabase } from '../../supabaseClient'; // Adjust path if needed
 
 const SignInPage = () => {
   const navigate = useNavigate();
   const [userType, setUserType] = React.useState('candidate');
+  const [loading, setLoading] = React.useState(false);
   const handleSocialLogin = (provider) => {
     toast({
       title: `Sign in with ${provider}`,
@@ -19,11 +21,29 @@ const SignInPage = () => {
     });
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    // Simulate sign-in success
-    // In a real app, replace this with actual authentication logic
-    sessionStorage.setItem('userType', userType); // candidate or employer
+    setLoading(true);
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Sign-in failed',
+        description: error.message,
+        status: 'error',
+      });
+      return;
+    }
+
+    sessionStorage.setItem('userType', userType);
     toast({
       title: 'Signed in!',
       description: `Welcome back, ${userType === 'candidate' ? 'Candidate' : 'Employer'}. Redirecting...`
@@ -32,7 +52,7 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-2">
       <div className="absolute top-4 left-4">
         <Link to="/">
           <Button variant="ghost" className="text-white hover:bg-white/10">
@@ -45,9 +65,9 @@ const SignInPage = () => {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-full max-w-md glass-effect border-purple-500/20 shadow-2xl shadow-purple-500/10">
+        <Card className="w-[600px] max-w-2xl glass-effect border-purple-500/20 shadow-2xl shadow-purple-500/10 py-2">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
+            <div className="mx-auto mb-2">
               <Link to="/" className="text-4xl font-bold gradient-text">Hirly</Link>
             </div>
             <CardTitle className="text-3xl font-bold text-white">Welcome Back</CardTitle>
@@ -55,7 +75,7 @@ const SignInPage = () => {
           </CardHeader>
           <CardContent>
             {/* User type toggle */}
-            <div className="flex justify-center gap-4 mb-6">
+            <div className="flex justify-center gap-4 mb-4">
               <button
                 type="button"
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 ${userType === 'candidate' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
@@ -71,12 +91,12 @@ const SignInPage = () => {
                 Employer
               </button>
             </div>
-            <form onSubmit={handleSignIn} className="space-y-6">
+            <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-300">Email or Username</Label>
+                <Label htmlFor="email" className="text-gray-300">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input id="email" type="email" placeholder="you@example.com" required className="bg-slate-800/50 border-slate-700 text-white pl-10" />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required className="bg-slate-800/50 border-slate-700 text-white pl-10" disabled={loading} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -88,14 +108,14 @@ const SignInPage = () => {
                 </div>
                 <div className="relative">
                   <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input id="password" type="password" required className="bg-slate-800/50 border-slate-700 text-white pl-10" />
+                  <Input id="password" name="password" type="password" required className="bg-slate-800/50 border-slate-700 text-white pl-10" disabled={loading} />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 text-lg glow-effect">
-                Sign In
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 text-lg glow-effect" disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
-            <div className="flex items-center my-6">
+            <div className="flex items-center my-4">
   <span className="flex-grow border-t border-slate-700"></span>
   <span className="mx-4 text-gray-400 text-sm">Or continue with</span>
   <span className="flex-grow border-t border-slate-700"></span>
@@ -112,7 +132,7 @@ const SignInPage = () => {
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="mt-6 text-center text-gray-400 text-sm">
+            <p className="mt-4 text-center text-gray-400 text-sm">
               Don&apos;t have an account?{' '}
               <Link to="/onboarding" className="text-pink-400 hover:underline font-semibold">
                 Sign Up
