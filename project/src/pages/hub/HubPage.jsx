@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,7 @@ import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '@/components/AI_Prompt';
 import VerifyCard from '@/components/hub/VerifyCard';
+import { supabase } from '../../supabaseClient'; // Adjust path if needed
 
 
 // Dashboard metrics config
@@ -128,17 +129,11 @@ const employerMenuItems = [
 
 const HubPage = () => {
   // ...existing state declarations...
-  // (all state variables must be declared above)
-
-  // ...rest of state declarations and logic...
-
-  const [algorandTxResult, setAlgorandTxResult] = useState(null);
-  // Add expiration date state
-  const [expirationDate, setExpirationDate] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
   // Algorand posting state
   const [isPostingToAlgorand, setIsPostingToAlgorand] = useState(false);
-
-  // ...all state declarations...
 
   // Quick message sent modal state
   const [autoDismissModalOpen, setAutoDismissModalOpen] = useState(false);
@@ -172,14 +167,13 @@ const HubPage = () => {
   // Fake match state
   const [matches, setMatches] = useState([]);
   const [swipeCount, setSwipeCount] = useState(0);
-  const navigate = useNavigate();
   const [userType, setUserType] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [menuItems, setMenuItems]  = useState([]);
   const [cards, setCards] = useState([]);
   const [flippedCardId, setFlippedCardId] = useState(null);
-// State to track if the Expiration Date modal is open
-const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
+  // State to track if the Expiration Date modal is open
+  const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
   // Quick Message modal state
   const [quickMessageModalOpen, setQuickMessageModalOpen] = useState(false);
   const [quickMessageRecipient, setQuickMessageRecipient] = useState(null);
@@ -209,20 +203,36 @@ const [isExpirationModalOpen, setIsExpirationModalOpen] = useState(false);
     benefits: '',
     expiration: '' // New expiration field
   });
-  
+  const [expirationDate, setExpirationDate] = useState(null);
+
   useEffect(() => {
-    const storedUserType = sessionStorage.getItem('userType');
-    const storedUserEmail = sessionStorage.getItem('userEmail');
-    if (!storedUserType) {
-      navigate('/login');
-    } else {
-      setUserType(storedUserType);
-      setUserEmail(storedUserEmail || 'User');
-      const items = storedUserType === 'candidate' ? candidateMenuItems : employerMenuItems;
-      setMenuItems(items);
-      setCards([...items].reverse()); 
+    async function fetchUserType() {
+      setLoading(true);
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/login');
+        setLoading(false);
+        return;
+      }
+      setUserEmail(user.email || '');
+      let type = user.user_metadata?.userType;
+      // Try to get userType from query param if not in metadata
+      if (!type) {
+        const params = new URLSearchParams(location.search);
+        const paramType = params.get('userType');
+        if (paramType === 'candidate' || paramType === 'employer') {
+          type = paramType;
+          // Persist to Supabase user_metadata
+          await supabase.auth.updateUser({ data: { userType: type } });
+        }
+      }
+      setUserType(type);
+      // Set menu items
+      setMenuItems(type === 'employer' ? employerMenuItems : candidateMenuItems);
+      setLoading(false);
     }
-  }, [navigate]);
+    fetchUserType();
+  }, [navigate, location.search]);
   
   const x = useMotionValue(0);
   const xSpring = useSpring(x, { stiffness: 300, damping: 50 });
@@ -604,7 +614,13 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
 
   // MAIN RETURN (ensure only one return in the component)
   // (Keyboard navigation: visually indicate focus on card stack for accessibility)
-  if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -986,6 +1002,17 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
     }
   };
 
+  // Set cards when userType changes
+  useEffect(() => {
+    if (userType === 'candidate') {
+      setCards(candidateMenuItems);
+    } else if (userType === 'employer') {
+      setCards(employerMenuItems);
+    } else {
+      setCards([]);
+    }
+  }, [userType]);
+
   if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
 
 
@@ -1025,7 +1052,6 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
       )}
 
       <AnimatePresence>
-// ... (rest of the code remains the same)
         <motion.header 
           className="absolute top-0 left-0 right-0 p-6 flex justify-center items-center z-20"
           initial={{ y: -100, opacity: 0 }}

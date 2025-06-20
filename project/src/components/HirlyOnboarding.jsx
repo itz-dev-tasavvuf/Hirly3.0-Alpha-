@@ -389,7 +389,10 @@ const HirlyOnboarding = () => {
     // Sign up user
     const { data, error: signupError } = await supabase.auth.signUp({
       email: userProfile.email,
-      password: userProfile.password
+      password: userProfile.password,
+      options: {
+        data: { userType: userProfile.userType && userProfile.userType.toLowerCase() }
+      }
     });
     if (signupError) {
       // Handle duplicate email gracefully

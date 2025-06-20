@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,16 @@ const SignInPage = () => {
       description: `Welcome back, ${userType === 'candidate' ? 'Candidate' : 'Employer'}. Redirecting...`
     });
     navigate('/hub');
+  };
+
+  // Google sign-in handler (redirect only, no One Tap)
+  const handleGoogleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/hub`
+      }
+    });
   };
 
   return (
@@ -121,7 +131,7 @@ const SignInPage = () => {
   <span className="flex-grow border-t border-slate-700"></span>
 </div>
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2" onClick={() => handleSocialLogin('Google')}>
+              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2" onClick={handleGoogleSignIn}>
                 <GoogleIcon />
                 Google
               </Button>
