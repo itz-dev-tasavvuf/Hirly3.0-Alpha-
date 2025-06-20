@@ -40,7 +40,7 @@ import { mockJobListings, mockCandidateProfiles } from '@/components/hub/swipeAp
 import Orb from '@/components/Orb';
 import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 import MetricDetailChart from '@/components/hub/MetricDetailChart';
-import AI_Prompt from '@/components/AI_Prompt';
+import AI_Prompt from '../../components/AI_Prompt';
 import VerifyCard from '@/components/hub/VerifyCard';
 import { supabase } from '../../supabaseClient'; // Adjust path if needed
 
@@ -204,6 +204,9 @@ const HubPage = () => {
     expiration: '' // New expiration field
   });
   const [expirationDate, setExpirationDate] = useState(null);
+
+  // AI Coach Prompt state
+  const [aiCoachPrompt, setAiCoachPrompt] = useState('');
 
   useEffect(() => {
     async function fetchUserType() {
@@ -1303,11 +1306,11 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
 
               {/* Main Content */}
               <div className="flex flex-col items-center space-y-8">
-                <AI_Prompt />
-                
+                {/* AI Prompt with prefill support */}
+                <AI_Prompt prefill={aiCoachPrompt} setPrefill={setAiCoachPrompt} />
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
-                  {[
+                  {/*
                     { title: "Resume Review", description: "Get AI feedback on your resume", icon: "📄" },
                     { title: "Interview Prep", description: "Practice with AI mock interviews", icon: "🎯" },
                     { title: "Career Path", description: "Explore career advancement options", icon: "🚀" }
@@ -1316,14 +1319,45 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                       key={index}
                       whileHover={{ scale: 1.05 }}
                       className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                      onClick={() => setAiCoachPrompt(aiCoachQuickPrompts[action.title])}
                     >
                       <div className="text-3xl mb-3">{action.icon}</div>
                       <h3 className="font-semibold text-white mb-2 text-lg">{action.title}</h3>
                       <p className="text-sm text-gray-300">{action.description}</p>
                     </motion.div>
                   ))}
+                  */}
+                  <motion.div
+                    key="resume_review"
+                    whileHover={{ scale: 1.05 }}
+                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Resume Review'])}
+                  >
+                    <div className="text-3xl mb-3">📄</div>
+                    <h3 className="font-semibold text-white mb-2 text-lg">Resume Review</h3>
+                    <p className="text-sm text-gray-300">Get AI feedback on your resume</p>
+                  </motion.div>
+                  <motion.div
+                    key="interview_prep"
+                    whileHover={{ scale: 1.05 }}
+                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Interview Prep'])}
+                  >
+                    <div className="text-3xl mb-3">🎯</div>
+                    <h3 className="font-semibold text-white mb-2 text-lg">Interview Prep</h3>
+                    <p className="text-sm text-gray-300">Practice with AI mock interviews</p>
+                  </motion.div>
+                  <motion.div
+                    key="career_path"
+                    whileHover={{ scale: 1.05 }}
+                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
+                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Career Path'])}
+                  >
+                    <div className="text-3xl mb-3">🚀</div>
+                    <h3 className="font-semibold text-white mb-2 text-lg">Career Path</h3>
+                    <p className="text-sm text-gray-300">Explore career advancement options</p>
+                  </motion.div>
                 </div>
-
                 {/* Additional padding for better scrolling */}
                 <div className="pb-8"></div>
               </div>
