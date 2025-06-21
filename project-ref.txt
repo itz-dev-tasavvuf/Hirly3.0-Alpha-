@@ -1,0 +1,8 @@
+Please replace 'your-project-ref' below with your actual Supabase project ref (found in your Supabase dashboard, e.g. abcd1234efgh5678):
+
+Example usage in your code:
+
+const projectRef = 'your-project-ref';
+const url = `https://${projectRef}.functions.supabase.co/ai-coach`;
+
+// Replace 'your-project-ref' with your real project ref!

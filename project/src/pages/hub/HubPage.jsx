@@ -42,7 +42,7 @@ import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '../../components/AI_Prompt';
 import VerifyCard from '@/components/hub/VerifyCard';
-import { supabase } from '../../supabaseClient'; // Adjust path if needed
+import { supabase } from '../../supabaseClient'; // adjust path if needed
 
 
 // Dashboard metrics config
@@ -206,7 +206,45 @@ const HubPage = () => {
   const [expirationDate, setExpirationDate] = useState(null);
 
   // AI Coach Prompt state
-  const [aiCoachPrompt, setAiCoachPrompt] = useState('');
+  const [aiCoachPrompt, setAiCoachPrompt] = useState("");
+  // AI Coach response state
+  const [aiCoachResponse, setAiCoachResponse] = useState("");
+  const [aiCoachLoading, setAiCoachLoading] = useState(false);
+  const [aiCoachError, setAiCoachError] = useState("");
+
+  // Handler to call Supabase Edge Function
+  const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
+
+const handleAICoachPrompt = async (prompt) => {
+  setAiCoachLoading(true);
+  setAiCoachError("");
+  setAiCoachResponse("");
+  try {
+    // --- DISABLE AUTH HEADER: call Edge Function without Authorization header ---
+    const response = await fetch(SUPABASE_AI_COACH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'AI Coach error');
+    }
+    const data = await response.json();
+    setAiCoachResponse(data.message || data.result || data.response || "");
+    if (data.message || data.result || data.response) {
+      setAiCoachError("");
+    } else {
+      setAiCoachError("No Response from AI");
+    }
+  } catch (err) {
+    setAiCoachError(err.message || "Error contacting Coach. Please try again later.");
+  } finally {
+    setAiCoachLoading(false);
+  }
+};
 
   useEffect(() => {
     async function fetchUserType() {
@@ -1296,7 +1334,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 </div>
                 <Button 
                   variant="ghost" 
-                  size="icon" 
+                  size="icon"
                   onClick={() => setAiCoachOpen(false)}
                   className="text-white hover:bg-white/20 rounded-full flex-shrink-0"
                 >
@@ -1307,26 +1345,31 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               {/* Main Content */}
               <div className="flex flex-col items-center space-y-8">
                 {/* AI Prompt with prefill support */}
-                <AI_Prompt prefill={aiCoachPrompt} setPrefill={setAiCoachPrompt} />
+                <AI_Prompt
+                  prefill={aiCoachPrompt}
+                  setPrefill={setAiCoachPrompt}
+                  onSubmit={handleAICoachPrompt}
+                  loading={aiCoachLoading}
+                />
+
+                {/* AI Coach Response */}
+                {(aiCoachLoading || aiCoachResponse || aiCoachError) && (
+                  <div className="w-full max-w-3xl bg-white/10 rounded-xl p-6 mt-2 text-white border border-white/20 min-h-[64px]">
+                    {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
+                    {aiCoachResponse && !aiCoachLoading && (
+                      <span className="whitespace-pre-line">{aiCoachResponse}</span>
+                    )}
+                    {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
+                      <span className="text-red-400">{aiCoachError}</span>
+                    )}
+                    {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
+                      <span className="text-yellow-300">No Response from AI</span>
+                    )}
+                  </div>
+                )}
+
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
-                  {/*
-                    { title: "Resume Review", description: "Get AI feedback on your resume", icon: "📄" },
-                    { title: "Interview Prep", description: "Practice with AI mock interviews", icon: "🎯" },
-                    { title: "Career Path", description: "Explore career advancement options", icon: "🚀" }
-                  ].map((action, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                      onClick={() => setAiCoachPrompt(aiCoachQuickPrompts[action.title])}
-                    >
-                      <div className="text-3xl mb-3">{action.icon}</div>
-                      <h3 className="font-semibold text-white mb-2 text-lg">{action.title}</h3>
-                      <p className="text-sm text-gray-300">{action.description}</p>
-                    </motion.div>
-                  ))}
-                  */}
                   <motion.div
                     key="resume_review"
                     whileHover={{ scale: 1.05 }}
