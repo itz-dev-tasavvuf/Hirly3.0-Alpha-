@@ -1354,19 +1354,34 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                   loading={aiCoachLoading}
                 />
 
-                {/* AI Coach Response */}
+                {/* AI Coach Response as overlay modal */}
                 {(aiCoachLoading || aiCoachResponse || aiCoachError) && (
-                  <div className="w-full max-w-3xl bg-white/10 rounded-xl p-6 mt-2 text-white border border-white/20 min-h-[64px]">
-                    {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
-                    {aiCoachResponse && !aiCoachLoading && (
-                      <span className="whitespace-pre-line">{aiCoachResponse}</span>
-                    )}
-                    {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
-                      <span className="text-red-400">{aiCoachError}</span>
-                    )}
-                    {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
-                      <span className="text-yellow-300">No Response from AI</span>
-                    )}
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
+                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl p-8 border border-white/20 text-white shadow-2xl max-h-[70vh] overflow-y-auto invisible-scrollbar">
+                      <button
+                        className="absolute top-4 right-4 text-white/70 hover:text-white text-xl"
+                        onClick={() => {
+                          setAiCoachResponse("");
+                          setAiCoachError("");
+                          setAiCoachLoading(false);
+                        }}
+                        aria-label="Close answer"
+                      >
+                        <X size={28} />
+                      </button>
+                      <div className="min-h-[64px] whitespace-pre-line pr-2">
+                        {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
+                        {aiCoachResponse && !aiCoachLoading && (
+                          <span>{aiCoachResponse}</span>
+                        )}
+                        {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
+                          <span className="text-red-400">{aiCoachError}</span>
+                        )}
+                        {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
+                          <span className="text-yellow-300">No Response from AI</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
