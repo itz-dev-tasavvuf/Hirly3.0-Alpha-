@@ -211,15 +211,62 @@ const HubPage = () => {
   const [aiCoachResponse, setAiCoachResponse] = useState("");
   const [aiCoachLoading, setAiCoachLoading] = useState(false);
   const [aiCoachError, setAiCoachError] = useState("");
+  // Resume upload modal state
+  const [resumeUploadOpen, setResumeUploadOpen] = useState(false);
+  const [resumeFileError, setResumeFileError] = useState("");
 
-  // Ensure AI Coach input/response/error are cleared every time popup opens
-  useEffect(() => {
-    if (aiCoachOpen) {
-      setAiCoachPrompt("");
-      setAiCoachResponse("");
-      setAiCoachError("");
+  // Handler for Resume Review quick action
+  const handleResumeReviewClick = () => {
+    setResumeFileError("");
+    setResumeUploadOpen(true);
+  };
+
+  // Handler for processing resume file upload
+  const handleResumeFile = async (file) => {
+    setResumeFileError("");
+    setAiCoachError("");
+    setAiCoachResponse("");
+    setAiCoachLoading(false);
+    if (!file) return;
+    setAiCoachLoading(true);
+    let text = "";
+    try {
+      if (file.type === "text/plain") {
+        text = await file.text();
+      } else if (file.type === "application/pdf") {
+        // Dynamically import pdfjs-dist only when needed
+        const pdfjsLib = await import('pdfjs-dist/build/pdf');
+        const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let pageText = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          pageText.push(content.items.map(item => item.str).join(' '));
+        }
+        text = pageText.join('\n');
+      } else {
+        setResumeFileError("Unsupported file type. Please upload a .txt or .pdf file.");
+        setAiCoachLoading(false);
+        return;
+      }
+      if (!text.trim()) {
+        setResumeFileError("Could not extract text from file. Try a different file.");
+        setAiCoachLoading(false);
+        return;
+      }
+      setResumeUploadOpen(false);
+      setAiCoachPrompt(`Please review this resume and provide feedback for improvement.\n\n${text}`);
+      setTimeout(() => {
+        handleAICoachPrompt(`Please review this resume and provide feedback for improvement.\n\n${text}`);
+      }, 300);
+    } catch (err) {
+      setResumeFileError("Failed to read file. Try a different file.");
+      setAiCoachLoading(false);
     }
-  }, [aiCoachOpen]);
+  };
 
   // Handler to call Supabase Edge Function
   const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
@@ -677,6 +724,34 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   return (
     <>
       {/* ...existing JSX... */}
+
+      {/* Resume Upload Modal */}
+      <Dialog open={resumeUploadOpen} onOpenChange={setResumeUploadOpen}>
+        <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl gradient-text">Upload Your Resume</DialogTitle>
+            <DialogDescription className="text-gray-300">Upload a .txt or .pdf file for AI review.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <input
+              type="file"
+              accept=".txt,.pdf"
+              className="block w-full text-white bg-white/10 border border-white/20 rounded-lg p-2"
+              onChange={async e => {
+                const file = e.target.files && e.target.files[0];
+                if (file) {
+                  await handleResumeFile(file);
+                }
+              }}
+              disabled={aiCoachLoading}
+            />
+            {resumeFileError && <div className="text-red-400 mt-2 text-sm">{resumeFileError}</div>}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setResumeUploadOpen(false)} className="bg-purple-600 hover:bg-purple-700">Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ...existing JSX... */}
     </>
@@ -1458,39 +1533,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                   </div>
                 )}
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
-                  <motion.div
-                    key="resume_review"
-                    whileHover={{ scale: 1.05 }}
-                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Resume Review'])}
-                  >
-                    <div className="text-3xl mb-3">📄</div>
-                    <h3 className="font-semibold text-white mb-2 text-lg">Resume Review</h3>
-                    <p className="text-sm text-gray-300">Get AI feedback on your resume</p>
-                  </motion.div>
-                  <motion.div
-                    key="interview_prep"
-                    whileHover={{ scale: 1.05 }}
-                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Interview Prep'])}
-                  >
-                    <div className="text-3xl mb-3">🎯</div>
-                    <h3 className="font-semibold text-white mb-2 text-lg">Interview Prep</h3>
-                    <p className="text-sm text-gray-300">Practice with AI mock interviews</p>
-                  </motion.div>
-                  <motion.div
-                    key="career_path"
-                    whileHover={{ scale: 1.05 }}
-                    className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                                       onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Career Path'])}
-                  >
-                    <div className="text-3xl mb-3">🚀</div>
-                    <h3 className="font-semibold text-white mb-2 text-lg">Career Path</h3>
-                                                                             <p className="text-sm text-gray-300">Explore career advancement options</p>
-                  </motion.div>
-                </div>
+                {/* Quick Actions removed as requested */}
                 {/* Additional padding for better scrolling */}
                 <div className="pb-8"></div>
               </div>
