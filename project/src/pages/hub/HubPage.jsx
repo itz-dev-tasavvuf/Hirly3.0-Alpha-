@@ -1357,7 +1357,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 {/* AI Coach Response as overlay modal */}
                 {(aiCoachLoading || aiCoachResponse || aiCoachError) && (
                   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl p-8 border border-white/20 text-white shadow-2xl max-h-[70vh] overflow-y-auto invisible-scrollbar">
+                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl p-8 border border-white/20 text-white shadow-2xl max-h-[70vh] flex flex-col overflow-y-auto invisible-scrollbar" style={{ paddingBottom: '80px' }}>
                       <button
                         className="absolute top-4 right-4 text-white/70 hover:text-white text-xl"
                         onClick={() => {
@@ -1369,7 +1369,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                       >
                         <X size={28} />
                       </button>
-                      <div className="min-h-[64px] whitespace-pre-line pr-2">
+                      <div className="min-h-[64px] whitespace-pre-line pr-2 mb-6">
                         {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
                         {aiCoachResponse && !aiCoachLoading && (
                           <span>{aiCoachResponse}</span>
@@ -1380,6 +1380,54 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                         {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
                           <span className="text-yellow-300">No Response from AI</span>
                         )}
+                      </div>
+                      {/* Sticky, visible input at the bottom with submit button */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          padding: '16px',
+                          background: 'rgba(255,255,255,0.95)',
+                          borderBottomLeftRadius: '16px',
+                          borderBottomRightRadius: '16px',
+                          borderTop: '1px solid rgba(0,0,0,0.08)',
+                          zIndex: 10,
+                          boxShadow: '0 -2px 16px 0 rgba(0,0,0,0.08)',
+                        }}
+                      >
+                        <form
+                          onSubmit={e => {
+                            e.preventDefault();
+                            if (aiCoachLoading) return;
+                            if (aiCoachPrompt.trim()) {
+                              handleAICoachPrompt(aiCoachPrompt);
+                            }
+                          }}
+                          className="w-full flex items-center gap-2"
+                        >
+                          <input
+                            type="text"
+                            value={aiCoachPrompt}
+                            onChange={e => setAiCoachPrompt(e.target.value)}
+                            placeholder="Type your message..."
+                            className="flex-1 bg-white text-gray-900 text-base px-4 py-2 rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-400"
+                            disabled={aiCoachLoading}
+                            autoFocus
+                            style={{ minWidth: 0 }}
+                          />
+                          <button
+                            type="submit"
+                            disabled={aiCoachLoading || !aiCoachPrompt.trim()}
+                            className="ml-2 p-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white shadow transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            aria-label="Send"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-7.5-15-7.5v6l10 1.5-10 1.5v6z" />
+                            </svg>
+                          </button>
+                        </form>
                       </div>
                     </div>
                   </div>
