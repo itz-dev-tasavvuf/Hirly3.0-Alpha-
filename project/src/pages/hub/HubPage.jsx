@@ -212,6 +212,15 @@ const HubPage = () => {
   const [aiCoachLoading, setAiCoachLoading] = useState(false);
   const [aiCoachError, setAiCoachError] = useState("");
 
+  // Ensure AI Coach input/response/error are cleared every time popup opens
+  useEffect(() => {
+    if (aiCoachOpen) {
+      setAiCoachPrompt("");
+      setAiCoachResponse("");
+      setAiCoachError("");
+    }
+  }, [aiCoachOpen]);
+
   // Handler to call Supabase Edge Function
   const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
 
@@ -1418,6 +1427,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                             if (aiCoachLoading) return;
                             if (aiCoachPrompt.trim()) {
                               handleAICoachPrompt(aiCoachPrompt);
+                              setAiCoachPrompt(""); // Clear input after sending
                             }
                           }}
                           className="w-full flex items-center gap-2"
@@ -1454,7 +1464,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                     key="resume_review"
                     whileHover={{ scale: 1.05 }}
                     className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Resume Review'])}
+                    onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Resume Review'])}
                   >
                     <div className="text-3xl mb-3">📄</div>
                     <h3 className="font-semibold text-white mb-2 text-lg">Resume Review</h3>
@@ -1464,7 +1474,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                     key="interview_prep"
                     whileHover={{ scale: 1.05 }}
                     className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Interview Prep'])}
+                    onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Interview Prep'])}
                   >
                     <div className="text-3xl mb-3">🎯</div>
                     <h3 className="font-semibold text-white mb-2 text-lg">Interview Prep</h3>
@@ -1474,11 +1484,11 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                     key="career_path"
                     whileHover={{ scale: 1.05 }}
                     className="p-6 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/20 transition-colors"
-                    onClick={() => setAiCoachPrompt(aiCoachQuickPrompts['Career Path'])}
+                                       onClick={() => handleAICoachQuickAction(aiCoachQuickPrompts['Career Path'])}
                   >
                     <div className="text-3xl mb-3">🚀</div>
                     <h3 className="font-semibold text-white mb-2 text-lg">Career Path</h3>
-                    <p className="text-sm text-gray-300">Explore career advancement options</p>
+                                                                             <p className="text-sm text-gray-300">Explore career advancement options</p>
                   </motion.div>
                 </div>
                 {/* Additional padding for better scrolling */}
