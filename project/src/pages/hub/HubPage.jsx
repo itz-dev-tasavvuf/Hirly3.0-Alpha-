@@ -1357,7 +1357,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 {/* AI Coach Response as overlay modal */}
                 {(aiCoachLoading || aiCoachResponse || aiCoachError) && (
                   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl p-8 border border-white/20 text-white shadow-2xl max-h-[70vh] flex flex-col overflow-y-auto invisible-scrollbar" style={{ paddingBottom: '80px' }}>
+                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl border border-white/20 text-white shadow-2xl max-h-[70vh] flex flex-col" style={{ minHeight: '320px' }}>
                       <button
                         className="absolute top-4 right-4 text-white/70 hover:text-white text-xl"
                         onClick={() => {
@@ -1369,19 +1369,21 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                       >
                         <X size={28} />
                       </button>
-                      <div className="min-h-[64px] whitespace-pre-line pr-2 mb-6">
-                        {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
-                        {aiCoachResponse && !aiCoachLoading && (
-                          <span>{aiCoachResponse}</span>
-                        )}
-                        {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
-                          <span className="text-red-400">{aiCoachError}</span>
-                        )}
-                        {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
-                          <span className="text-yellow-300">No Response from AI</span>
-                        )}
+                      <div className="flex-1 overflow-y-auto invisible-scrollbar p-8" style={{ paddingBottom: '100px' }}>
+                        <div className="min-h-[64px] whitespace-pre-line pr-2 mb-6">
+                          {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
+                          {aiCoachResponse && !aiCoachLoading && (
+                            <span>{aiCoachResponse}</span>
+                          )}
+                          {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
+                            <span className="text-red-400">{aiCoachError}</span>
+                          )}
+                          {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
+                            <span className="text-yellow-300">No Response from AI</span>
+                          )}
+                        </div>
                       </div>
-                      {/* Sticky, visible input at the bottom with submit button */}
+                      {/* Sticky, visible input at the bottom with submit button, outside scrollable area */}
                       <div
                         style={{
                           position: 'absolute',
@@ -1394,7 +1396,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                           borderBottomRightRadius: '16px',
                           borderTop: '1px solid rgba(0,0,0,0.08)',
                           zIndex: 10,
-                          boxShadow: '0 -2px 16px 0 rgba(0,0,0,0.08)',
+                          boxShadow: '0 -2px 16px 0 rgba(0,0,0,0.08)'
                         }}
                       >
                         <form
