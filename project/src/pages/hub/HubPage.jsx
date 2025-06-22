@@ -216,11 +216,11 @@ const HubPage = () => {
   const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
 
 const handleAICoachPrompt = async (prompt) => {
+  console.log('handleAICoachPrompt called with:', prompt); // Debug: confirm handler is called
   setAiCoachLoading(true);
   setAiCoachError("");
   setAiCoachResponse("");
   try {
-    // --- DISABLE AUTH HEADER: call Edge Function without Authorization header ---
     const response = await fetch(SUPABASE_AI_COACH_URL, {
       method: "POST",
       headers: {
@@ -228,16 +228,18 @@ const handleAICoachPrompt = async (prompt) => {
       },
       body: JSON.stringify({ prompt }),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'AI Coach error');
-    }
     const data = await response.json();
-    setAiCoachResponse(data.message || data.result || data.response || "");
-    if (data.message || data.result || data.response) {
-      setAiCoachError("");
+    console.log('AI Coach response:', data); // Debug log
+    if (response.ok) {
+      setAiCoachResponse(data.message || data.result || data.response || "");
+      if (data.message || data.result || data.response) {
+        setAiCoachError("");
+      } else {
+        setAiCoachError("No Response from AI");
+      }
     } else {
-      setAiCoachError("No Response from AI");
+      setAiCoachError(data.error || data.message || 'AI Coach error');
+      setAiCoachResponse("");
     }
   } catch (err) {
     setAiCoachError(err.message || "Error contacting Coach. Please try again later.");

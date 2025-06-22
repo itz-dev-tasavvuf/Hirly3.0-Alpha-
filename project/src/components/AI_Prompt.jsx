@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 
-import { ArrowRight, Bot, Check, ChevronDown, Paperclip, X } from "lucide-react"
+import { ArrowRight, Bot, Check, ChevronDown, Paperclip } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea"
@@ -8,16 +8,29 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { motion, AnimatePresence } from "framer-motion"
 
-export default function AI_Prompt({ prefill, setPrefill }) {
-  const [value, setValue] = useState(prefill || "")
+export default function AI_Prompt({ prefill, setPrefill, onSubmit, loading }) {
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 72,
     maxHeight: 300,
   })
-  const [selectedModel, setSelectedModel] = useState("GPT-4-1 Mini")
-  const [response, setResponse] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showPopup, setShowPopup] = useState(false)
+  const [selectedModel, setSelectedModel] = React.useState("GPT-4-1 Mini")
+
+  React.useEffect(() => {
+    if (prefill !== undefined && prefill !== null) setPrefill(prefill)
+    // eslint-disable-next-line
+  }, [prefill])
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      if (onSubmit && prefill.trim()) {
+        onSubmit(prefill)
+      }
+      // Optionally clear input after submit
+      // setPrefill("");
+      adjustHeight(true)
+    }
+  }
 
   const AI_MODELS = ["o3-mini", "Gemini 2.5 Flash", "Claude 3.5 Sonnet", "GPT-4-1 Mini", "GPT-4-1"]
   const OPENAI_SVG = (
@@ -113,85 +126,15 @@ export default function AI_Prompt({ prefill, setPrefill }) {
     "GPT-4-1": OPENAI_SVG,
   }
 
-  useEffect(() => {
-    if (prefill) setValue(prefill)
-  }, [prefill])
-
-  // Use the deployed Supabase Edge Function URL
-  const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
-
-  const handleSend = async () => {
-    if (!value.trim()) return;
-    setLoading(true);
-    setShowPopup(true);
-    setResponse("");
-    try {
-      const res = await fetch(SUPABASE_AI_COACH_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: value })
-      });
-      const data = await res.json();
-      setResponse(data.choices?.[0]?.message?.content || data.result || data.response || 'No response from AI.');
-    } catch (err) {
-      setResponse('Error contacting AI Coach.');
-    }
-    setLoading(false);
-  }
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-      setValue("")
-      adjustHeight(true)
-    }
-  }
-
   return (
     <div className="w-full max-w-3xl py-4 relative z-10">
-      {/* Answer Popup */}
-      <AnimatePresence>
-        {showPopup && (loading || response) && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-          >
-            <div className="relative bg-white/90 dark:bg-[#18122B] rounded-2xl shadow-2xl p-8 max-w-xl w-full mx-4">
-              <button
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                onClick={() => { setShowPopup(false); setResponse(""); setLoading(false); }}
-                aria-label="Close answer"
-              >
-                <X size={24} />
-              </button>
-              {loading ? (
-                <div className="flex flex-col items-center justify-center min-h-[120px]">
-                  <svg className="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                  </svg>
-                  <span className="text-lg text-gray-700 dark:text-white">Thinking...</span>
-                </div>
-              ) : (
-                <div className="text-gray-900 dark:text-white whitespace-pre-line text-base min-h-[120px]">
-                  {response}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       <div className="bg-white/20 dark:bg-white/25 rounded-2xl p-1.5 backdrop-blur-md border border-white/30">
         <div className="relative">
           <div className="relative flex flex-col">
             <div className="overflow-y-auto" style={{ maxHeight: "400px" }}>
               <Textarea
                 id="ai-input-15"
-                value={value}
+                value={prefill}
                 placeholder="Let's practice and get you interview ready!"
                 className={cn(
                   "w-full rounded-xl rounded-b-none px-4 py-3 bg-white/30 dark:bg-white/20 border-none text-white dark:text-white placeholder:text-white/80 dark:placeholder:text-white/80 resize-none focus-visible:ring-0 focus-visible:ring-offset-0",
@@ -200,12 +143,12 @@ export default function AI_Prompt({ prefill, setPrefill }) {
                 ref={textareaRef}
                 onKeyDown={handleKeyDown}
                 onChange={(e) => {
-                  setValue(e.target.value)
+                  setPrefill(e.target.value)
                   adjustHeight()
                 }}
+                disabled={loading}
               />
             </div>
-
             <div className="h-14 bg-white/30 dark:bg-white/20 rounded-b-xl flex items-center">
               <div className="absolute left-3 right-3 bottom-3 flex items-center justify-between w-[calc(100%-24px)]">
                 <div className="flex items-center gap-2">
@@ -214,6 +157,7 @@ export default function AI_Prompt({ prefill, setPrefill }) {
                       <Button
                         variant="ghost"
                         className="flex items-center gap-1 h-8 pl-1 pr-2 text-xs rounded-md text-white hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
+                        disabled={loading}
                       >
                         <AnimatePresence mode="wait">
                           <motion.div
@@ -242,13 +186,11 @@ export default function AI_Prompt({ prefill, setPrefill }) {
                         </AnimatePresence>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className={cn(
-                        "min-w-[10rem]",
-                        "border-black/10 dark:border-white/10",
-                        "bg-gradient-to-b from-white via-white to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-800",
-                      )}
-                    >
+                    <DropdownMenuContent className={cn(
+                      "min-w-[10rem]",
+                      "border-black/10 dark:border-white/10",
+                      "bg-gradient-to-b from-white via-white to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-800",
+                    )}>
                       {AI_MODELS.map((model) => (
                         <DropdownMenuItem
                           key={model}
@@ -273,7 +215,7 @@ export default function AI_Prompt({ prefill, setPrefill }) {
                     )}
                     aria-label="Attach file"
                   >
-                    <input type="file" className="hidden" />
+                    <input type="file" className="hidden" disabled={loading} />
                     <Paperclip className="w-4 h-4 transition-colors" />
                   </label>
                 </div>
@@ -284,13 +226,19 @@ export default function AI_Prompt({ prefill, setPrefill }) {
                     "hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500",
                   )}
                   aria-label="Send message"
-                  disabled={!value.trim() || loading}
-                  onClick={handleSend}
+                  disabled={!prefill.trim() || loading}
+                  onClick={() => {
+                    if (onSubmit && prefill.trim()) {
+                      onSubmit(prefill)
+                    }
+                    // Optionally clear input after submit
+                    // setPrefill("");
+                  }}
                 >
                   <ArrowRight
                     className={cn(
                       "w-4 h-4 dark:text-white text-black transition-opacity duration-200",
-                      value.trim() ? "opacity-100" : "opacity-30",
+                      prefill.trim() ? "opacity-100" : "opacity-30",
                     )}
                   />
                 </button>

@@ -76,7 +76,11 @@ serve(async (req) => {
 
     if (!openRouterRes.ok) {
       const errorText = await openRouterRes.text();
-      return new Response(JSON.stringify({ error: "OpenRouter API error", details: errorText }), {
+      return new Response(JSON.stringify({ 
+        message: '',
+        error: "OpenRouter API error", 
+        details: errorText 
+      }), {
         status: 502,
         headers: {
           "Content-Type": "application/json",
@@ -100,8 +104,12 @@ serve(async (req) => {
         },
       });
     } else {
-      // Debug: return the full OpenRouter response
-      return new Response(JSON.stringify({ error: "No AI message found", openRouterData }), {
+      // Debug: return the full OpenRouter response, but always include message
+      return new Response(JSON.stringify({ 
+        message: '',
+        error: "No AI message found", 
+        openRouterData 
+      }), {
         status: 200,
         headers: {
           "Content-Type": "application/json",
@@ -112,7 +120,11 @@ serve(async (req) => {
       });
     }
   } catch (err) {
-    return new Response(JSON.stringify({ error: "Failed to contact OpenRouter API", details: String(err) }), {
+    return new Response(JSON.stringify({ 
+      message: '',
+      error: "Failed to contact OpenRouter API", 
+      details: String(err) 
+    }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",
