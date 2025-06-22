@@ -1372,15 +1372,28 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                       <div className="flex-1 overflow-y-auto invisible-scrollbar p-8" style={{ paddingBottom: '100px' }}>
                         <div className="min-h-[64px] whitespace-pre-line pr-2 mb-6">
                           {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
-                          {aiCoachResponse && !aiCoachLoading && (
-                            <span>{aiCoachResponse}</span>
-                          )}
-                          {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
-                            <span className="text-red-400">{aiCoachError}</span>
-                          )}
-                          {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
-                            <span className="text-yellow-300">No Response from AI</span>
-                          )}
+                          {aiCoachResponse && !aiCoachLoading && (() => {
+    let pretty = null;
+    try {
+      const obj = typeof aiCoachResponse === 'string' ? JSON.parse(aiCoachResponse) : aiCoachResponse;
+      pretty = JSON.stringify(obj, null, 2);
+    } catch {
+      pretty = null;
+    }
+    return pretty ? (
+      <pre className="bg-black/60 text-green-200 rounded-lg p-4 overflow-x-auto text-sm whitespace-pre-wrap">
+        {pretty}
+      </pre>
+    ) : (
+      <span>{aiCoachResponse}</span>
+    );
+  })()}
+  {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
+    <span className="text-red-400">{aiCoachError}</span>
+  )}
+  {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
+    <span className="text-yellow-300">No Response from AI</span>
+  )}
                         </div>
                       </div>
                       {/* Sticky, visible input at the bottom with submit button, outside scrollable area */}
