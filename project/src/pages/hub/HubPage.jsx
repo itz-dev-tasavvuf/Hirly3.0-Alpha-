@@ -447,6 +447,11 @@ const handleAICoachPrompt = async (prompt) => {
     }
     const handleKeyDown = (e) => {
       if (!cards.length) return;
+      // Prevent flip if a text input, textarea, or select is focused
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT' || active.isContentEditable)) {
+        return;
+      }
       const isFlipped = flippedCardId === cards[cards.length - 1]?.id;
       if (e.key === 'ArrowLeft') {
         if (!isFlipped) {
