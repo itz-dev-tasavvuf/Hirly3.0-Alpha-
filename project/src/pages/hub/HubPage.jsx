@@ -135,6 +135,7 @@ const HubPage = () => {
   const location = useLocation();
   // Algorand posting state
   const [isPostingToAlgorand, setIsPostingToAlgorand] = useState(false);
+  const [algorandTxResult, setAlgorandTxResult] = useState(null);
 
   // Quick message sent modal state
   const [autoDismissModalOpen, setAutoDismissModalOpen] = useState(false);
@@ -531,7 +532,7 @@ const handleAICoachPrompt = async (prompt) => {
         company: mockCompanyProfile.name || '',
         expiration: expirationDate ? Math.floor(expirationDate.getTime() / 1000) : Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 // default: 30 days
       };
-      const response = await fetch('/api/algorand/deployJobListing', {
+      const response = await fetch('https://occrvhahkgvvyzvpnsjz.functions.supabase.co/algorand-deploy-job', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(jobData)
@@ -1498,7 +1499,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                             value={aiCoachPrompt}
                             onChange={e => setAiCoachPrompt(e.target.value)}
                             placeholder="Type your message..."
-                            className="flex-1 bg-white text-gray-900 text-base px-4 py-2 rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-400"
+                            className="flex-1 bg-white text-gray-900 text-base px-4 py-2 rounded-lg border bordergray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-300"
                             disabled={aiCoachLoading}
                             autoFocus
                             style={{ minWidth: 0 }}
