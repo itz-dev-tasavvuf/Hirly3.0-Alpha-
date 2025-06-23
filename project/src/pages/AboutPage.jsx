@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Heart, Users, Sparkles } from 'lucide-react';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 const Section = ({ children, className = '' }) => (
   <motion.section
@@ -15,6 +16,10 @@ const Section = ({ children, className = '' }) => (
 );
 
 const AboutPage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="relative min-h-screen pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden">
       <div className="absolute inset-0">
@@ -145,6 +150,8 @@ const AboutPage = () => {
             Get Started
           </motion.button>
         </Section>
+
+        <ScrollToTopButton />
       </div>
     </div>
   );

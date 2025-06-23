@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { CheckCircle, ArrowRight, User, Building, Gift, Star } from 'lucide-react';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 const PricingPage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleGetStarted = (plan) => {
     toast({
       title: `Get Started with ${plan}`,
@@ -171,6 +176,8 @@ const PricingPage = () => {
             </motion.div>
           ))}
         </div>
+
+        <ScrollToTopButton />
       </div>
     </div>
   );
