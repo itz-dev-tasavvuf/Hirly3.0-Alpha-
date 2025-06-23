@@ -1121,9 +1121,9 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   // Set cards when userType changes
   useEffect(() => {
     if (userType === 'candidate') {
-      setCards(candidateMenuItems);
+      setCards(candidateMenuItems.slice().reverse());
     } else if (userType === 'employer') {
-      setCards(employerMenuItems);
+      setCards(employerMenuItems.slice().reverse());
     } else {
       setCards([]);
     }
