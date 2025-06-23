@@ -15,6 +15,10 @@ const PricingPage = () => {
       window.location.href = '/onboarding';
       return;
     }
+    if (plan === 'Enterprise') {
+      window.location.href = 'mailto:hrirlyhr@gmail.com';
+      return;
+    }
     toast({
       title: `Get Started with ${plan}`,
       description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
@@ -168,9 +172,11 @@ const PricingPage = () => {
                   onClick={() => handleGetStarted(plan.title)}
                   size="lg"
                   className={`w-full font-semibold px-8 py-4 rounded-xl text-lg ${
-                    plan.isFeatured
+                    plan.title === 'Job Seekers' || plan.cta === 'Contact Sales'
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white glow-effect transform hover:scale-105 transition-all'
-                      : 'border-purple-500/50 text-purple-300 hover:bg-purple-500/20'
+                      : plan.isFeatured
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white glow-effect transform hover:scale-105 transition-all'
+                        : 'border-purple-500/50 text-purple-300 hover:bg-purple-500/20'
                   }`}
                 >
                   {plan.cta}
