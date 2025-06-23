@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { CheckCircle, ArrowRight, User, Building, Gift, Star } from 'lucide-react';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
+import ContactSalesModal from '@/components/ContactSalesModal';
 
 const PricingPage = () => {
+  const [contactModalOpen, setContactModalOpen] = React.useState(false);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -16,7 +18,7 @@ const PricingPage = () => {
       return;
     }
     if (plan === 'Enterprise') {
-      window.location.href = 'mailto:hrirlyhr@gmail.com';
+      setContactModalOpen(true);
       return;
     }
     toast({
@@ -186,6 +188,8 @@ const PricingPage = () => {
             </motion.div>
           ))}
         </div>
+
+        <ContactSalesModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} />
 
         <ScrollToTopButton />
       </div>
