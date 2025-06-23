@@ -5,6 +5,7 @@ import BlockchainSection from '@/components/BlockchainSection';
 import Testimonials from '@/components/Testimonials';
 import DemoPreview from '@/components/DemoPreview';
 import CallToAction from '@/components/CallToAction';
+import ComingSoonStores from '@/components/ComingSoonStores';
 
 const LandingPage = () => {
   return (
@@ -14,6 +15,7 @@ const LandingPage = () => {
       <BlockchainSection />
       <Testimonials />
       <DemoPreview />
+      <ComingSoonStores />
       <CallToAction />
     </>
   );
