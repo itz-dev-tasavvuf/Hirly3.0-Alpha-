@@ -11,6 +11,10 @@ const PricingPage = () => {
   }, []);
 
   const handleGetStarted = (plan) => {
+    if (plan === 'Job Seekers') {
+      window.location.href = '/onboarding';
+      return;
+    }
     toast({
       title: `Get Started with ${plan}`,
       description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
