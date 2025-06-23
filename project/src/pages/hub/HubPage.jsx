@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import DatePicker from 'react-datepicker';
 import { forwardRef } from 'react';
+import { Sparkles } from "lucide-react"; // Add at top with other imports
 
 // Custom input for DatePicker to always use the custom calendar modal
 const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
@@ -214,6 +215,8 @@ const HubPage = () => {
   // Resume upload modal state
   const [resumeUploadOpen, setResumeUploadOpen] = useState(false);
   const [resumeFileError, setResumeFileError] = useState("");
+  // File upload toast state for AI Coach
+  const [fileUploadToast, setFileUploadToast] = useState(false);
 
   // Handler for Resume Review quick action
   const handleResumeReviewClick = () => {
@@ -247,8 +250,16 @@ const HubPage = () => {
           pageText.push(content.items.map(item => item.str).join(' '));
         }
         text = pageText.join('\n');
+      } else if (
+        file.type === "application/msword" ||
+        file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        file.name.match(/\.(doc|docx)$/i)
+      ) {
+        setResumeFileError("Word document support coming soon. Please upload PDF or TXT for now.");
+        setAiCoachLoading(false);
+        return;
       } else {
-        setResumeFileError("Unsupported file type. Please upload a .txt or .pdf file.");
+        setResumeFileError("Unsupported file type. Please upload a .txt, .pdf, or .doc/.docx file.");
         setAiCoachLoading(false);
         return;
       }
@@ -724,34 +735,6 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   return (
     <>
       {/* ...existing JSX... */}
-
-      {/* Resume Upload Modal */}
-      <Dialog open={resumeUploadOpen} onOpenChange={setResumeUploadOpen}>
-        <DialogContent className="glass-effect border-white/20 text-white sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl gradient-text">Upload Your Resume</DialogTitle>
-            <DialogDescription className="text-gray-300">Upload a .txt or .pdf file for AI review.</DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <input
-              type="file"
-              accept=".txt,.pdf"
-              className="block w-full text-white bg-white/10 border border-white/20 rounded-lg p-2"
-              onChange={async e => {
-                const file = e.target.files && e.target.files[0];
-                if (file) {
-                  await handleResumeFile(file);
-                }
-              }}
-              disabled={aiCoachLoading}
-            />
-            {resumeFileError && <div className="text-red-400 mt-2 text-sm">{resumeFileError}</div>}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setResumeUploadOpen(false)} className="bg-purple-600 hover:bg-purple-700">Cancel</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* ...existing JSX... */}
     </>
@@ -1413,10 +1396,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
                     <Bot className="w-6 h-6 text-white" />
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">AI Career Coach</h2>
-                    <p className="text-gray-300">Your personal AI assistant for career growth</p>
-                  </div>
+                  <p className="text-gray-300">Your personal AI assistant for career growth</p>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -1434,7 +1414,13 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 <AI_Prompt
                   prefill={aiCoachPrompt}
                   setPrefill={setAiCoachPrompt}
-                  onSubmit={handleAICoachPrompt}
+                  onSubmit={async (prompt, fileText) => {
+                    // If fileText is present, append it to the prompt
+                    const fullPrompt = fileText
+                      ? `${prompt}\n\nResume:\n${fileText}`
+                      : prompt;
+                    await handleAICoachPrompt(fullPrompt);
+                  }}
                   loading={aiCoachLoading}
                 />
 
@@ -1536,6 +1522,9 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 {/* Quick Actions removed as requested */}
                 {/* Additional padding for better scrolling */}
                 <div className="pb-8"></div>
+
+                {/* Prompt Suggestions (fade-in cycling) */}
+                <PromptSuggestions />
               </div>
             </motion.div>
           </motion.div>
@@ -1546,3 +1535,61 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
 };
 
 export default HubPage;
+
+// Add this component at the bottom of the file (outside HubPage)
+const promptSuggestionsList = [
+  "'Can you review my resume?'",
+  "'Give me a mock interview for a frontend developer.'",
+  "'What career paths fit my skills?'"
+];
+
+function PromptSuggestions() {
+  const [index, setIndex] = React.useState(0);
+  const [fade, setFade] = React.useState(true);
+  React.useEffect(() => {
+    const timeout = setTimeout(() => setFade(false), 3200);
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex(i => (i + 1) % promptSuggestionsList.length);
+        setFade(true);
+      }, 400);
+    }, 4000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, []);
+  return (
+    <div className="w-full flex justify-center sticky bottom-0 z-30 pointer-events-none select-none" aria-live="polite">
+      <div
+        className={
+          `flex items-center gap-2 px-5 py-3 rounded-2xl shadow-lg bg-gradient-to-r from-cyan-700/80 to-blue-800/80 border-2 border-cyan-400/40 relative animate-glow` +
+          (fade ? ' opacity-100 translate-y-0' : ' opacity-0 -translate-y-2')
+        }
+        style={{
+          minHeight: 40,
+          transition: 'opacity 0.4s, transform 0.4s',
+          boxShadow: '0 0 16px 2px #22d3ee55, 0 2px 24px 0 #0ea5e955',
+          pointerEvents: 'auto',
+        }}
+        key={index}
+      >
+        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-cyan-500/80 mr-2 shadow-md animate-pulse">
+          <Sparkles className="w-4 h-4 text-white" />
+        </span>
+        <span className="text-base font-medium text-cyan-100 drop-shadow-sm tracking-wide">
+          {promptSuggestionsList[index]}
+        </span>
+      </div>
+      <style>{`
+        @keyframes glow {
+          0% { box-shadow: 0 0 16px 2px #22d3ee55, 0 2px 24px 0 #0ea5e955; }
+          50% { box-shadow: 0 0 32px 8px #22d3eeaa, 0 2px 32px 0 #0ea5e9aa; }
+          100% { box-shadow: 0 0 16px 2px #22d3ee55, 0 2px 24px 0 #0ea5e955; }
+        }
+        .animate-glow { animation: glow 2.5s ease-in-out infinite; }
+      `}</style>
+    </div>
+  );
+}

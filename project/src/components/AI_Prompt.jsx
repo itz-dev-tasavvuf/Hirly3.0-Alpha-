@@ -41,13 +41,16 @@ const OPENAI_SVG = (
   </div>
 )
 
-export default function AI_Prompt() {
+export default function AI_Prompt({ prefill, setPrefill, onSubmit, loading }) {
   const [value, setValue] = useState("")
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 72,
     maxHeight: 300,
   })
   const [selectedModel, setSelectedModel] = useState("GPT-4-1 Mini")
+  const [attachedFile, setAttachedFile] = useState(null)
+  const [fileText, setFileText] = useState("")
+  const [fileError, setFileError] = useState("")
 
   const AI_MODELS = ["o3-mini", "Gemini 2.5 Flash", "Claude 3.5 Sonnet", "GPT-4-1 Mini", "GPT-4-1"]
 
@@ -116,9 +119,62 @@ export default function AI_Prompt() {
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      setValue("")
-      adjustHeight(true)
+      if (value.trim()) {
+        onSubmit(value, fileText || undefined)
+        setValue("")
+        adjustHeight(true)
+      }
     }
+  }
+
+  // Add handler for file input
+  const handleFileInput = async (e) => {
+    const file = e.target.files && e.target.files[0]
+    setFileError("")
+    setAttachedFile(null)
+    setFileText("")
+    if (file) {
+      setAttachedFile(file)
+      try {
+        if (file.type === "text/plain") {
+          const text = await file.text()
+          setFileText(text)
+        } else if (file.type === "application/pdf") {
+          const pdfjsLib = await import('pdfjs-dist/build/pdf');
+          const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+          pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let pageText = [];
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            pageText.push(content.items.map(item => item.str).join(' '));
+          }
+          setFileText(pageText.join('\n'));
+        } else if (
+          file.type === "application/msword" ||
+          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+          file.name.match(/\.(doc|docx)$/i)
+        ) {
+          setFileError("Word document support coming soon. Please upload PDF or TXT for now.")
+          setAttachedFile(null)
+        } else {
+          setFileError("Unsupported file type. Please upload a .txt, .pdf, or .doc/.docx file.")
+          setAttachedFile(null)
+        }
+      } catch (err) {
+        setFileError("Failed to read file. Try a different file.")
+        setAttachedFile(null)
+      }
+    }
+    e.target.value = "" // Reset so same file can be uploaded again
+  }
+
+  const handleRemoveFile = () => {
+    setAttachedFile(null)
+    setFileText("")
+    setFileError("")
   }
 
   return (
@@ -141,6 +197,7 @@ export default function AI_Prompt() {
                   setValue(e.target.value)
                   adjustHeight()
                 }}
+                disabled={loading}
               />
             </div>
 
@@ -211,9 +268,24 @@ export default function AI_Prompt() {
                     )}
                     aria-label="Attach file"
                   >
-                    <input type="file" className="hidden" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.txt,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={handleFileInput}
+                      disabled={loading}
+                    />
                     <Paperclip className="w-4 h-4 transition-colors" />
                   </label>
+                  {attachedFile && (
+                    <div className="flex items-center gap-1 ml-2 bg-cyan-900/70 text-cyan-100 px-2 py-1 rounded-lg text-xs">
+                      <span className="truncate max-w-[120px]">{attachedFile.name}</span>
+                      <button type="button" className="ml-1 text-cyan-200 hover:text-red-400" onClick={handleRemoveFile} aria-label="Remove file">&times;</button>
+                    </div>
+                  )}
+                  {fileError && (
+                    <span className="ml-2 text-red-400 text-xs">{fileError}</span>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -222,7 +294,14 @@ export default function AI_Prompt() {
                     "hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500",
                   )}
                   aria-label="Send message"
-                  disabled={!value.trim()}
+                  disabled={!value.trim() || loading}
+                  onClick={() => {
+                    if (value.trim()) {
+                      onSubmit(value, fileText || undefined)
+                      setValue("")
+                      adjustHeight(true)
+                    }
+                  }}
                 >
                   <ArrowRight
                     className={cn(
