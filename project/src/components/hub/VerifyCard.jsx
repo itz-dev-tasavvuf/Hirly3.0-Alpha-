@@ -4,7 +4,9 @@ import algorandLogo from '@/assets/algorand_full_logo_white.png';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
-const API_URL = 'http://localhost:3001/api/algorand/verify'; // Adjust if deployed
+// Update API_URL to use Supabase Edge Function
+const API_URL = 'https://occrvhahkgvvyzvpnsjz.functions.supabase.co/algorand-verify';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export default function VerifyCard() {
   const [form, setForm] = useState({
@@ -30,7 +32,10 @@ export default function VerifyCard() {
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
         body: JSON.stringify(form)
       });
       if (!response.ok) throw new Error('Verification failed');
