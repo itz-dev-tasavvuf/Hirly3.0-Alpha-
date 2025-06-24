@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -12,6 +11,7 @@ import ForgotPassword from '@/pages/auth/ForgotPassword';
 import UpdatePassword from '@/pages/auth/UpdatePassword';
 import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
+import HelpCenter from '@/pages/HelpCenter';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 
 function ProtectedRoute({ children }) {
@@ -45,6 +45,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/help-center" element={<HelpCenter />} />
       </Routes>
       <Toaster />
     </AuthProvider>

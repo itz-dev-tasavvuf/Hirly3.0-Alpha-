@@ -77,12 +77,21 @@ const Footer = () => {
               <ul className="space-y-3">
                 {links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <button
-                      onClick={() => handleLinkClick(link)}
-                      className="text-gray-400 hover:text-purple-400 transition-colors text-left"
-                    >
-                      {link}
-                    </button>
+                    {link === 'Help Center' ? (
+                      <a
+                        href="/help-center"
+                        className="text-gray-400 hover:text-purple-400 transition-colors text-left"
+                      >
+                        Help Center
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => handleLinkClick(link)}
+                        className="text-gray-400 hover:text-purple-400 transition-colors text-left"
+                      >
+                        {link}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
