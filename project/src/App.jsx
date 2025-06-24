@@ -13,6 +13,7 @@ import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
 import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
+import Community from '@/pages/Community';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 
 function ProtectedRoute({ children }) {
@@ -48,6 +49,7 @@ function App() {
         />
         <Route path="/help-center" element={<HelpCenter />} />
         <Route path="/documentation" element={<Documentation />} />
+        <Route path="/community" element={<Community />} />
       </Routes>
       <Toaster />
     </AuthProvider>
