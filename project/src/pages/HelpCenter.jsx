@@ -23,7 +23,9 @@ export default function HelpCenter() {
             border: '1.5px solid rgba(255,255,255,0.18)'
           }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-4 text-center">Help Center</h1>
+          <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-4 text-center drop-shadow-[0_0_16px_rgba(168,85,247,0.7)] animate-glow">
+            Help Center
+          </h1>
           {/* Search Bar with Magnifier Icon */}
           <div className="flex justify-center mb-8">
             <div className="relative w-full max-w-md">
@@ -82,3 +84,13 @@ export default function HelpCenter() {
     </div>
   );
 }
+
+/* Add this to your global CSS or Tailwind config if not present:
+.animate-glow {
+  animation: glowPulse 2s infinite alternate;
+}
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 16px #a855f7, 0 0 32px #a855f7; }
+  100% { text-shadow: 0 0 32px #a855f7, 0 0 48px #a855f7; }
+}
+*/

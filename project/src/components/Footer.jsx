@@ -84,6 +84,13 @@ const Footer = () => {
                       >
                         Help Center
                       </a>
+                    ) : link === 'Documentation' ? (
+                      <a
+                        href="/documentation"
+                        className="text-gray-400 hover:text-purple-400 transition-colors text-left"
+                      >
+                        Documentation
+                      </a>
                     ) : (
                       <button
                         onClick={() => handleLinkClick(link)}
