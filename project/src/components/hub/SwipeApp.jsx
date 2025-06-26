@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/use-toast';
 import { X, Heart, RotateCcw, RefreshCw, ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Users, Award, BookOpen, Building, CheckCircle, Info, Star, Eye, TrendingUp, Calendar, Globe, Phone, Mail, ExternalLink, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import HubBackground from './HubBackground';
@@ -562,7 +561,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
       </div>
       
       {expanded && (
-        <div className="absolute top-3 right-3 z-20">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
           <Button variant="ghost" size="sm" className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
             <Info className="w-4 h-4 mr-1" />
             Tap outside to close
@@ -588,6 +587,7 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
   const [rejected, setRejected] = useState([]);
   const [lastDismissed, setLastDismissed] = useState(null);
   const [showRedFlash, setShowRedFlash] = useState(false);
+  const [showGreenFlash, setShowGreenFlash] = useState(false);
 
   // Optimize motion values with better spring settings
   const topCardDragX = useMotionValue(0);
@@ -604,8 +604,11 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     setLastDismissed({ item: dismissedItem, direction });
 
     if (direction === 'right') {
+      // Trigger green flash for right swipe
+      setShowGreenFlash(true);
+      setTimeout(() => setShowGreenFlash(false), 400);
+      
       setInterested(prev => [...prev, dismissedItem]);
-      toast({ title: "Interested!", description: `You liked ${dismissedItem.name || dismissedItem.title}`, variant: "default" });
       
       // Check for match separately (33% chance)
       if (Math.random() < 0.33) {
@@ -617,7 +620,6 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
       setTimeout(() => setShowRedFlash(false), 400);
       
       setRejected(prev => [...prev, dismissedItem]);
-      toast({ title: "Passed", description: `You passed on ${dismissedItem.name || dismissedItem.title}`, variant: "destructive" });
     }
     
     setStack(prev => {
@@ -657,7 +659,6 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     setLastDismissed(null);
     setExpanded(false);
     topCardDragX.set(0);
-    toast({ title: "Stack Reset!", description: "All cards are back." });
     if(onReset) onReset();
   }, [items, onReset]);
 
@@ -688,10 +689,8 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') {
         handleSwipe('left');
-        toast({ title: 'Passed (Keyboard)', description: 'You passed using the left arrow key.', variant: 'destructive' });
       } else if (e.key === 'ArrowRight') {
         handleSwipe('right');
-        toast({ title: 'Interested (Keyboard)', description: 'You liked using the right arrow key.', variant: 'default' });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -709,6 +708,27 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
             className="fixed inset-0 pointer-events-none"
             style={{
               background: 'radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 50%, rgba(185, 28, 28, 0.1) 100%)',
+              zIndex: 9999,
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.7, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.4,
+              times: [0, 0.3, 0.7, 1],
+              ease: "easeOut"
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Green Flash Overlay for Right Swipe - Fixed to cover entire screen */}
+      <AnimatePresence>
+        {showGreenFlash && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(34, 197, 94, 0.3) 0%, rgba(22, 163, 74, 0.2) 50%, rgba(21, 128, 61, 0.1) 100%)',
               zIndex: 9999,
             }}
             initial={{ opacity: 0 }}
@@ -802,10 +822,11 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
             <CheckCircle size={64} className="mx-auto text-white mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">All Done!</h3>
             <p className="text-white/80 mb-1">Interested: {interested.length}</p>
-            <p className="text-white/80 mb-4">Passed: {rejected.length}</p>
-            <Button onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
-              <RefreshCw size={18} className="mr-2" /> 
-              Reset Stack
+            <p className="text-white/80 mb-2">Passed: {rejected.length}</p>
+            <p className="text-white/70 text-sm mb-4">Come back later for more matches!</p>
+            <Button onClick={(e) => { e.stopPropagation(); onCollapse(); }} className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
+              <ArrowLeft size={18} className="mr-2" /> 
+              Return Home
             </Button>
           </Card>
         </div>
@@ -844,19 +865,11 @@ const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfi
 
   const handleMatch = useCallback((item) => {
     setShowConfetti(true);
-    toast({
-      title: "🎉 It's a Match!",
-      description: `You matched with ${item.name || item.title}!`,
-      variant: "default",
-    });
     if (onMatch) onMatch(item);
   }, [onMatch]);
 
   const handleSwipeEnd = useCallback((stats) => {
-    toast({
-      title: "Swiping Complete!",
-      description: `You showed interest in ${stats.interested.length} and passed on ${stats.rejected.length}.`,
-    });
+    // Swiping complete - no toast needed as completion screen shows stats
   }, []);
 
   const handleConfettiComplete = useCallback(() => {
