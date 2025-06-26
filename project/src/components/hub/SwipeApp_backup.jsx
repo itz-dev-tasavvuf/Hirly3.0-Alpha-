@@ -17,9 +17,6 @@ const ANIMATION_CONFIG = {
   easeOut: { duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
-// Pre-calculate static card rotations to avoid recalculation
-const CARD_ROTATIONS = Array.from({ length: 10 }, (_, i) => (Math.random() - 0.5) * 8 - (i * 1.5));
-
 // Confetti Effect Component
 const ConfettiEffect = React.memo(({ show, onComplete }) => {
   const [particles, setParticles] = useState([]);
@@ -27,20 +24,22 @@ const ConfettiEffect = React.memo(({ show, onComplete }) => {
   useEffect(() => {
     if (!show) return;
 
+    // Create particles that spread across the entire screen
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     
     const newParticles = Array.from({ length: 80 }, (_, i) => {
+      // Create particles from different starting positions across the top
       const startX = (i / 80) * screenWidth + Math.random() * (screenWidth / 80);
-      const startY = -Math.random() * 100 - 20;
+      const startY = -Math.random() * 100 - 20; // Start above screen
       
       return {
         id: i,
         x: startX,
         y: startY,
-        vx: (Math.random() - 0.5) * 12,
-        vy: Math.random() * 8 + 4,
-        gravity: 0.3 + Math.random() * 0.2,
+        vx: (Math.random() - 0.5) * 12, // Horizontal velocity
+        vy: Math.random() * 8 + 4, // Downward velocity
+        gravity: 0.3 + Math.random() * 0.2, // Gravity effect
         rotation: Math.random() * 360,
         rotationSpeed: (Math.random() - 0.5) * 10,
         color: [
@@ -98,6 +97,7 @@ const ConfettiEffect = React.memo(({ show, onComplete }) => {
         />
       ))}
       
+      {/* Additional burst from center */}
       {particles.length > 0 && (
         <>
           {Array.from({ length: 30 }, (_, i) => {
@@ -140,9 +140,9 @@ const ConfettiEffect = React.memo(({ show, onComplete }) => {
   );
 });
 
-const generateMatchPercentage = () => Math.floor(Math.random() * 51) + 50;
+const generateMatchPercentage = () => Math.floor(Math.random() * 51) + 50; // 50-100%
 
-const getMatchColor = (percentage) => {
+const getMatchColor = useMemo(() => (percentage) => {
   if (percentage >= 90) return { 
     bg: 'from-green-600 to-green-700', 
     border: 'border-green-500/30', 
@@ -167,7 +167,7 @@ const getMatchColor = (percentage) => {
     cardBg: 'bg-gradient-to-br from-red-500 to-red-600',
     hover: 'hover:from-red-600 hover:to-red-700'
   };
-};
+}, []);
 
 const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, onSwipe, dragX, onCollapse }) => {
   const cardType = userType === 'candidate' ? 'job' : 'candidate';
@@ -190,6 +190,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
     }
   }, [onSwipe, dragX]);
 
+  // Optimize click outside handler with useCallback
   const handleClickOutside = useCallback((e) => {
     if (cardRef.current && !cardRef.current.contains(e.target)) {
       if (onCollapse) onCollapse();
@@ -212,7 +213,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
   const cardContent = useMemo(() => {
     if (cardType === 'job') {
       return (
-        <Card className={cn("h-full border-0 shadow-lg group", matchColor.cardBg)}>
+        <Card className={cn("h-full border-0 shadow-lg transition-all duration-300 group", matchColor.cardBg, matchColor.hover)}>
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
@@ -229,7 +230,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className={cn("text-lg font-semibold truncate", matchColor.text)}>
+                    <CardTitle className={cn("text-lg font-semibold transition-colors truncate", matchColor.text)}>
                       {item.title}
                     </CardTitle>
                     <Badge variant="secondary" className={cn("font-medium", matchColor.badge)}>
@@ -248,17 +249,17 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
           
           <CardContent className="pt-0 space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+              <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                 <MapPin className="w-3 h-3 mr-1" />
                 {item.location}
               </Badge>
               {item.salary && (
-                <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+                <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                   <DollarSign className="w-3 h-3 mr-1" />
                   {item.salary}
                 </Badge>
               )}
-              <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+              <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                 <Clock className="w-3 h-3 mr-1" />
                 {item.type}
               </Badge>
@@ -306,7 +307,6 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                 initial={{ opacity: 0, height: 0 }} 
                 animate={{ opacity: 1, height: 'auto' }} 
                 exit={{ opacity: 0, height: 0 }}
-                transition={ANIMATION_CONFIG.springSmooth}
                 className="space-y-4"
               >
                 <div className="prose prose-sm max-w-none">
@@ -344,7 +344,14 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                   </div>
                 )}
 
-
+                <div className="flex gap-2 pt-4 border-t border-white/20">
+                  <Button className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                    Apply Now
+                  </Button>
+                  <Button variant="outline" size="icon" className="border-white/30 text-white hover:bg-white/10">
+                    <Heart className="w-4 h-4" />
+                  </Button>
+                </div>
               </motion.div>
             )}
           </CardContent>
@@ -353,7 +360,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
     } else {
       // Candidate Card
       return (
-        <Card className={cn("h-full border-0 shadow-lg group", matchColor.cardBg)}>
+        <Card className={cn("h-full border-0 shadow-lg transition-all duration-300 group", matchColor.cardBg, matchColor.hover)}>
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
@@ -368,7 +375,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className={cn("text-lg font-semibold truncate", matchColor.text)}>
+                    <CardTitle className={cn("text-lg font-semibold transition-colors truncate", matchColor.text)}>
                       {item.name}
                     </CardTitle>
                     <Badge variant="secondary" className={cn("font-medium", matchColor.badge)}>
@@ -387,17 +394,17 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
           
           <CardContent className="pt-0 space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+              <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                 <MapPin className="w-3 h-3 mr-1" />
                 {item.location}
               </Badge>
               {item.salary && (
-                <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+                <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                   <DollarSign className="w-3 h-3 mr-1" />
                   {item.salary}
                 </Badge>
               )}
-              <Badge variant="outline" className="border-white/30 text-white bg-white/10">
+              <Badge variant="outline" className={cn("border-white/30 text-white bg-white/10")}>
                 <Award className="w-3 h-3 mr-1" />
                 {item.experience}
               </Badge>
@@ -445,7 +452,6 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                 initial={{ opacity: 0, height: 0 }} 
                 animate={{ opacity: 1, height: 'auto' }} 
                 exit={{ opacity: 0, height: 0 }}
-                transition={ANIMATION_CONFIG.springSmooth}
                 className="space-y-4"
               >
                 <div className="prose prose-sm max-w-none">
@@ -485,7 +491,15 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                   </div>
                 )}
 
-
+                <div className="flex gap-2 pt-4 border-t border-white/20">
+                  <Button className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Contact
+                  </Button>
+                  <Button variant="outline" size="icon" className="border-white/30 text-white hover:bg-white/10">
+                    <Heart className="w-4 h-4" />
+                  </Button>
+                </div>
               </motion.div>
             )}
           </CardContent>
@@ -493,6 +507,20 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
       );
     }
   }, [cardType, item, matchColor, matchPercentage, expanded]);
+
+  // Optimize drag end handler
+  const handleDragEnd = useCallback((_event, info) => {
+    if (Math.abs(info.offset.x) > 100) {
+      onSwipe(info.offset.x > 0 ? 'right' : 'left');
+    } else {
+      dragX.set(0); 
+    }
+  }, [onSwipe, dragX]);
+
+  // Optimize click handler
+  const handleCardClick = useCallback(() => {
+    if (!expanded) setExpanded(true);
+  }, [expanded, setExpanded]);
 
   return (
     <motion.div
@@ -503,15 +531,13 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
         rotate: rotateVal, 
         opacity, 
         scale,
-        willChange: 'transform'
+        willChange: 'transform' // Performance optimization
       }}
       drag={!expanded ? "x" : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.2}
-      dragMomentum={false}
       onDragEnd={handleDragEnd}
       onClick={handleCardClick}
-      transition={ANIMATION_CONFIG.springFast}
+      transition={{ type: "spring", stiffness: 400, damping: 40 }} // Improved spring settings
     >
       <div className="h-full">
         {cardContent}
@@ -530,13 +556,11 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
 });
 
 const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onReset, onCollapse, onMatch }) => {
+  // Keyboard navigation state
   const [keyboardActive, setKeyboardActive] = useState(true);
+
   const [stack, setStack] = useState(
-    items.slice(0, 5).map((item, index) => ({
-      ...item, 
-      matchPercentage: generateMatchPercentage(),
-      id: item.id || `${item.title || item.name}-${index}`
-    }))
+    items.slice(0, 5).map(item => ({...item, matchPercentage: generateMatchPercentage() }))
   );
   const [expanded, setExpanded] = useState(false);
   const [interested, setInterested] = useState([]);
@@ -545,13 +569,18 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
 
   // Optimize motion values with better spring settings
   const topCardDragX = useMotionValue(0);
-  const topCardSpringX = useSpring(topCardDragX, { stiffness: 300, damping: 25 });
+  const topCardSpringX = useSpring(topCardDragX, { stiffness: 400, damping: 50 });
 
-  const leftIconScale = useTransform(topCardDragX, [-150, 0], [1.6, 1]);
-  const rightIconScale = useTransform(topCardDragX, [0, 150], [1, 1.6]);
+  // Optimize transforms for swipe indicators
+  const leftIconScale = useTransform(topCardDragX, [-150, 0], [1.5, 1]);
+  const rightIconScale = useTransform(topCardDragX, [0, 150], [1, 1.5]);
   const leftIconOpacity = useTransform(topCardDragX, [-50, 0], [1, 0]);
   const rightIconOpacity = useTransform(topCardDragX, [0, 50], [0, 1]);
 
+  // Memoize static motion value
+  const staticMotionValue = useMemo(() => useMotionValue(0), []);
+
+  // Optimize swipe handler with useCallback
   const handleSwipe = useCallback((direction) => {
     if (expanded || stack.length === 0) return;
     const dismissedItem = stack[stack.length - 1];
@@ -570,30 +599,21 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     
     setStack(prev => {
       const newStack = prev.slice(0, -1);
-      const nextItemIndex = items.findIndex(item => 
-        !newStack.find(s => s.id === item.id) && 
-        !interested.find(i => i.id === item.id) && 
-        !rejected.find(r => r.id === item.id) && 
-        item.id !== dismissedItem.id
-      );
-      
+      const nextItemIndex = items.findIndex(item => !newStack.find(s => s.id === item.id) && !interested.find(i => i.id === item.id) && !rejected.find(r => r.id === item.id) && item.id !== dismissedItem.id);
       if (newStack.length < 5 && nextItemIndex !== -1 && (items.length - (interested.length + rejected.length + 1)) > newStack.length) {
-        const newItem = items[items.length - 1 - (interested.length + rejected.length)]; 
-        if (newItem && !newStack.find(s => s.id === newItem.id)) { 
-          return [{...newItem, matchPercentage: generateMatchPercentage()}, ...newStack];
-        }
+          const newItem = items[items.length - 1 - (interested.length + rejected.length)]; 
+          if (newItem && !newStack.find(s => s.id === newItem.id)) { 
+            return [{...newItem, matchPercentage: generateMatchPercentage()}, ...newStack];
+          }
       }
       return newStack;
     });
     topCardDragX.set(0); 
-  }, [expanded, stack.length, items, interested, rejected, onMatch]);
+  }, [expanded, stack, items, interested, rejected, onMatch, topCardDragX]);
 
+  // Optimize reset handler
   const handleResetStack = useCallback(() => {
-    setStack(items.slice(0, 5).map((item, index) => ({
-      ...item, 
-      matchPercentage: generateMatchPercentage(),
-      id: item.id || `${item.title || item.name}-${index}`
-    })));
+    setStack(items.slice(0, 5).map(item => ({...item, matchPercentage: generateMatchPercentage() })));
     setInterested([]);
     setRejected([]);
     setLastDismissed(null);
@@ -601,8 +621,9 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     topCardDragX.set(0);
     toast({ title: "Stack Reset!", description: "All cards are back." });
     if(onReset) onReset();
-  }, [items, onReset]);
+  }, [items, topCardDragX, onReset]);
 
+  // Optimize event handlers
   const handleCardAreaClick = useCallback((e) => {
     e.stopPropagation();
   }, []);
@@ -618,13 +639,19 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     onCollapse();
   }, [onCollapse]);
 
+  const handleResetClick = useCallback((e) => {
+    e.stopPropagation();
+    handleResetStack();
+  }, [handleResetStack]);
+
+  // Check for completion
   useEffect(() => {
     if (stack.length === 0 && (interested.length + rejected.length === items.length)) {
       if(onSwipeEnd) onSwipeEnd({ interested, rejected });
     }
-  }, [stack, interested, rejected, items.length, onSwipeEnd]);
+  }, [stack.length, interested.length, rejected.length, items.length, onSwipeEnd]);
 
-  // Keyboard navigation for swiping
+  // Keyboard navigation for swiping  
   useEffect(() => {
     if (!keyboardActive || expanded || stack.length === 0) return;
     const handleKeyDown = (e) => {
@@ -639,8 +666,11 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [keyboardActive, expanded, stack.length, handleSwipe]);
-  
-  const staticMotionValue = useMotionValue(0);
+
+  // Memoize card rotation values to prevent recalculation
+  const cardRotations = useMemo(() => {
+    return stack.map((_, index) => (Math.random() - 0.5) * 10 - (index * 2));
+  }, [stack.length]);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center relative pt-16" onClick={handleBackdropClick}>
@@ -658,31 +688,26 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
             const isTopCard = index === stack.length - 1;
             return (
               <motion.div
-                key={item.id} 
+                key={item.id || item.title} 
                 style={{
                   position: 'absolute',
                   zIndex: index,
-                  willChange: 'transform',
+                  willChange: 'transform', // Performance optimization
                 }}
-                initial={{ 
-                  opacity: 0, 
-                  scale: 0.95, 
-                  y: index * -6, 
-                  rotate: CARD_ROTATIONS[index] || 0 
-                }}
+                initial={{ opacity: 0, scale: 0.9, y: index * -8, rotate: cardRotations[index] || 0 }}
                 animate={{ 
                   opacity: 1, 
-                  scale: 1 - (stack.length - 1 - index) * 0.015,
-                  y: index * -5,
-                  rotate: (isTopCard && !expanded) ? 0 : (CARD_ROTATIONS[index] || 0)
+                  scale: 1 - (stack.length - 1 - index) * 0.02, // Reduced scale difference for smoothness
+                  y: index * -6, // Reduced offset for better stacking
+                  rotate: (isTopCard && !expanded) ? 0 : (cardRotations[index] || 0)
                 }}
                 exit={{ 
                   x: topCardDragX.get() > 0 ? 300 : -300, 
                   opacity: 0, 
                   scale: 0.9, 
-                  transition: ANIMATION_CONFIG.easeOut
+                  transition: { duration: 0.25, ease: "easeOut" } // Faster exit animation
                 }}
-                transition={ANIMATION_CONFIG.springSmooth}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }} // Optimized spring
               >
                 <DraggableCardBody 
                   item={item} 
@@ -701,13 +726,21 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
         {stack.length > 0 && !expanded && (
           <>
             <motion.div 
-              style={{ scale: leftIconScale, opacity: leftIconOpacity, willChange: 'transform' }} 
+              style={{ 
+                scale: leftIconScale, 
+                opacity: leftIconOpacity,
+                willChange: 'transform' // Performance optimization
+              }} 
               className="absolute left-[-80px] top-1/2 -translate-y-1/2 p-4 bg-red-500 rounded-full shadow-lg"
             >
               <X size={32} className="text-white" />
             </motion.div>
             <motion.div 
-              style={{ scale: rightIconScale, opacity: rightIconOpacity, willChange: 'transform' }} 
+              style={{ 
+                scale: rightIconScale, 
+                opacity: rightIconOpacity,
+                willChange: 'transform' // Performance optimization
+              }} 
               className="absolute right-[-80px] top-1/2 -translate-y-1/2 p-4 bg-green-500 rounded-full shadow-lg"
             >
               <Heart size={32} className="text-white" />
@@ -724,7 +757,7 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
             <h3 className="text-2xl font-bold text-white mb-2">All Done!</h3>
             <p className="text-white/80 mb-1">Interested: {interested.length}</p>
             <p className="text-white/80 mb-4">Passed: {rejected.length}</p>
-            <Button onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
+            <Button onClick={handleResetClick} className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
               <RefreshCw size={18} className="mr-2" /> 
               Reset Stack
             </Button>
@@ -734,7 +767,7 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
 
       {/* Reset button */}
       <div className="absolute bottom-4 right-4 z-30">
-        <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg">
+        <Button variant="outline" size="icon" onClick={handleResetClick} className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg">
           <RefreshCw size={20} />
         </Button>
       </div>
@@ -750,17 +783,19 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
   );
 });
 
+
 const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfiles = [], jobListings = [], onMatch }) => {
   const [showConfetti, setShowConfetti] = useState(false);
   
+  // Memoize items to prevent unnecessary recalculations
   const itemsToSwipe = useMemo(() => 
-    (contentType === 'jobs' ? jobListings : candidateProfiles).map((item, index) => ({
+    (contentType === 'jobs' ? jobListings : candidateProfiles).map(item => ({
       ...item,
-      matchPercentage: generateMatchPercentage(),
-      id: item.id || `${item.title || item.name}-${index}`
+      matchPercentage: generateMatchPercentage() 
     })), 
   [contentType, jobListings, candidateProfiles]);
 
+  // Optimize match handler
   const handleMatch = useCallback((item) => {
     setShowConfetti(true);
     toast({
@@ -771,6 +806,7 @@ const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfi
     if (onMatch) onMatch(item);
   }, [onMatch]);
 
+  // Optimize swipe end handler
   const handleSwipeEnd = useCallback((stats) => {
     toast({
       title: "Swiping Complete!",
@@ -778,6 +814,7 @@ const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfi
     });
   }, []);
 
+  // Optimize confetti completion handler
   const handleConfettiComplete = useCallback(() => {
     setShowConfetti(false);
   }, []);
@@ -787,9 +824,9 @@ const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfi
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      transition={ANIMATION_CONFIG.spring}
+      transition={{ duration: 0.2, type: "spring", stiffness: 200, damping: 25 }}
       className="fixed inset-0 z-40"
-      style={{ willChange: 'transform' }}
+      style={{ willChange: 'transform' }} // Performance optimization
     >
       <HubBackground userType={userType}>
         <ConfettiEffect 
