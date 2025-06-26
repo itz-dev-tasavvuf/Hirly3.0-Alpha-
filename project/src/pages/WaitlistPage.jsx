@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
 import algorandLogo from '@/assets/algorand-logo.svg';
@@ -11,8 +11,32 @@ export default function WaitlistPage() {
   const [error, setError] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [role, setRole] = useState('jobseeker');
+  const [frontCard, setFrontCard] = useState(1);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [swipedCard, setSwipedCard] = useState(null);
 
   const waitlistCount = 1200;
+
+  // Cycle cards every 4 seconds with swipe animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setSwipedCard(frontCard); // Track which card is being swiped
+      
+      // Step 1: Swipe out and disappear front card, move back card forward
+      setTimeout(() => {
+        setFrontCard(prev => prev === 1 ? 2 : 1);
+      }, 400);
+      
+      // Step 2: Bring back the disappeared card behind the new front card
+      setTimeout(() => {
+        setIsAnimating(false);
+        setSwipedCard(null);
+      }, 800);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [frontCard]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -159,79 +183,100 @@ export default function WaitlistPage() {
           >
             <div className="relative w-80 h-96">
               {/* Card Stack */}
-              {[1, 2, 3].map((index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
-                    rotate: index === 1 ? 0 : index === 2 ? -5 : -10,
-                    x: index === 1 ? 0 : index === 2 ? -20 : -40,
-                    y: index === 1 ? 0 : index === 2 ? 20 : 40
-                  }}
-                  transition={{ delay: 0.5 + index * 0.2, duration: 0.6 }}
-                  className={`absolute inset-0 swipe-card glass-effect rounded-2xl p-6 ${
-                    index === 1 ? 'z-30' : index === 2 ? 'z-20' : 'z-10'
-                  }`}
-                  style={{
-                    background: index === 1 
-                      ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%)'
-                      : 'rgba(255, 255, 255, 0.05)'
-                  }}
-                >
-                  <div className="h-full flex flex-col">
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold">
-                          {index === 1 ? 'JS' : index === 2 ? 'TM' : 'AL'}
-                        </span>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-white font-semibold">
-                          {index === 1 ? 'Jane Smith' : index === 2 ? 'TechCorp' : 'Alex Lee'}
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          {index === 1 ? 'Senior Developer' : index === 2 ? 'Hiring Manager' : 'UI Designer'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-gray-300 text-sm mb-4">
-                        {index === 1 
-                          ? 'Full-stack developer with 5+ years experience in React, Node.js, and cloud technologies.'
-                          : index === 2
-                          ? 'Looking for talented developers to join our growing team. Remote-friendly culture.'
-                          : 'Creative designer passionate about user experience and modern interfaces.'
-                        }
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {(index === 1 
-                          ? ['React', 'Node.js', 'AWS']
-                          : index === 2
-                          ? ['Remote', 'Full-time', '$120k']
-                          : ['Figma', 'UI/UX', 'Prototyping']
-                        ).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full"
-                          >
-                            {tag}
+              {[1, 2].map((index) => {
+                const isInFront = frontCard === index;
+                const isBeingSwiped = swipedCard === index && isAnimating;
+                const shouldMoveForward = isAnimating && !isInFront && !isBeingSwiped;
+                const shouldDisappear = isBeingSwiped;
+                const shouldReappearBehind = swipedCard === index && !isAnimating && !isInFront;
+                
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ 
+                      opacity: 0, 
+                      scale: 0.8, 
+                      rotate: -10,
+                      x: 0,
+                      y: 0
+                    }}
+                    animate={{ 
+                      opacity: shouldDisappear ? 0 : 1,
+                      scale: shouldMoveForward ? 1 : (isInFront ? 1 : 0.95),
+                      rotate: shouldDisappear ? 15 : 
+                              shouldMoveForward ? 0 : 
+                              isInFront ? 0 : -8,
+                      x: shouldDisappear ? 400 : 
+                         shouldMoveForward ? 0 : 
+                         isInFront ? 0 : -30,
+                      y: shouldDisappear ? -50 : 
+                         shouldMoveForward ? 0 : 
+                         isInFront ? 0 : 30
+                    }}
+                    transition={{ 
+                      duration: shouldDisappear ? 0.4 : 0.6,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 swipe-card glass-effect rounded-2xl p-6"
+                    style={{
+                      background: index === 1 
+                        ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%)'
+                        : 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
+                      zIndex: shouldDisappear ? 40 : 
+                              shouldMoveForward ? 30 : 
+                              isInFront ? 30 : 20,
+                      display: shouldDisappear ? 'block' : 'block'
+                    }}
+                  >
+                    <div className="h-full flex flex-col">
+                      <div className="flex items-center mb-4">
+                        <div className={`w-12 h-12 ${index === 1 ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-green-500 to-blue-500'} rounded-full flex items-center justify-center`}>
+                          <span className="text-white font-bold">
+                            {index === 1 ? '💼' : '👤'}
                           </span>
-                        ))}
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-white font-semibold">
+                            {index === 1 ? 'Employer Perks' : 'Candidate Perks'}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            {index === 1 ? 'Limited Time Offer' : 'Always Free'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-300 text-sm mb-4">
+                          {index === 1 
+                            ? 'First 100 employers get Hirly at an exclusive early-bird rate. Advanced matching, verified talent pool, and premium features.'
+                            : 'Job seekers enjoy Hirly completely free forever. Swipe through opportunities, get matched with top employers, and land your dream job.'
+                          }
+                        </p>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {(index === 1 
+                            ? ['$99/mo', 'First 100 Only', 'Premium Features']
+                            : ['Free Forever', 'No Hidden Fees', 'Full Access']
+                          ).map((tag) => (
+                            <span
+                              key={tag}
+                              className={`px-2 py-1 ${index === 1 ? 'bg-pink-500/20 text-pink-300' : 'bg-green-500/20 text-green-300'} text-xs rounded-full`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-center mt-auto">
+                        <div className={`text-2xl font-bold ${index === 1 ? 'text-pink-300' : 'text-green-300'}`}>
+                          {index === 1 ? '$99/month' : 'FREE'}
+                        </div>
+                        <div className="text-gray-400 text-xs mt-1">
+                          {index === 1 ? 'Early Bird Special' : 'For All Candidates'}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex justify-center space-x-4 mt-auto">
-                      <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <span className="text-red-400">✕</span>
-                      </div>
-                      <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                        <span className="text-green-400">♥</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         </div>
