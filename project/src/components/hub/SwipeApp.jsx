@@ -7,6 +7,127 @@ import { toast } from '@/components/ui/use-toast';
 import { X, Heart, RotateCcw, RefreshCw, ArrowLeft, Briefcase, MapPin, DollarSign, Clock, Users, Award, BookOpen, Building, CheckCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Confetti Effect Component
+const ConfettiEffect = ({ show, onComplete }) => {
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    if (!show) return;
+
+    // Create particles that spread across the entire screen
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    const newParticles = Array.from({ length: 80 }, (_, i) => {
+      // Create particles from different starting positions across the top
+      const startX = (i / 80) * screenWidth + Math.random() * (screenWidth / 80);
+      const startY = -Math.random() * 100 - 20; // Start above screen
+      
+      return {
+        id: i,
+        x: startX,
+        y: startY,
+        vx: (Math.random() - 0.5) * 12, // Horizontal velocity
+        vy: Math.random() * 8 + 4, // Downward velocity
+        gravity: 0.3 + Math.random() * 0.2, // Gravity effect
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        color: [
+          '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', 
+          '#ffeaa7', '#dda0dd', '#ff9ff3', '#54a0ff',
+          '#5f27cd', '#00d2d3', '#ff9f43', '#10ac84'
+        ][Math.floor(Math.random() * 12)],
+        size: Math.random() * 10 + 6,
+        shape: Math.random() > 0.5 ? 'circle' : 'square',
+      };
+    });
+
+    setParticles(newParticles);
+
+    const timeout = setTimeout(() => {
+      setParticles([]);
+      if (onComplete) onComplete();
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [show, onComplete]);
+
+  if (!show || particles.length === 0) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute"
+          style={{
+            backgroundColor: particle.color,
+            width: particle.size,
+            height: particle.size,
+            borderRadius: particle.shape === 'circle' ? '50%' : '2px',
+          }}
+          initial={{
+            x: particle.x,
+            y: particle.y,
+            rotate: particle.rotation,
+            opacity: 1,
+          }}
+          animate={{
+            x: particle.x + particle.vx * 50,
+            y: window.innerHeight + 100,
+            rotate: particle.rotation + particle.rotationSpeed * 20,
+            opacity: [1, 1, 0.8, 0.4, 0],
+          }}
+          transition={{
+            duration: 4,
+            ease: "easeOut",
+            times: [0, 0.3, 0.6, 0.8, 1],
+          }}
+        />
+      ))}
+      
+      {/* Additional burst from center */}
+      {particles.length > 0 && (
+        <>
+          {Array.from({ length: 30 }, (_, i) => {
+            const angle = (i / 30) * Math.PI * 2;
+            const velocity = 200 + Math.random() * 100;
+            return (
+              <motion.div
+                key={`burst-${i}`}
+                className="absolute w-3 h-3 rounded-full"
+                style={{
+                  backgroundColor: [
+                    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', 
+                    '#ffeaa7', '#dda0dd', '#ff9ff3', '#54a0ff'
+                  ][Math.floor(Math.random() * 8)],
+                }}
+                initial={{
+                  x: window.innerWidth / 2,
+                  y: window.innerHeight / 2,
+                  scale: 0,
+                  opacity: 1,
+                }}
+                animate={{
+                  x: window.innerWidth / 2 + Math.cos(angle) * velocity,
+                  y: window.innerHeight / 2 + Math.sin(angle) * velocity,
+                  scale: [0, 1, 1, 0],
+                  opacity: [1, 1, 0.5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  ease: "easeOut",
+                  times: [0, 0.2, 0.8, 1],
+                }}
+              />
+            );
+          })}
+        </>
+      )}
+    </div>
+  );
+};
+
 const generateMatchPercentage = () => Math.floor(Math.random() * 51) + 50; // 50-100%
 
 const getMatchColor = (percentage) => {
@@ -45,49 +166,100 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
         <div className="h-full flex flex-col">
           <CardHeader className="p-4 pt-8 flex-shrink-0">
             <div className="flex items-start space-x-4">
-              <Avatar className="w-16 h-16 rounded-lg border-2 border-purple-500/50">
-                <AvatarImage src={item.logo || `https://avatar.vercel.sh/${item.company}.png?text=${item.company[0]}`} alt={item.company} />
-                <AvatarFallback>{item.company.substring(0, 2)}</AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-16 h-16 rounded-xl border-2 border-purple-400/50 shadow-lg">
+                  <AvatarImage src={item.logo || `https://avatar.vercel.sh/${item.company}.png?text=${item.company[0]}`} alt={item.company} />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
+                    {item.company.substring(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Verified badge */}
+                <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1">
+                  <CheckCircle size={12} className="text-white" />
+                </div>
+              </div>
               <div className="flex-1">
-                <CardTitle className="text-xl font-bold text-white">{item.title}</CardTitle>
-                <CardDescription className="text-purple-300">{item.company}</CardDescription>
+                <CardTitle className="text-xl font-bold text-white mb-1">{item.title}</CardTitle>
+                <CardDescription className="text-purple-300 font-medium flex items-center gap-1">
+                  <Building size={14} />
+                  {item.company}
+                </CardDescription>
+                {/* Job type badge */}
+                <div className="mt-2 flex gap-2">
+                  <span className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300 text-xs px-2 py-1 rounded-full">
+                    {item.type}
+                  </span>
+                  {item.remote && (
+                    <span className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 text-green-300 text-xs px-2 py-1 rounded-full">
+                      Remote
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent className={cn("p-4 space-y-3 text-sm flex-1", expanded ? "overflow-y-auto invisible-scrollbar" : "")}>
-            <div className="flex items-center text-gray-300"><MapPin size={16} className="mr-2 text-purple-400" /> {item.location}</div>
-            <div className="flex items-center text-gray-300"><Briefcase size={16} className="mr-2 text-purple-400" /> {item.type}</div>
-            {item.salary && <div className="flex items-center text-gray-300"><DollarSign size={16} className="mr-2 text-purple-400" /> {item.salary}</div>}
-            <div className="flex items-center text-gray-300"><Clock size={16} className="mr-2 text-purple-400" /> Posted {item.posted}</div>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                <MapPin size={16} className="mr-2 text-purple-400 flex-shrink-0" /> 
+                <span className="truncate">{item.location}</span>
+              </div>
+              {item.salary && (
+                <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                  <DollarSign size={16} className="mr-2 text-green-400 flex-shrink-0" /> 
+                  <span className="font-medium text-green-300">{item.salary}</span>
+                </div>
+              )}
+              <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                <Clock size={16} className="mr-2 text-blue-400 flex-shrink-0" /> 
+                <span>Posted {item.posted}</span>
+              </div>
+            </div>
             
             {expanded && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }} 
                 animate={{ opacity: 1, height: 'auto' }} 
                 exit={{ opacity: 0, height: 0 }}
-                className="space-y-3 pt-3 border-t border-white/10"
+                className="space-y-4 pt-4 border-t border-white/10"
               >
                 <div>
-                  <h4 className="font-semibold text-purple-300 mb-1">Requirements:</h4>
+                  <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                    <BookOpen size={16} />
+                    Requirements
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {item.requirements.map(req => <span key={req} className="bg-white/10 text-xs px-2 py-1 rounded-full">{req}</span>)}
+                    {item.requirements.map(req => (
+                      <span key={req} className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-300 text-xs px-2 py-1 rounded-full">
+                        {req}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-purple-300 mb-1">Description:</h4>
-                  <p className="text-gray-300 text-xs leading-relaxed">{item.description}</p>
+                  <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                    <Info size={16} />
+                    Description
+                  </h4>
+                  <p className="text-gray-300 text-sm leading-relaxed bg-white/5 rounded-lg p-3">{item.description}</p>
                 </div>
                 {item.benefits && item.benefits.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-purple-300 mb-1">Benefits:</h4>
-                    <ul className="list-disc list-inside text-xs text-gray-300 space-y-1">
-                      {item.benefits.map(benefit => <li key={benefit}>{benefit}</li>)}
+                    <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                      <Award size={16} />
+                      Benefits
+                    </h4>
+                    <ul className="space-y-2">
+                      {item.benefits.map(benefit => (
+                        <li key={benefit} className="text-sm text-gray-300 flex items-start gap-2">
+                          <CheckCircle size={14} className="text-green-400 mt-0.5 flex-shrink-0" />
+                          {benefit}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
-                <div className="pb-4"> {/* Extra padding for better scrolling */}
-                </div>
+                <div className="pb-4"></div>
               </motion.div>
             )}
           </CardContent>
@@ -97,52 +269,111 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
       return (
         <div className="h-full flex flex-col">
           <CardHeader className="p-4 pt-8 items-center text-center flex-shrink-0">
-            <Avatar className="w-24 h-24 rounded-full border-4 border-purple-500/50 mb-2">
-              <AvatarImage src={item.avatarSrc || `https://avatar.vercel.sh/${item.name}.png`} alt={item.name} />
-              <AvatarFallback>{item.name.substring(0, 2)}</AvatarFallback>
-            </Avatar>
-            <CardTitle className="text-xl font-bold text-white">{item.name}</CardTitle>
-            <CardDescription className="text-purple-300">{item.title}</CardDescription>
+            <div className="relative mb-3">
+              <Avatar className="w-24 h-24 rounded-full border-4 border-purple-400/50 shadow-lg">
+                <AvatarImage src={item.avatarSrc || `https://avatar.vercel.sh/${item.name}.png`} alt={item.name} />
+                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-lg">
+                  {item.name.substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online status indicator */}
+              <div className="absolute bottom-2 right-2 bg-green-500 border-2 border-white rounded-full w-6 h-6 flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+              </div>
+            </div>
+            <CardTitle className="text-xl font-bold text-white mb-1">{item.name}</CardTitle>
+            <CardDescription className="text-purple-300 font-medium">{item.title}</CardDescription>
+            {/* Skills preview badges */}
+            <div className="flex flex-wrap gap-1 mt-2 justify-center">
+              {item.skills.slice(0, 2).map(skill => (
+                <span key={skill} className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-300 text-xs px-2 py-1 rounded-full">
+                  {skill}
+                </span>
+              ))}
+              {item.skills.length > 2 && (
+                <span className="bg-gradient-to-r from-gray-500/20 to-gray-600/20 border border-gray-400/30 text-gray-300 text-xs px-2 py-1 rounded-full">
+                  +{item.skills.length - 2}
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent className={cn("p-4 space-y-3 text-sm flex-1", expanded ? "overflow-y-auto invisible-scrollbar" : "")}>
-            <div className="flex items-center text-gray-300"><Users size={16} className="mr-2 text-purple-400" /> Skills: {item.skills.slice(0,3).join(', ')}{item.skills.length > 3 ? '...' : ''}</div>
-            <div className="flex items-center text-gray-300"><Award size={16} className="mr-2 text-purple-400" /> {item.experience} experience</div>
-            <div className="flex items-center text-gray-300"><MapPin size={16} className="mr-2 text-purple-400" /> {item.location}</div>
-            {item.salary && <div className="flex items-center text-gray-300"><DollarSign size={16} className="mr-2 text-purple-400" /> Expected: {item.salary}</div>}
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                <Award size={16} className="mr-2 text-yellow-400 flex-shrink-0" /> 
+                <span>{item.experience} experience</span>
+              </div>
+              <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                <MapPin size={16} className="mr-2 text-purple-400 flex-shrink-0" /> 
+                <span className="truncate">{item.location}</span>
+              </div>
+              {item.salary && (
+                <div className="flex items-center text-gray-300 bg-white/5 rounded-lg p-2">
+                  <DollarSign size={16} className="mr-2 text-green-400 flex-shrink-0" /> 
+                  <span className="font-medium text-green-300">Expected: {item.salary}</span>
+                </div>
+              )}
+            </div>
             
             {expanded && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }} 
                 animate={{ opacity: 1, height: 'auto' }} 
                 exit={{ opacity: 0, height: 0 }}
-                className="space-y-3 pt-3 border-t border-white/10"
+                className="space-y-4 pt-4 border-t border-white/10"
               >
                 <div>
-                  <h4 className="font-semibold text-purple-300 mb-1">Summary:</h4>
-                  <p className="text-gray-300 text-xs leading-relaxed">{item.description}</p>
+                  <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                    <Users size={16} />
+                    All Skills
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {item.skills.map(skill => (
+                      <span key={skill} className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 text-blue-300 text-xs px-2 py-1 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                    <Info size={16} />
+                    Summary
+                  </h4>
+                  <p className="text-gray-300 text-sm leading-relaxed bg-white/5 rounded-lg p-3">{item.description}</p>
                 </div>
                 {item.resume?.experience && (
                   <div>
-                    <h4 className="font-semibold text-purple-300 mb-1">Recent Experience:</h4>
-                    {item.resume.experience.slice(0,1).map((exp, i) => (
-                      <div key={i} className="text-xs text-gray-300">
-                        <p className="font-medium">{exp.title} @ {exp.company}</p>
-                        <p className="opacity-70">{exp.duration}</p>
+                    <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                      <Briefcase size={16} />
+                      Recent Experience
+                    </h4>
+                    {item.resume.experience.slice(0, 2).map((exp, i) => (
+                      <div key={i} className="text-sm text-gray-300 bg-white/5 rounded-lg p-3 mb-2">
+                        <p className="font-medium text-white">{exp.title}</p>
+                        <p className="text-purple-300 flex items-center gap-1">
+                          <Building size={12} />
+                          {exp.company}
+                        </p>
+                        <p className="text-gray-400 text-xs">{exp.duration}</p>
                       </div>
                     ))}
                   </div>
                 )}
-                 {item.resume?.education && (
+                {item.resume?.education && (
                   <div>
-                    <h4 className="font-semibold text-purple-300 mb-1">Education:</h4>
-                     <div className="text-xs text-gray-300">
-                        <p className="font-medium">{item.resume.education.degree} - {item.resume.education.school}</p>
-                        <p className="opacity-70">{item.resume.education.duration}</p>
-                      </div>
+                    <h4 className="font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                      <BookOpen size={16} />
+                      Education
+                    </h4>
+                    <div className="text-sm text-gray-300 bg-white/5 rounded-lg p-3">
+                      <p className="font-medium text-white">{item.resume.education.degree}</p>
+                      <p className="text-purple-300">{item.resume.education.school}</p>
+                      <p className="text-gray-400 text-xs">{item.resume.education.duration}</p>
+                    </div>
                   </div>
                 )}
-                <div className="pb-4"> {/* Extra padding for better scrolling */}
-                </div>
+                <div className="pb-4"></div>
               </motion.div>
             )}
           </CardContent>
@@ -157,7 +388,10 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
       className={cn(
         "w-[340px] h-[480px] rounded-2xl shadow-2xl cursor-grab overflow-hidden relative",
         "backdrop-blur-md border-2 text-white",
-        matchColor.bg, 
+        "bg-gradient-to-br from-purple-900/40 via-blue-900/40 to-pink-900/40",
+        "shadow-[0_20px_50px_rgba(0,0,0,0.4)]",
+        "hover:shadow-[0_25px_60px_rgba(0,0,0,0.5)]",
+        "transition-shadow duration-300",
         matchColor.border
       )}
       style={{ 
@@ -165,6 +399,7 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
         rotate: rotateVal, 
         opacity, 
         scale,
+        boxShadow: "0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset"
       }}
       drag={!expanded ? "x" : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -178,14 +413,34 @@ const DraggableCardBody = ({ item, userType, expanded, setExpanded, onSwipe, dra
       onClick={() => !expanded && setExpanded(true)}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className={cn("absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs font-bold z-10", matchColor.text)}>
-        {matchPercentage}%
+      {/* Match percentage badge with improved styling */}
+      <div className={cn(
+        "absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold z-10",
+        "backdrop-blur-sm border shadow-lg",
+        "bg-gradient-to-r from-white/20 to-white/10",
+        matchColor.text,
+        matchColor.border
+      )}>
+        <span className="flex items-center gap-1">
+          <CheckCircle size={12} />
+          {matchPercentage}%
+        </span>
       </div>
-      {cardContent()}
+      
+      {/* Glassmorphic overlay for better content readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+      
+      <div className="relative z-10 h-full">
+        {cardContent()}
+      </div>
+      
       {expanded && (
-        <div className="absolute top-2 left-2 z-20">
-          <div className="bg-black/50 rounded-full px-3 py-1">
-            <p className="text-white text-xs">Tap outside to collapse</p>
+        <div className="absolute top-3 left-3 z-20">
+          <div className="bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/20">
+            <p className="text-white text-xs flex items-center gap-1">
+              <Info size={12} />
+              Tap outside to collapse
+            </p>
           </div>
         </div>
       )}
@@ -262,9 +517,8 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
   const handleBackdropClick = () => {
     if (expanded) {
       setExpanded(false);
-    } else {
-      onCollapse();
     }
+    // Removed automatic collapse - only close via back button
   };
 
   useEffect(() => {
@@ -386,6 +640,8 @@ const DraggableCardContainer = ({ items, userType, onSwipeEnd, onReset, onCollap
 
 
 const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], jobListings = [], onMatch }) => {
+  const [showConfetti, setShowConfetti] = useState(false);
+  
   const itemsToSwipe = useMemo(() => 
     (contentType === 'jobs' ? jobListings : candidateProfiles).map(item => ({
       ...item,
@@ -393,6 +649,15 @@ const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], j
     })), 
   [contentType, jobListings, candidateProfiles]);
 
+  const handleMatch = (item) => {
+    setShowConfetti(true);
+    toast({
+      title: "🎉 It's a Match!",
+      description: `You matched with ${item.name || item.title}!`,
+      variant: "default",
+    });
+    if (onMatch) onMatch(item);
+  };
 
   const handleSwipeEnd = (stats) => {
     toast({
@@ -409,13 +674,17 @@ const SwipeApp = ({ onCollapse, userType, contentType, candidateProfiles = [], j
       transition={{ duration: 0.3, type: "spring", stiffness:120, damping:18 }}
       className="fixed inset-0 z-40 bg-black/70 backdrop-blur-lg"
     >
+      <ConfettiEffect 
+        show={showConfetti} 
+        onComplete={() => setShowConfetti(false)} 
+      />
       <div className="w-full h-full">
         <DraggableCardContainer
           items={itemsToSwipe}
           userType={userType}
           onSwipeEnd={handleSwipeEnd}
           onCollapse={onCollapse}
-          onMatch={onMatch}
+          onMatch={handleMatch}
         />
       </div>
     </motion.div>
