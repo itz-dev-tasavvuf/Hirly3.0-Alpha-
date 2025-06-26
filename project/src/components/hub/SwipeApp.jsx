@@ -587,6 +587,7 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
   const [interested, setInterested] = useState([]);
   const [rejected, setRejected] = useState([]);
   const [lastDismissed, setLastDismissed] = useState(null);
+  const [showRedFlash, setShowRedFlash] = useState(false);
 
   // Optimize motion values with better spring settings
   const topCardDragX = useMotionValue(0);
@@ -611,6 +612,10 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
         if (onMatch) onMatch(dismissedItem);
       }
     } else {
+      // Trigger red flash for left swipe
+      setShowRedFlash(true);
+      setTimeout(() => setShowRedFlash(false), 400);
+      
       setRejected(prev => [...prev, dismissedItem]);
       toast({ title: "Passed", description: `You passed on ${dismissedItem.name || dismissedItem.title}`, variant: "destructive" });
     }
@@ -697,6 +702,27 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center relative pt-16" onClick={handleBackdropClick}>
+      {/* Red Flash Overlay for Left Swipe - Fixed to cover entire screen */}
+      <AnimatePresence>
+        {showRedFlash && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 50%, rgba(185, 28, 28, 0.1) 100%)',
+              zIndex: 9999,
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0.7, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.4,
+              times: [0, 0.3, 0.7, 1],
+              ease: "easeOut"
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Back button */}
       <div className="absolute top-4 left-4 z-30">
         <Button variant="outline" size="icon" onClick={handleCollapseClick} className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg">
