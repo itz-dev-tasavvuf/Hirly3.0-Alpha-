@@ -98,6 +98,13 @@ const Footer = () => {
                       >
                         Community
                       </a>
+                    ) : link === 'API' ? (
+                      <a
+                        href="/developer"
+                        className="text-gray-400 hover:text-purple-400 transition-colors text-left"
+                      >
+                        API
+                      </a>
                     ) : (
                       <button
                         onClick={() => handleLinkClick(link)}

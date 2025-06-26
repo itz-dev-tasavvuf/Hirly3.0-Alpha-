@@ -15,6 +15,8 @@ import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
 import { AuthProvider, useAuth } from './components/AuthProvider';
+import API from '@/pages/API.jsx';
+import WaitlistPage from '@/pages/WaitlistPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -34,6 +36,7 @@ function App() {
           <Route path="pricing" element={<PricingPage />} />
           <Route path="about" element={<AboutPage />} />
         </Route>
+        <Route path="/developer" element={<API />} />
         <Route path="/login" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -50,6 +53,7 @@ function App() {
         <Route path="/help-center" element={<HelpCenter />} />
         <Route path="/documentation" element={<Documentation />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/waitlist" element={<WaitlistPage />} />
       </Routes>
       <Toaster />
     </AuthProvider>
