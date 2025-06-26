@@ -11,32 +11,22 @@ export default function WaitlistPage() {
   const [error, setError] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [role, setRole] = useState('jobseeker');
-  const [frontCard, setFrontCard] = useState(1);
+  const [frontCard, setFrontCard] = useState(2); // Start with candidate card (jobseeker default)
   const [isAnimating, setIsAnimating] = useState(false);
-  const [swipedCard, setSwipedCard] = useState(null);
 
   const waitlistCount = 1200;
 
-  // Cycle cards every 4 seconds with swipe animation
+  // Update front card when role changes
   useEffect(() => {
-    const interval = setInterval(() => {
+    const targetCard = role === 'employer' ? 1 : 2; // 1 = employer, 2 = candidate
+    if (frontCard !== targetCard) {
       setIsAnimating(true);
-      setSwipedCard(frontCard); // Track which card is being swiped
-      
-      // Step 1: Swipe out and disappear front card, move back card forward
       setTimeout(() => {
-        setFrontCard(prev => prev === 1 ? 2 : 1);
-      }, 400);
-      
-      // Step 2: Bring back the disappeared card behind the new front card
-      setTimeout(() => {
+        setFrontCard(targetCard);
         setIsAnimating(false);
-        setSwipedCard(null);
-      }, 800);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [frontCard]);
+      }, 300);
+    }
+  }, [role, frontCard]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -185,10 +175,7 @@ export default function WaitlistPage() {
               {/* Card Stack */}
               {[1, 2].map((index) => {
                 const isInFront = frontCard === index;
-                const isBeingSwiped = swipedCard === index && isAnimating;
-                const shouldMoveForward = isAnimating && !isInFront && !isBeingSwiped;
-                const shouldDisappear = isBeingSwiped;
-                const shouldReappearBehind = swipedCard === index && !isAnimating && !isInFront;
+                const shouldMoveForward = isAnimating && !isInFront;
                 
                 return (
                   <motion.div
@@ -201,20 +188,14 @@ export default function WaitlistPage() {
                       y: 0
                     }}
                     animate={{ 
-                      opacity: shouldDisappear ? 0 : 1,
+                      opacity: 1,
                       scale: shouldMoveForward ? 1 : (isInFront ? 1 : 0.95),
-                      rotate: shouldDisappear ? 15 : 
-                              shouldMoveForward ? 0 : 
-                              isInFront ? 0 : -8,
-                      x: shouldDisappear ? 400 : 
-                         shouldMoveForward ? 0 : 
-                         isInFront ? 0 : -30,
-                      y: shouldDisappear ? -50 : 
-                         shouldMoveForward ? 0 : 
-                         isInFront ? 0 : 30
+                      rotate: shouldMoveForward ? 0 : (isInFront ? 0 : -8),
+                      x: shouldMoveForward ? 0 : (isInFront ? 0 : -30),
+                      y: shouldMoveForward ? 0 : (isInFront ? 0 : 30)
                     }}
                     transition={{ 
-                      duration: shouldDisappear ? 0.4 : 0.6,
+                      duration: 0.4,
                       ease: "easeInOut"
                     }}
                     className="absolute inset-0 swipe-card glass-effect rounded-2xl p-6"
@@ -222,10 +203,7 @@ export default function WaitlistPage() {
                       background: index === 1 
                         ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%)'
                         : 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)',
-                      zIndex: shouldDisappear ? 40 : 
-                              shouldMoveForward ? 30 : 
-                              isInFront ? 30 : 20,
-                      display: shouldDisappear ? 'block' : 'block'
+                      zIndex: shouldMoveForward ? 30 : (isInFront ? 30 : 20)
                     }}
                   >
                     <div className="h-full flex flex-col">
