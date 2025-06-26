@@ -1,12 +1,18 @@
 
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
+import algorandLogo from '@/assets/algorand-logo.svg';
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [role, setRole] = useState('jobseeker');
+
+  const waitlistCount = 1200;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +26,7 @@ export default function WaitlistPage() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden p-0">
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl floating-animation" />
@@ -28,20 +34,31 @@ export default function WaitlistPage() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center min-h-screen">
+        {/* Branding Bar */}
+        <div className="flex items-center justify-center mb-8 mt-8">
+          <span className="text-4xl font-bold gradient-text mr-3">Hirly</span>
+          <span className="text-gray-300 text-lg font-medium mr-3">|</span>
+          <span className="text-purple-200 text-lg font-semibold">Waitlist</span>
+        </div>
+        {/* Social Proof Bar */}
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="text-purple-200 text-base font-semibold mb-2">Join {waitlistCount.toLocaleString()}+ others on the waitlist!</div>
+        </div>
+        <div className="grid lg:grid-cols-2 gap-8 items-center w-full flex-1 min-h-[500px]">
           {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center lg:text-left"
+            className="text-center lg:text-left flex flex-col justify-center h-full"
+            style={{ maxWidth: 480 }}
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl md:text-6xl font-black mb-6"
+              className="text-3xl md:text-4xl font-black mb-3 drop-shadow-[0_0_16px_rgba(168,85,247,0.7)] animate-glow"
             >
               <span className="gradient-text">Get Early Access</span>
               <br />
@@ -52,12 +69,12 @@ export default function WaitlistPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-xl text-gray-300 mb-8 max-w-lg mx-auto lg:mx-0"
+              className="text-sm text-gray-300 mb-3 max-w-lg mx-auto lg:mx-0"
             >
-              Join our exclusive waitlist and be the first to experience swipe-based job hunting, AI-powered matching, and blockchain-verified profiles. Whether you’re a candidate or an employer, Hirly is reimagining how talent meets opportunity.
+              Join our exclusive waitlist and be the first to experience swipe-based job hunting, AI-powered matching, and blockchain-verified profiles. Whether you’re a candidate or an employer, <span className="text-purple-300 font-bold">Hirly</span> is reimagining how talent meets opportunity.
             </motion.p>
 
-            <ul className="text-left text-purple-200 mb-8 space-y-2 max-w-md mx-auto lg:mx-0">
+            <ul className="text-left text-purple-200 mb-4 space-y-1 max-w-md mx-auto lg:mx-0 text-sm">
               <li>✓ Blockchain Verified Profiles</li>
               <li>✓ AI-Powered Matching</li>
               <li>✓ Mobile First Experience</li>
@@ -67,26 +84,68 @@ export default function WaitlistPage() {
             </ul>
 
             {!submitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 lg:items-start">
+              <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3 lg:items-start">
                 <input
                   type="email"
                   required
                   placeholder="Your email address"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+                  className="w-full px-4 py-2 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all text-base"
+                  style={{maxWidth: 340}}
                 />
+                {/* Role selection */}
+                <div className="flex gap-4 items-center mt-1 mb-1 text-sm text-purple-200" style={{maxWidth: 340}}>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="jobseeker"
+                      checked={role === 'jobseeker'}
+                      onChange={() => setRole('jobseeker')}
+                      className="accent-purple-500 mr-1"
+                    />
+                    Job Seeker
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="employer"
+                      checked={role === 'employer'}
+                      onChange={() => setRole('employer')}
+                      className="accent-pink-500 mr-1"
+                    />
+                    Employer
+                  </label>
+                </div>
+                <label className="flex items-center text-sm text-purple-200 mt-1 select-none" style={{maxWidth: 340}}>
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={e => setAgreed(e.target.checked)}
+                    className="mr-2 accent-purple-500"
+                    required
+                  />
+                  I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-400 ml-1">Terms &amp; Conditions</a>
+                </label>
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-8 rounded-2xl glow-effect text-lg shadow-lg"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-8 rounded-2xl glow-effect text-lg shadow-lg mt-1"
+                  disabled={!agreed}
+                  style={{opacity: agreed ? 1 : 0.6, cursor: agreed ? 'pointer' : 'not-allowed'}}
                 >
                   Join Waitlist
                 </button>
-                {error && <div className="text-red-300 mt-2">{error}</div>}
+                {error && <div className="text-red-300 mt-2 text-sm">{error}</div>}
               </form>
             ) : (
-              <div className="text-green-300 font-semibold mt-4">
-                Thank you! You’re on the waitlist. We’ll notify you when we go live.
+              <div className="text-green-300 font-semibold mt-4 text-base">
+                {role === 'employer' ? (
+                  <>Thank you! You’re on the waitlist as an <span className="font-bold text-pink-300">Employer</span>. We’ll notify you when we go live.</>
+                ) : (
+                  <>Thank you! You’re on the waitlist as a <span className="font-bold text-purple-300">Job Seeker</span>. We’ll notify you when we go live.</>
+                )}
               </div>
             )}
           </motion.div>
