@@ -161,7 +161,21 @@ const ConfettiEffect = React.memo(({ show, onComplete }) => {
   );
 });
 
-const generateMatchPercentage = () => Math.floor(Math.random() * 51) + 50;
+const generateMatchPercentage = (index = 0) => {
+  // Cycle through green (90-100%), yellow (75-89%), and red (50-74%) matches
+  const cycle = index % 3;
+  
+  if (cycle === 0) {
+    // Green matches: 90-100%
+    return Math.floor(Math.random() * 11) + 90;
+  } else if (cycle === 1) {
+    // Yellow matches: 75-89%
+    return Math.floor(Math.random() * 15) + 75;
+  } else {
+    // Red matches: 50-74%
+    return Math.floor(Math.random() * 25) + 50;
+  }
+};
 
 const getMatchColor = (percentage) => {
   if (percentage >= 90) return { 
@@ -195,7 +209,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
   const cardRef = useRef(null);
 
   // Memoize match percentage and color to prevent recalculation
-  const matchPercentage = useMemo(() => item.matchPercentage || generateMatchPercentage(), [item.matchPercentage]);
+  const matchPercentage = useMemo(() => item.matchPercentage || generateMatchPercentage(item.index || 0), [item.matchPercentage, item.index]);
   const matchColor = useMemo(() => getMatchColor(matchPercentage), [matchPercentage]);
 
   // Optimize event handlers with useCallback
@@ -564,7 +578,8 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
   const [stack, setStack] = useState(
     items.slice(0, 5).map((item, index) => ({
       ...item, 
-      matchPercentage: generateMatchPercentage(),
+      matchPercentage: generateMatchPercentage(index),
+      index: index,
       id: item.id || `${item.title || item.name}-${index}`
     }))
   );
@@ -612,7 +627,12 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
       if (newStack.length < 5 && nextItemIndex !== -1 && (items.length - (interested.length + rejected.length + 1)) > newStack.length) {
         const newItem = items[items.length - 1 - (interested.length + rejected.length)]; 
         if (newItem && !newStack.find(s => s.id === newItem.id)) { 
-          return [{...newItem, matchPercentage: generateMatchPercentage()}, ...newStack];
+          const newItemWithMatch = {
+            ...newItem, 
+            matchPercentage: generateMatchPercentage(interested.length + rejected.length),
+            index: interested.length + rejected.length
+          };
+          return [newItemWithMatch, ...newStack];
         }
       }
       return newStack;
@@ -623,7 +643,8 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
   const handleResetStack = useCallback(() => {
     setStack(items.slice(0, 5).map((item, index) => ({
       ...item, 
-      matchPercentage: generateMatchPercentage(),
+      matchPercentage: generateMatchPercentage(index),
+      index: index,
       id: item.id || `${item.title || item.name}-${index}`
     })));
     setInterested([]);
@@ -789,7 +810,8 @@ const SwipeApp = React.memo(({ onCollapse, userType, contentType, candidateProfi
   const itemsToSwipe = useMemo(() => 
     (contentType === 'jobs' ? jobListings : candidateProfiles).map((item, index) => ({
       ...item,
-      matchPercentage: generateMatchPercentage(),
+      matchPercentage: generateMatchPercentage(index),
+      index: index,
       id: item.id || `${item.title || item.name}-${index}`
     })), 
   [contentType, jobListings, candidateProfiles]);
