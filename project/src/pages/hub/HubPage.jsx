@@ -44,6 +44,7 @@ import MetricDetailChart from '@/components/hub/MetricDetailChart';
 import AI_Prompt from '../../components/AI_Prompt';
 import VerifyCard from '@/components/hub/VerifyCard';
 import { supabase } from '../../supabaseClient'; // adjust path if needed
+import HubBackground from '@/components/hub/HubBackground';
 
 
 // Dashboard metrics config
@@ -1133,7 +1134,8 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
 
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] p-4 overflow-hidden relative" onClick={selectedMetric ? undefined : handleBackgroundClick}>
+    <HubBackground userType={userType}>
+      <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 overflow-hidden relative" onClick={selectedMetric ? undefined : handleBackgroundClick}>
       {/* Metric Detail Overlay */}
       {selectedMetric && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60">
@@ -1537,6 +1539,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
         )}
       </AnimatePresence>
     </div>
+    </HubBackground>
   );
 };
 
