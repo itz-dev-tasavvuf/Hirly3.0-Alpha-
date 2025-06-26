@@ -1,9 +1,8 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../supabaseClient';
 import algorandLogo from '@/assets/algorand-logo.svg';
+import '../hide-scrollbar.css';
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +12,7 @@ export default function WaitlistPage() {
   const [role, setRole] = useState('jobseeker');
   const [frontCard, setFrontCard] = useState(2); // Start with candidate card (jobseeker default)
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const waitlistCount = 1200;
 
@@ -28,19 +28,75 @@ export default function WaitlistPage() {
     }
   }, [role, frontCard]);
 
+  // Confetti effect
+  const createConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const { error } = await supabase.from('waitlist').insert([{ email }]);
-    if (error) {
-      setError('There was a problem signing up. Maybe you already joined?');
-    } else {
+    
+    // Temporarily bypass Supabase for testing - always succeed
+    // TODO: Re-enable Supabase integration later
+    // const { error } = await supabase.from('waitlist').insert([{ email }]);
+    // if (error) {
+    //   setError('There was a problem signing up. Maybe you already joined?');
+    // } else {
+    //   setSubmitted(true);
+    // }
+    
+    // Simulate a brief loading time for realistic UX
+    setTimeout(() => {
       setSubmitted(true);
-    }
+      createConfetti(); // Trigger confetti when modal opens
+    }, 500);
+  };
+
+  // Confetti component
+  const Confetti = () => {
+    const confettiPieces = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      animationDelay: Math.random() * 3,
+      animationDuration: 3 + Math.random() * 2,
+      color: ['#a855f7', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 6)]
+    }));
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+        {confettiPieces.map((piece) => (
+          <motion.div
+            key={piece.id}
+            className="absolute w-2 h-2 rounded-full"
+            style={{
+              backgroundColor: piece.color,
+              left: `${piece.left}%`,
+              top: '-10px'
+            }}
+            initial={{ y: -10, opacity: 1, rotate: 0 }}
+            animate={{ 
+              y: window.innerHeight + 10, 
+              opacity: 0,
+              rotate: 360,
+              x: Math.random() * 200 - 100 // Random horizontal drift
+            }}
+            transition={{
+              duration: piece.animationDuration,
+              delay: piece.animationDelay,
+              ease: "easeOut"
+            }}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden p-0">
+      {/* Confetti Effect */}
+      {showConfetti && <Confetti />}
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl floating-animation" />
@@ -109,29 +165,29 @@ export default function WaitlistPage() {
                   style={{maxWidth: 340}}
                 />
                 {/* Role selection */}
-                <div className="flex gap-4 items-center mt-1 mb-1 text-sm text-purple-200" style={{maxWidth: 340}}>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="role"
-                      value="jobseeker"
-                      checked={role === 'jobseeker'}
-                      onChange={() => setRole('jobseeker')}
-                      className="accent-purple-500 mr-1"
-                    />
-                    Job Seeker
-                  </label>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="role"
-                      value="employer"
-                      checked={role === 'employer'}
-                      onChange={() => setRole('employer')}
-                      className="accent-pink-500 mr-1"
-                    />
-                    Employer
-                  </label>
+                <div className="flex gap-3 items-center mt-1 mb-1" style={{maxWidth: 340}}>
+                  <button
+                    type="button"
+                    onClick={() => setRole('jobseeker')}
+                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 border-2 ${
+                      role === 'jobseeker' 
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-500 border-purple-400 text-white shadow-lg shadow-purple-500/50 glow-effect' 
+                        : 'bg-white/10 border-white/20 text-purple-200 hover:bg-white/20 hover:border-white/30'
+                    }`}
+                  >
+                    👤 Job Seeker
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('employer')}
+                    className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 border-2 ${
+                      role === 'employer' 
+                        ? 'bg-gradient-to-r from-pink-600 to-pink-500 border-pink-400 text-white shadow-lg shadow-pink-500/50 glow-effect' 
+                        : 'bg-white/10 border-white/20 text-purple-200 hover:bg-white/20 hover:border-white/30'
+                    }`}
+                  >
+                    💼 Employer
+                  </button>
                 </div>
                 <label className="flex items-center text-sm text-purple-200 mt-1 select-none" style={{maxWidth: 340}}>
                   <input
@@ -154,13 +210,181 @@ export default function WaitlistPage() {
                 {error && <div className="text-red-300 mt-2 text-sm">{error}</div>}
               </form>
             ) : (
-              <div className="text-green-300 font-semibold mt-4 text-base">
-                {role === 'employer' ? (
-                  <>Thank you! You’re on the waitlist as an <span className="font-bold text-pink-300">Employer</span>. We’ll notify you when we go live.</>
-                ) : (
-                  <>Thank you! You’re on the waitlist as a <span className="font-bold text-purple-300">Job Seeker</span>. We’ll notify you when we go live.</>
-                )}
-              </div>
+              <>
+                {/* Modal Overlay */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                  onClick={() => setSubmitted(false)}
+                >
+                  {/* Modal Content */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto hide-scrollbar"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setSubmitted(false)}
+                      className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-200 group"
+                    >
+                      <svg className="w-4 h-4 text-gray-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+
+                    <div className="text-center space-y-6">
+                      {/* Success Icon */}
+                      <div className="flex justify-center">
+                        <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-2xl">🎉</span>
+                        </div>
+                      </div>
+
+                      {/* Main Success Message */}
+                      <div>
+                        <h2 className="text-2xl font-bold text-white mb-2">You're In!</h2>
+                        <p className="text-green-300 font-semibold">
+                          {role === 'employer' ? (
+                            <>Welcome to the waitlist as an <span className="font-bold text-pink-300">Employer</span>!</>
+                          ) : (
+                            <>Welcome to the waitlist as a <span className="font-bold text-purple-300">Job Seeker</span>!</>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* Your Perks */}
+                      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                        <h3 className="text-lg font-semibold text-white mb-3">Your Early Access Perks:</h3>
+                        <ul className="text-sm text-gray-300 space-y-2 text-left">
+                          {role === 'employer' ? (
+                            <>
+                              <li>🎯 <strong className="text-pink-300">$99/month</strong> early bird pricing (limited time)</li>
+                              <li>🚀 First access to our talent pool</li>
+                              <li>🤖 AI-powered candidate matching</li>
+                              <li>📱 Mobile-first hiring dashboard</li>
+                            </>
+                          ) : (
+                            <>
+                              <li>🆓 <strong className="text-green-300">Forever Free</strong> - no hidden fees</li>
+                              <li>🎯 AI-powered job matching</li>
+                              <li>📱 Swipe-to-apply mobile experience</li>
+                              <li>🔐 Blockchain verified profiles</li>
+                            </>
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* What Happens Next */}
+                      <div className="text-sm text-gray-300">
+                        <h3 className="font-semibold text-white mb-2">What happens next?</h3>
+                        <div className="space-y-1">
+                          <p>📧 We'll email you updates as we get closer to launch</p>
+                          <p>🚀 You'll be among the first to get access when we go live</p>
+                          <p>💬 Join our community for exclusive updates and feedback</p>
+                        </div>
+                      </div>
+
+                      {/* Social Sharing */}
+                      <div className="pt-4 border-t border-white/10">
+                        <p className="text-sm text-purple-200 mb-3">Help us grow! Share with friends:</p>
+                        <div className="flex justify-center gap-3">
+                          <button 
+                            onClick={() => window.open(`https://twitter.com/intent/tweet?text=Just joined the @Hirly waitlist! The future of hiring is swipe-based job hunting with AI matching 🚀 Join me: ${window.location.href}`, '_blank')}
+                            className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm transition-all border border-blue-500/20"
+                          >
+                            Share on Twitter
+                          </button>
+                          <button 
+                            onClick={() => navigator.clipboard.writeText(window.location.href)}
+                            className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm transition-all border border-purple-500/20"
+                          >
+                            Copy Link
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Position in Queue */}
+                      <div className="text-xs text-gray-400">
+                        You're #{waitlistCount + 1} in line! 🎯
+                      </div>
+
+                      {/* Close Button at Bottom */}
+                      <button
+                        onClick={() => setSubmitted(false)}
+                        className="w-full mt-4 py-2 px-4 bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 text-white rounded-lg transition-all duration-200 border border-white/10"
+                      >
+                        Continue Exploring
+                      </button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+
+                {/* Show form again when modal is closed */}
+                <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3 lg:items-start">
+                  <input
+                    type="email"
+                    required
+                    placeholder="Your email address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all text-base"
+                    style={{maxWidth: 340}}
+                  />
+                  {/* Role selection */}
+                  <div className="flex gap-3 items-center mt-1 mb-1" style={{maxWidth: 340}}>
+                    <button
+                      type="button"
+                      onClick={() => setRole('jobseeker')}
+                      className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 border-2 ${
+                        role === 'jobseeker' 
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-500 border-purple-400 text-white shadow-lg shadow-purple-500/50 glow-effect' 
+                          : 'bg-white/10 border-white/20 text-purple-200 hover:bg-white/20 hover:border-white/30'
+                      }`}
+                    >
+                      👤 Job Seeker
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole('employer')}
+                      className={`px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 border-2 ${
+                        role === 'employer' 
+                          ? 'bg-gradient-to-r from-pink-600 to-pink-500 border-pink-400 text-white shadow-lg shadow-pink-500/50 glow-effect' 
+                          : 'bg-white/10 border-white/20 text-purple-200 hover:bg-white/20 hover:border-white/30'
+                      }`}
+                    >
+                      💼 Employer
+                    </button>
+                  </div>
+                  <label className="flex items-center text-sm text-purple-200 mt-1 select-none" style={{maxWidth: 340}}>
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={e => setAgreed(e.target.checked)}
+                      className="mr-2 accent-purple-500"
+                      required
+                    />
+                    I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-400 ml-1">Terms &amp; Conditions</a>
+                  </label>
+                  <button
+                    type="submit"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-8 rounded-2xl glow-effect text-lg shadow-lg mt-1"
+                    disabled={!agreed}
+                    style={{opacity: agreed ? 1 : 0.6, cursor: agreed ? 'pointer' : 'not-allowed'}}
+                  >
+                    Join Waitlist
+                  </button>
+                  {error && <div className="text-red-300 mt-2 text-sm">{error}</div>}
+                </form>
+              </>
             )}
           </motion.div>
 
