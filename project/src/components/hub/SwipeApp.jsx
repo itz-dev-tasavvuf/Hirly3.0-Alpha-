@@ -67,6 +67,27 @@ const ConfettiEffect = React.memo(({ show, onComplete }) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {/* MATCH! Text Animation */}
+      {particles.length > 0 && (
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ 
+            opacity: [0, 1, 1, 0.8, 0],
+            scale: [0, 1.2, 1, 1, 0.8]
+          }}
+          transition={{
+            duration: 2,
+            times: [0, 0.2, 0.4, 0.7, 1],
+            ease: "easeOut"
+          }}
+        >
+          <div className="text-8xl font-black text-white drop-shadow-2xl transform rotate-3">
+            MATCH!
+          </div>
+        </motion.div>
+      )}
+
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
