@@ -232,8 +232,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                     <CardTitle className={cn("text-lg font-semibold truncate", matchColor.text)}>
                       {item.title}
                     </CardTitle>
-                    <Badge variant="secondary" className={cn("font-medium", matchColor.badge)}>
-                      <Zap className="w-3 h-3 mr-1" />
+                    <Badge variant="secondary" className={cn("font-medium border-0", matchColor.badge)}>
                       {matchPercentage}%
                     </Badge>
                   </div>
@@ -371,8 +370,7 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
                     <CardTitle className={cn("text-lg font-semibold truncate", matchColor.text)}>
                       {item.name}
                     </CardTitle>
-                    <Badge variant="secondary" className={cn("font-medium", matchColor.badge)}>
-                      <Zap className="w-3 h-3 mr-1" />
+                    <Badge variant="secondary" className={cn("font-medium border-0", matchColor.badge)}>
                       {matchPercentage}%
                     </Badge>
                   </div>
@@ -497,14 +495,20 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
   return (
     <motion.div
       ref={cardRef}
-      className="w-[380px] h-[520px] rounded-2xl shadow-lg overflow-hidden relative cursor-grab active:cursor-grabbing"
+      className={cn(
+        "w-[380px] h-[520px] rounded-2xl shadow-lg relative",
+        expanded ? "overflow-y-auto cursor-default scrollbar-none" : "overflow-hidden cursor-grab active:cursor-grabbing"
+      )}
       style={{ 
         x: dragX, 
         rotate: rotateVal, 
         opacity, 
         scale,
-        willChange: 'transform'
+        willChange: 'transform',
+        scrollbarWidth: 'none', // Firefox
+        msOverflowStyle: 'none', // IE/Edge
       }}
+      onWheel={expanded ? undefined : (e) => e.preventDefault()} // Prevent scroll when not expanded
       drag={!expanded ? "x" : false}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={0.2}
@@ -513,7 +517,12 @@ const DraggableCardBody = React.memo(({ item, userType, expanded, setExpanded, o
       onClick={handleCardClick}
       transition={ANIMATION_CONFIG.springFast}
     >
-      <div className="h-full">
+      <style jsx>{`
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+      <div className={cn("h-full", expanded && "min-h-full")}>
         {cardContent}
       </div>
       
@@ -558,9 +567,11 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
     setLastDismissed({ item: dismissedItem, direction });
 
     if (direction === 'right') {
+      setInterested(prev => [...prev, dismissedItem]);
       toast({ title: "Interested!", description: `You liked ${dismissedItem.name || dismissedItem.title}`, variant: "default" });
+      
+      // Check for match separately (33% chance)
       if (Math.random() < 0.33) {
-        setInterested(prev => [...prev, dismissedItem]);
         if (onMatch) onMatch(dismissedItem);
       }
     } else {
@@ -732,18 +743,19 @@ const DraggableCardContainer = React.memo(({ items, userType, onSwipeEnd, onRese
         </div>
       )}
 
-      {/* Reset button */}
-      <div className="absolute bottom-4 right-4 z-30">
-        <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-white/10 border-white/20 text-white hover:bg-white/20 shadow-md hover:shadow-lg">
-          <RefreshCw size={20} />
-        </Button>
-      </div>
-
-      {/* Status info */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 text-center">
-        <Card className="px-4 py-2 bg-white/10 border-white/20 text-white backdrop-blur-sm">
-          <p className="text-xs text-white/90">Interested: {interested.length} | Passed: {rejected.length} | Remaining: {items.length - (interested.length + rejected.length)}</p>
-          <p className="text-xs text-white/70 mt-1">Tap to expand • Drag to decide • Arrow keys work too</p>
+      {/* Metrics and Reset at bottom center */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 p-4 flex justify-center">
+        <Card className="px-6 py-3 bg-white/10 border-white/20 text-white backdrop-blur-sm flex items-center gap-4">
+          <div className="text-center">
+            <p className="text-xs text-white/90">Interested: {interested.length} | Passed: {rejected.length} | Remaining: {items.length - (interested.length + rejected.length)}</p>
+            <p className="text-xs text-white/70 mt-1">Tap to expand • Drag to decide • Arrow keys work too</p>
+          </div>
+          
+          {/* Reset button integrated */}
+          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleResetStack(); }} className="bg-white/10 border-white/20 text-white hover:bg-white/30 shadow-md hover:shadow-lg">
+            <RefreshCw size={16} className="mr-1" />
+            Reset
+          </Button>
         </Card>
       </div>
     </div>
