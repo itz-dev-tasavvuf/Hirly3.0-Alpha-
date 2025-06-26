@@ -38,20 +38,36 @@ export default function WaitlistPage() {
     e.preventDefault();
     setError('');
     
-    // Temporarily bypass Supabase for testing - always succeed
-    // TODO: Re-enable Supabase integration later
-    // const { error } = await supabase.from('waitlist').insert([{ email }]);
-    // if (error) {
-    //   setError('There was a problem signing up. Maybe you already joined?');
-    // } else {
-    //   setSubmitted(true);
-    // }
-    
-    // Simulate a brief loading time for realistic UX
-    setTimeout(() => {
+    try {
+      // Insert into Supabase waitlist table
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([
+          { 
+            email: email.toLowerCase().trim(), 
+            role: role 
+          }
+        ]);
+
+      if (error) {
+        // Handle specific error cases
+        if (error.code === '23505') { // Unique constraint violation (duplicate email)
+          setError('This email is already on our waitlist! Check your inbox for updates.');
+        } else {
+          setError('There was a problem signing you up. Please try again.');
+          console.error('Supabase error:', error);
+        }
+        return;
+      }
+
+      // Success - show the modal with confetti
       setSubmitted(true);
-      createConfetti(); // Trigger confetti when modal opens
-    }, 500);
+      createConfetti();
+      
+    } catch (err) {
+      setError('There was a problem signing you up. Please try again.');
+      console.error('Unexpected error:', err);
+    }
   };
 
   // Confetti component
