@@ -1432,16 +1432,6 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               // setChatHistory([]);
             }}
           >
-            {/* Background Orb */}
-            <div className="absolute inset-0 z-0">
-              <Orb 
-                hue={180}
-                hoverIntensity={0.3}
-                rotateOnHover={true}
-                forceHoverState={true}
-              />
-            </div>
-
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1506,9 +1496,84 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 {/* Main Content Area - Full Width Chat */}
                 <div className="flex flex-col h-[70vh]">
                   {chatHistory.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center">
+                    <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+                      {/* Floating Background Suggestions */}
+                      <div className="absolute inset-0 pointer-events-none">
+                        {[
+                          { text: "Resume Review", x: "15%", y: "20%", delay: 0, size: "text-sm", opacity: "opacity-30", cycleDuration: 8, pauseDuration: 6 },
+                          { text: "Interview Tips", x: "80%", y: "15%", delay: 2, size: "text-xs", opacity: "opacity-20", cycleDuration: 10, pauseDuration: 4 },
+                          { text: "Career Planning", x: "10%", y: "70%", delay: 5, size: "text-lg", opacity: "opacity-25", cycleDuration: 7, pauseDuration: 8 },
+                          { text: "Salary Negotiation", x: "75%", y: "75%", delay: 3, size: "text-sm", opacity: "opacity-30", cycleDuration: 9, pauseDuration: 5 },
+                          { text: "Skill Assessment", x: "85%", y: "45%", delay: 7, size: "text-xs", opacity: "opacity-15", cycleDuration: 6, pauseDuration: 7 },
+                          { text: "Job Search Strategy", x: "5%", y: "45%", delay: 1, size: "text-sm", opacity: "opacity-25", cycleDuration: 11, pauseDuration: 3 },
+                          { text: "Portfolio Review", x: "70%", y: "30%", delay: 4, size: "text-xs", opacity: "opacity-20", cycleDuration: 8, pauseDuration: 9 },
+                          { text: "LinkedIn Optimization", x: "25%", y: "80%", delay: 6, size: "text-sm", opacity: "opacity-30", cycleDuration: 7, pauseDuration: 6 },
+                          { text: "Mock Interview", x: "90%", y: "60%", delay: 8, size: "text-xs", opacity: "opacity-15", cycleDuration: 9, pauseDuration: 4 },
+                          { text: "Cover Letter Help", x: "20%", y: "35%", delay: 2.5, size: "text-sm", opacity: "opacity-25", cycleDuration: 10, pauseDuration: 5 }
+                        ].map((suggestion, index) => (
+                          <motion.div
+                            key={suggestion.text}
+                            initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                            animate={{ 
+                              opacity: [0, 1, 1, 1, 0],
+                              scale: [0.5, 1, 1, 1, 0.8],
+                              y: [50, 0, 0, 0, -30],
+                              x: [0, 10, -5, 8, 0],
+                              rotate: [0, 2, -1, 1, 0]
+                            }}
+                            transition={{ 
+                              delay: suggestion.delay,
+                              duration: suggestion.cycleDuration,
+                              repeat: Infinity,
+                              repeatDelay: suggestion.pauseDuration,
+                              times: [0, 0.2, 0.6, 0.8, 1],
+                              ease: "easeInOut",
+                              x: { duration: suggestion.cycleDuration * 0.8, repeat: Infinity, ease: "easeInOut" },
+                              rotate: { duration: suggestion.cycleDuration * 0.6, repeat: Infinity, ease: "easeInOut" }
+                            }}
+                            className={`absolute ${suggestion.opacity} text-white/60 font-medium ${suggestion.size} select-none`}
+                            style={{
+                              left: suggestion.x,
+                              top: suggestion.y,
+                              filter: 'blur(0.5px)',
+                              willChange: 'transform, opacity'
+                            }}
+                          >
+                            <div className="bg-white/5 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10 shadow-lg">
+                              {suggestion.text}
+                            </div>
+                          </motion.div>
+                        ))}
+                        
+                        {/* Floating particles for extra ambience - Reduced for performance */}
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <motion.div
+                            key={`particle-${i}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ 
+                              opacity: [0, 0.6, 0],
+                              scale: [0.5, 1, 0.5],
+                              x: [0, Math.random() * 200 - 100],
+                              y: [0, Math.random() * 200 - 100],
+                            }}
+                            transition={{
+                              duration: 8 + Math.random() * 4,
+                              repeat: Infinity,
+                              delay: i * 1.2,
+                              ease: "easeInOut"
+                            }}
+                            className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
+                            style={{
+                              left: `${Math.random() * 100}%`,
+                              top: `${Math.random() * 100}%`,
+                              willChange: 'transform, opacity'
+                            }}
+                          />
+                        ))}
+                      </div>
+
                       {/* Perfectly Centered Input Area */}
-                      <div className="w-full max-w-4xl px-8">
+                      <div className="w-full max-w-4xl px-8 relative z-10">
                         <AI_Prompt
                           prefill={aiCoachPrompt}
                           setPrefill={setAiCoachPrompt}
