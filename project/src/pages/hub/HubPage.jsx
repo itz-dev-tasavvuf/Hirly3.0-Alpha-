@@ -1503,160 +1503,31 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                     </div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="flex flex-col lg:flex-row h-[70vh]">
-                  {/* Left Panel - Quick Actions */}
-                  <div className="lg:w-80 p-6 border-r border-white/10 bg-white/5">
-                    <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                    <div className="space-y-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleQuickAction(
-                          "Review my resume and provide detailed feedback on how to improve it. Please analyze the structure, content, keywords, and overall presentation. Give me specific suggestions for improvement.",
-                          "Resume Review"
-                        )}
-                        className="w-full p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
-                        disabled={aiCoachLoading}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-medium">Resume Review</h4>
-                            <p className="text-gray-400 text-sm">Get detailed feedback</p>
-                          </div>
-                        </div>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleQuickAction(
-                          "Help me prepare for a job interview. What are the most common questions and how should I answer them? Please provide specific examples and practice scenarios.",
-                          "Interview Prep"
-                        )}
-                        className="w-full p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
-                        disabled={aiCoachLoading}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-green-500/30 rounded-lg flex items-center justify-center">
-                            <MessageSquare className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-medium">Interview Prep</h4>
-                            <p className="text-gray-400 text-sm">Practice questions & tips</p>
-                          </div>
-                        </div>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleQuickAction(
-                          "What are the current trends in my industry and how can I stay competitive? Please provide insights on emerging technologies, skills in demand, and market opportunities.",
-                          "Industry Trends"
-                        )}
-                        className="w-full p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
-                        disabled={aiCoachLoading}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-purple-500/30 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-medium">Industry Trends</h4>
-                            <p className="text-gray-400 text-sm">Stay competitive</p>
-                          </div>
-                        </div>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleQuickAction(
-                          "Help me create a comprehensive career development plan with specific goals and milestones. Include short-term and long-term objectives, skill development priorities, and actionable steps.",
-                          "Career Planning"
-                        )}
-                        className="w-full p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500/30 hover:to-red-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
-                        disabled={aiCoachLoading}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-orange-500/30 rounded-lg flex items-center justify-center">
-                            <Target className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-medium">Career Planning</h4>
-                            <p className="text-gray-400 text-sm">Set goals & milestones</p>
-                          </div>
-                        </div>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleQuickAction(
-                          "Guide me through salary negotiation strategies. What should I research, how should I present my case, and what are the best practices for negotiating compensation?",
-                          "Salary Negotiation"
-                        )}
-                        className="w-full p-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 hover:from-yellow-500/30 hover:to-orange-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
-                        disabled={aiCoachLoading}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-yellow-500/30 rounded-lg flex items-center justify-center">
-                            <DollarSign className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-medium">Salary Negotiation</h4>
-                            <p className="text-gray-400 text-sm">Maximize your worth</p>
-                          </div>
-                        </div>
-                      </motion.button>
+                {/* Main Content Area - Full Width Chat */}
+                <div className="flex flex-col h-[70vh]">
+                  {chatHistory.length === 0 ? (
+                    <div className="flex-1 flex items-center justify-center">
+                      {/* Perfectly Centered Input Area */}
+                      <div className="w-full max-w-4xl px-8">
+                        <AI_Prompt
+                          prefill={aiCoachPrompt}
+                          setPrefill={setAiCoachPrompt}
+                          onSubmit={async (prompt, fileText) => {
+                            // If fileText is present, append it to the prompt
+                            const fullPrompt = fileText
+                              ? `${prompt}\n\nResume:\n${fileText}`
+                              : prompt;
+                            await handleAICoachPrompt(fullPrompt);
+                          }}
+                          loading={aiCoachLoading}
+                        />
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Right Panel - Chat Interface */}
-                  <div className="flex-1 flex flex-col">
-                    {/* Chat Messages Area */}
-                    <div className="flex-1 p-6 overflow-y-auto invisible-scrollbar">
-                      {chatHistory.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center">
-                          <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mb-6"
-                          >
-                            <Bot className="w-12 h-12 text-white" />
-                          </motion.div>
-                          <h3 className="text-2xl font-bold text-white mb-3">How can I help you today?</h3>
-                          <p className="text-gray-400 mb-6 max-w-md">
-                            Ask me anything about your career, from resume tips to interview preparation. 
-                            You can also use the quick actions on the left to get started.
-                          </p>
-                          <div className="flex flex-wrap gap-2 justify-center">
-                            {[
-                              "Career advice",
-                              "Resume tips",
-                              "Interview prep",
-                              "Salary negotiation",
-                              "Skill development"
-                            ].map((tag, index) => (
-                              <motion.span
-                                key={tag}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 + index * 0.1 }}
-                                className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300"
-                              >
-                                {tag}
-                              </motion.span>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
+                  ) : (
+                    <>
+                      {/* Chat Messages Area */}
+                      <div className="flex-1 p-8 overflow-y-auto invisible-scrollbar">
+                        <div className="space-y-6 max-w-4xl mx-auto">
                           {/* Chat History */}
                           {chatHistory.map((message) => (
                             <motion.div
@@ -1667,14 +1538,14 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                               {message.type === 'system' ? (
-                                <div className="flex justify-center w-full mb-2">
-                                  <div className="px-3 py-1 bg-blue-500/20 rounded-full border border-blue-500/30">
+                                <div className="flex justify-center w-full mb-4">
+                                  <div className="px-4 py-2 bg-blue-500/20 rounded-full border border-blue-500/30">
                                     <span className="text-blue-300 text-sm font-medium">{message.content}</span>
                                   </div>
                                 </div>
                               ) : (
-                                <div className={`flex items-start space-x-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                <div className={`flex items-start space-x-4 max-w-[85%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                                     message.type === 'user' 
                                       ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
                                       : message.type === 'error'
@@ -1682,22 +1553,22 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                                       : 'bg-gradient-to-r from-blue-500 to-cyan-500'
                                   }`}>
                                     {message.type === 'user' ? (
-                                      <User className="w-4 h-4 text-white" />
+                                      <User className="w-5 h-5 text-white" />
                                     ) : message.type === 'error' ? (
-                                      <AlertCircle className="w-4 h-4 text-white" />
+                                      <AlertCircle className="w-5 h-5 text-white" />
                                     ) : (
-                                      <Bot className="w-4 h-4 text-white" />
+                                      <Bot className="w-5 h-5 text-white" />
                                     )}
                                   </div>
-                                  <div className={`rounded-2xl p-4 border ${
+                                  <div className={`rounded-2xl p-5 border ${
                                     message.type === 'user'
                                       ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30 text-white'
                                       : message.type === 'error'
                                       ? 'bg-red-500/10 border-red-500/20 text-red-300'
                                       : 'bg-white/5 border-white/10 text-white'
                                   }`}>
-                                    <div className="whitespace-pre-line">{message.content}</div>
-                                    <div className="text-xs opacity-50 mt-2">
+                                    <div className="whitespace-pre-line leading-relaxed">{message.content}</div>
+                                    <div className="text-xs opacity-50 mt-3">
                                       {message.timestamp.toLocaleTimeString()}
                                     </div>
                                   </div>
@@ -1711,13 +1582,13 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                             <motion.div
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="flex items-start space-x-3"
+                              className="flex items-start space-x-4"
                             >
-                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Bot className="w-4 h-4 text-white" />
+                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Bot className="w-5 h-5 text-white" />
                               </div>
-                              <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                                <div className="flex items-center space-x-2">
+                              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                                <div className="flex items-center space-x-3">
                                   <div className="flex space-x-1">
                                     <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
                                     <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -1732,26 +1603,29 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                           {/* Auto-scroll anchor */}
                           <div ref={chatEndRef} />
                         </div>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Enhanced Input Area */}
-                    <div className="p-6 border-t border-white/10 bg-white/5">
-                      <AI_Prompt
-                        prefill={aiCoachPrompt}
-                        setPrefill={setAiCoachPrompt}
-                        onSubmit={async (prompt, fileText) => {
-                          // If fileText is present, append it to the prompt
-                          const fullPrompt = fileText
-                            ? `${prompt}\n\nResume:\n${fileText}`
-                            : prompt;
-                          await handleAICoachPrompt(fullPrompt);
-                        }}
-                        loading={aiCoachLoading}
-                      />
-                    </div>                    </div>
-                  </div>
+                      {/* Bottom Input Area for Chat Mode */}
+                      <div className="p-8 border-t border-white/10 bg-white/5">
+                        <div className="max-w-4xl mx-auto">
+                          <AI_Prompt
+                            prefill={aiCoachPrompt}
+                            setPrefill={setAiCoachPrompt}
+                            onSubmit={async (prompt, fileText) => {
+                              // If fileText is present, append it to the prompt
+                              const fullPrompt = fileText
+                                ? `${prompt}\n\nResume:\n${fileText}`
+                                : prompt;
+                              await handleAICoachPrompt(fullPrompt);
+                            }}
+                            loading={aiCoachLoading}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
+              </div>
               </div>
             </motion.div>
           </motion.div>
