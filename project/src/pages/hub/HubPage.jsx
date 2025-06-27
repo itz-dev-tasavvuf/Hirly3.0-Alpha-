@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck, Mail as Envelope } from 'lucide-react';
+import { ChevronDown, LogOut, User, Settings, MessageSquare, Briefcase, UserCheck as UserSearchIcon, BarChart3, PlusSquare, Building, Bot, MapPin, Award, Users, Bell, Shield, Palette, Globe, DollarSign, Clock, Upload, X, UserCheck, Mail as Envelope, FileText, Target, AlertCircle, TrendingUp, RotateCcw } from 'lucide-react';
 import algorandMark from '@/assets/algorand_logo_mark_white.png';
 import MessagesModal from '@/components/hub/MessagesModal';
 import SwipeApp from '@/components/hub/SwipeApp'; 
@@ -210,10 +210,12 @@ const HubPage = () => {
 
   // AI Coach Prompt state
   const [aiCoachPrompt, setAiCoachPrompt] = useState("");
-  // AI Coach response state
-  const [aiCoachResponse, setAiCoachResponse] = useState("");
+  // AI Coach response state (REMOVED - now using chat history)
   const [aiCoachLoading, setAiCoachLoading] = useState(false);
   const [aiCoachError, setAiCoachError] = useState("");
+  // NEW: Chat history state
+  const [chatHistory, setChatHistory] = useState([]);
+  const chatEndRef = React.useRef(null);
   // Resume upload modal state
   const [resumeUploadOpen, setResumeUploadOpen] = useState(false);
   const [resumeFileError, setResumeFileError] = useState("");
@@ -285,10 +287,20 @@ const HubPage = () => {
   const SUPABASE_AI_COACH_URL = "https://occrvhahkgvvyzvpnsjz.functions.supabase.co/ai-coach";
 
 const handleAICoachPrompt = async (prompt) => {
-  console.log('handleAICoachPrompt called with:', prompt); // Debug: confirm handler is called
+  console.log('handleAICoachPrompt called with:', prompt);
+  
+  // Add user message to chat history
+  const userMessage = {
+    id: Date.now(),
+    type: 'user',
+    content: prompt,
+    timestamp: new Date()
+  };
+  setChatHistory(prev => [...prev, userMessage]);
+  
   setAiCoachLoading(true);
   setAiCoachError("");
-  setAiCoachResponse("");
+  
   try {
     const response = await fetch(SUPABASE_AI_COACH_URL, {
       method: "POST",
@@ -298,22 +310,58 @@ const handleAICoachPrompt = async (prompt) => {
       body: JSON.stringify({ prompt }),
     });
     const data = await response.json();
-    console.log('AI Coach response:', data); // Debug log
+    console.log('AI Coach response:', data);
     if (response.ok) {
-      setAiCoachResponse(data.message || data.result || data.response || "");
-      if (data.message || data.result || data.response) {
-        setAiCoachError("");
-      } else {
+      const aiResponse = data.message || data.result || data.response || "";
+      
+      // Add AI response to chat history
+      const aiMessage = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: aiResponse,
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, aiMessage]);
+      
+      if (!aiResponse) {
         setAiCoachError("No Response from AI");
+        // Add error message to chat history
+        const errorMsg = {
+          id: Date.now() + 2,
+          type: 'error',
+          content: "No Response from AI",
+          timestamp: new Date()
+        };
+        setChatHistory(prev => [...prev, errorMsg]);
       }
     } else {
-      setAiCoachError(data.error || data.message || 'AI Coach error');
-      setAiCoachResponse("");
+      const errorMessage = data.error || data.message || 'AI Coach error';
+      setAiCoachError(errorMessage);
+      
+      // Add error message to chat history
+      const errorMsg = {
+        id: Date.now() + 1,
+        type: 'error',
+        content: errorMessage,
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, errorMsg]);
     }
   } catch (err) {
-    setAiCoachError(err.message || "Error contacting Coach. Please try again later.");
+    const errorMessage = err.message || "Error contacting Coach. Please try again later.";
+    setAiCoachError(errorMessage);
+    
+    // Add error message to chat history
+    const errorMsg = {
+      id: Date.now() + 1,
+      type: 'error',
+      content: errorMessage,
+      timestamp: new Date()
+    };
+    setChatHistory(prev => [...prev, errorMsg]);
   } finally {
     setAiCoachLoading(false);
+    setAiCoachPrompt(""); // Clear input after sending
   }
 };
 
@@ -1378,7 +1426,11 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
-            onClick={() => setAiCoachOpen(false)}
+            onClick={() => {
+              setAiCoachOpen(false);
+              // Optionally clear chat history when closing
+              // setChatHistory([]);
+            }}
           >
             {/* Background Orb */}
             <div className="absolute inset-0 z-0">
@@ -1395,144 +1447,311 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 50 }}
               transition={{ duration: 0.4, type: "spring", stiffness: 150, damping: 20 }}
-              className="relative z-10 w-full max-w-5xl mx-auto p-4 max-h-[90vh] overflow-y-auto invisible-scrollbar"
+              className="relative z-10 w-full max-w-6xl mx-auto p-6 max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
-                    <Bot className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-gray-300">Your personal AI assistant for career growth</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setAiCoachOpen(false)}
-                  className="text-white hover:bg-white/20 rounded-full flex-shrink-0"
-                >
-                  <X size={24} />
-                </Button>
-              </div>
-
-              {/* Main Content */}
-              <div className="flex flex-col items-center space-y-8">
-                {/* AI Prompt with prefill support */}
-                <AI_Prompt
-                  prefill={aiCoachPrompt}
-                  setPrefill={setAiCoachPrompt}
-                  onSubmit={async (prompt, fileText) => {
-                    // If fileText is present, append it to the prompt
-                    const fullPrompt = fileText
-                      ? `${prompt}\n\nResume:\n${fileText}`
-                      : prompt;
-                    await handleAICoachPrompt(fullPrompt);
-                  }}
-                  loading={aiCoachLoading}
-                />
-
-                {/* AI Coach Response as overlay modal */}
-                {(aiCoachLoading || aiCoachResponse || aiCoachError) && (
-                  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-                    <div className="relative w-full max-w-2xl mx-4 bg-white/10 rounded-2xl border border-white/20 text-white shadow-2xl max-h-[70vh] flex flex-col" style={{ minHeight: '320px' }}>
-                      <button
-                        className="absolute top-4 right-4 text-white/70 hover:text-white text-xl"
-                        onClick={() => {
-                          setAiCoachResponse("");
-                          setAiCoachError("");
-                          setAiCoachLoading(false);
+              {/* Modern Glass Container */}
+              <div className="bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+                {/* Enhanced Header with Gradient */}
+                <div className="relative px-8 py-6 bg-gradient-to-r from-blue-600/20 via-cyan-500/20 to-purple-600/20 border-b border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <motion.div 
+                        className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg"
+                        animate={{ 
+                          boxShadow: ['0 0 20px rgba(59, 130, 246, 0.5)', '0 0 30px rgba(6, 182, 212, 0.5)', '0 0 20px rgba(59, 130, 246, 0.5)']
                         }}
-                        aria-label="Close answer"
+                        transition={{ repeat: Infinity, duration: 3 }}
                       >
-                        <X size={28} />
-                      </button>
-                      <div className="flex-1 overflow-y-auto invisible-scrollbar p-8" style={{ paddingBottom: '100px' }}>
-                        <div className="min-h-[64px] whitespace-pre-line pr-2 mb-6">
-                          {aiCoachLoading && <span className="text-cyan-300">Thinking...</span>}
-                          {aiCoachResponse && !aiCoachLoading && (() => {
-    let pretty = null;
-    try {
-      const obj = typeof aiCoachResponse === 'string' ? JSON.parse(aiCoachResponse) : aiCoachResponse;
-      pretty = JSON.stringify(obj, null, 2);
-    } catch {
-      pretty = null;
-    }
-    return pretty ? (
-      <pre className="bg-black/60 text-green-200 rounded-lg p-4 overflow-x-auto text-sm whitespace-pre-wrap">
-        {pretty}
-      </pre>
-    ) : (
-      <span>{aiCoachResponse}</span>
-    );
-  })()}
-  {!aiCoachResponse && aiCoachError && !aiCoachLoading && (
-    <span className="text-red-400">{aiCoachError}</span>
-  )}
-  {!aiCoachResponse && !aiCoachError && !aiCoachLoading && (
-    <span className="text-yellow-300">No Response from AI</span>
-  )}
-                        </div>
-                      </div>
-                      {/* Sticky, visible input at the bottom with submit button, outside scrollable area */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          padding: '16px',
-                          background: 'rgba(255,255,255,0.95)',
-                          borderBottomLeftRadius: '16px',
-                          borderBottomRightRadius: '16px',
-                          borderTop: '1px solid rgba(0,0,0,0.08)',
-                          zIndex: 10,
-                          boxShadow: '0 -2px 16px 0 rgba(0,0,0,0.08)'
-                        }}
-                      >
-                        <form
-                          onSubmit={e => {
-                            e.preventDefault();
-                            if (aiCoachLoading) return;
-                            if (aiCoachPrompt.trim()) {
-                              handleAICoachPrompt(aiCoachPrompt);
-                              setAiCoachPrompt(""); // Clear input after sending
-                            }
-                          }}
-                          className="w-full flex items-center gap-2"
-                        >
-                          <input
-                            type="text"
-                            value={aiCoachPrompt}
-                            onChange={e => setAiCoachPrompt(e.target.value)}
-                            placeholder="Type your message..."
-                            className="flex-1 bg-white text-gray-900 text-base px-4 py-2 rounded-lg border bordergray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-300"
-                            disabled={aiCoachLoading}
-                            autoFocus
-                            style={{ minWidth: 0 }}
-                          />
-                          <button
-                            type="submit"
-                            disabled={aiCoachLoading || !aiCoachPrompt.trim()}
-                            className="ml-2 p-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white shadow transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                            aria-label="Send"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-7.5-15-7.5v6l10 1.5-10 1.5v6z" />
-                            </svg>
-                          </button>
-                        </form>
+                        <Bot className="w-8 h-8 text-white" />
+                      </motion.div>
+                      <div>
+                        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
+                          AI Career Coach
+                        </h2>
+                        <p className="text-gray-300 text-sm">Your personal AI assistant for career growth</p>
                       </div>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      {/* Chat history counter */}
+                      {chatHistory.length > 0 && (
+                        <div className="flex items-center space-x-1 px-3 py-1 bg-white/10 rounded-full">
+                          <MessageSquare className="w-4 h-4 text-cyan-400" />
+                          <span className="text-sm text-white">{chatHistory.filter(msg => msg.type !== 'system').length}</span>
+                        </div>
+                      )}
+                      {/* Clear chat button */}
+                      {chatHistory.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setChatHistory([])}
+                          className="text-white/70 hover:text-white hover:bg-white/10 rounded-full"
+                          title="Clear chat history"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => setAiCoachOpen(false)}
+                        className="text-white/70 hover:text-white hover:bg-white/10 rounded-full flex-shrink-0 w-10 h-10"
+                      >
+                        <X size={24} />
+                      </Button>
+                    </div>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex flex-col lg:flex-row h-[70vh]">
+                  {/* Left Panel - Quick Actions */}
+                  <div className="lg:w-80 p-6 border-r border-white/10 bg-white/5">
+                    <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                    <div className="space-y-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleQuickAction(
+                          "Review my resume and provide detailed feedback on how to improve it. Please analyze the structure, content, keywords, and overall presentation. Give me specific suggestions for improvement.",
+                          "Resume Review"
+                        )}
+                        className="w-full p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
+                        disabled={aiCoachLoading}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-500/30 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">Resume Review</h4>
+                            <p className="text-gray-400 text-sm">Get detailed feedback</p>
+                          </div>
+                        </div>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleQuickAction(
+                          "Help me prepare for a job interview. What are the most common questions and how should I answer them? Please provide specific examples and practice scenarios.",
+                          "Interview Prep"
+                        )}
+                        className="w-full p-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
+                        disabled={aiCoachLoading}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-green-500/30 rounded-lg flex items-center justify-center">
+                            <MessageSquare className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">Interview Prep</h4>
+                            <p className="text-gray-400 text-sm">Practice questions & tips</p>
+                          </div>
+                        </div>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleQuickAction(
+                          "What are the current trends in my industry and how can I stay competitive? Please provide insights on emerging technologies, skills in demand, and market opportunities.",
+                          "Industry Trends"
+                        )}
+                        className="w-full p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
+                        disabled={aiCoachLoading}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-purple-500/30 rounded-lg flex items-center justify-center">
+                            <TrendingUp className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">Industry Trends</h4>
+                            <p className="text-gray-400 text-sm">Stay competitive</p>
+                          </div>
+                        </div>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleQuickAction(
+                          "Help me create a comprehensive career development plan with specific goals and milestones. Include short-term and long-term objectives, skill development priorities, and actionable steps.",
+                          "Career Planning"
+                        )}
+                        className="w-full p-4 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500/30 hover:to-red-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
+                        disabled={aiCoachLoading}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-orange-500/30 rounded-lg flex items-center justify-center">
+                            <Target className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">Career Planning</h4>
+                            <p className="text-gray-400 text-sm">Set goals & milestones</p>
+                          </div>
+                        </div>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleQuickAction(
+                          "Guide me through salary negotiation strategies. What should I research, how should I present my case, and what are the best practices for negotiating compensation?",
+                          "Salary Negotiation"
+                        )}
+                        className="w-full p-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 hover:from-yellow-500/30 hover:to-orange-500/30 rounded-xl border border-white/10 text-left transition-all duration-200"
+                        disabled={aiCoachLoading}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-yellow-500/30 rounded-lg flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">Salary Negotiation</h4>
+                            <p className="text-gray-400 text-sm">Maximize your worth</p>
+                          </div>
+                        </div>
+                      </motion.button>
+                    </div>
                   </div>
-                )}
 
-                {/* Quick Actions removed as requested */}
-                {/* Additional padding for better scrolling */}
-                <div className="pb-8"></div>
+                  {/* Right Panel - Chat Interface */}
+                  <div className="flex-1 flex flex-col">
+                    {/* Chat Messages Area */}
+                    <div className="flex-1 p-6 overflow-y-auto invisible-scrollbar">
+                      {chatHistory.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5 }}
+                            className="w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mb-6"
+                          >
+                            <Bot className="w-12 h-12 text-white" />
+                          </motion.div>
+                          <h3 className="text-2xl font-bold text-white mb-3">How can I help you today?</h3>
+                          <p className="text-gray-400 mb-6 max-w-md">
+                            Ask me anything about your career, from resume tips to interview preparation. 
+                            You can also use the quick actions on the left to get started.
+                          </p>
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {[
+                              "Career advice",
+                              "Resume tips",
+                              "Interview prep",
+                              "Salary negotiation",
+                              "Skill development"
+                            ].map((tag, index) => (
+                              <motion.span
+                                key={tag}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 + index * 0.1 }}
+                                className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300"
+                              >
+                                {tag}
+                              </motion.span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Chat History */}
+                          {chatHistory.map((message) => (
+                            <motion.div
+                              key={message.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                            >
+                              {message.type === 'system' ? (
+                                <div className="flex justify-center w-full mb-2">
+                                  <div className="px-3 py-1 bg-blue-500/20 rounded-full border border-blue-500/30">
+                                    <span className="text-blue-300 text-sm font-medium">{message.content}</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className={`flex items-start space-x-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    message.type === 'user' 
+                                      ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
+                                      : message.type === 'error'
+                                      ? 'bg-gradient-to-r from-red-500 to-red-600'
+                                      : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                                  }`}>
+                                    {message.type === 'user' ? (
+                                      <User className="w-4 h-4 text-white" />
+                                    ) : message.type === 'error' ? (
+                                      <AlertCircle className="w-4 h-4 text-white" />
+                                    ) : (
+                                      <Bot className="w-4 h-4 text-white" />
+                                    )}
+                                  </div>
+                                  <div className={`rounded-2xl p-4 border ${
+                                    message.type === 'user'
+                                      ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-500/30 text-white'
+                                      : message.type === 'error'
+                                      ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                                      : 'bg-white/5 border-white/10 text-white'
+                                  }`}>
+                                    <div className="whitespace-pre-line">{message.content}</div>
+                                    <div className="text-xs opacity-50 mt-2">
+                                      {message.timestamp.toLocaleTimeString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                          
+                          {/* Loading indicator */}
+                          {aiCoachLoading && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="flex items-start space-x-3"
+                            >
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Bot className="w-4 h-4 text-white" />
+                              </div>
+                              <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex space-x-1">
+                                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                  </div>
+                                  <span className="text-cyan-300">Thinking...</span>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                          
+                          {/* Auto-scroll anchor */}
+                          <div ref={chatEndRef} />
+                        </div>
+                      )}
+                    </div>
 
-                {/* Prompt Suggestions (fade-in cycling) */}
-                <PromptSuggestions />
+                    {/* Enhanced Input Area */}
+                    <div className="p-6 border-t border-white/10 bg-white/5">
+                      <AI_Prompt
+                        prefill={aiCoachPrompt}
+                        setPrefill={setAiCoachPrompt}
+                        onSubmit={async (prompt, fileText) => {
+                          // If fileText is present, append it to the prompt
+                          const fullPrompt = fileText
+                            ? `${prompt}\n\nResume:\n${fileText}`
+                            : prompt;
+                          await handleAICoachPrompt(fullPrompt);
+                        }}
+                        loading={aiCoachLoading}
+                      />
+                    </div>                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>
