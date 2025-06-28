@@ -11,6 +11,7 @@ import ForgotPassword from '@/pages/auth/ForgotPassword';
 import UpdatePassword from '@/pages/auth/UpdatePassword';
 import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
+import CandidateDashboardPage from '@/pages/CandidateDashboardPage';
 import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
@@ -47,6 +48,14 @@ function App() {
           element={
             <ProtectedRoute>
               <HubPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/candidate-dashboard" 
+          element={
+            <ProtectedRoute>
+              <CandidateDashboardPage />
             </ProtectedRoute>
           } 
         />

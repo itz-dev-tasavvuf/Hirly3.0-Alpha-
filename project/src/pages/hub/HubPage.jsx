@@ -111,6 +111,7 @@ const candidateMenuItems = [
   { id: 'jobs', title: 'Jobs', icon: Briefcase, description: "Browse job opportunities", gradient: "from-green-500 to-teal-500", action: 'openSwipeJobs' },
   { id: 'matches', title: 'Matches', icon: UserCheck, description: "Your matches with jobs", gradient: "from-green-400 to-blue-400" },
   { id: 'messages', title: 'Messages', icon: MessageSquare, description: "Chat with recruiters", gradient: "from-indigo-500 to-purple-500", action: 'openMessagesModal' },
+  { id: 'dashboard', title: 'Dashboard', icon: BarChart3, description: "View your job history and career insights", gradient: "from-blue-500 to-cyan-500", action: 'openCandidateDashboard' },
   { id: 'profile', title: 'Profile', icon: User, description: "View and edit your profile", gradient: "from-purple-600 to-pink-600" },
   { id: 'verify_algorand', title: 'Verify with Algorand', icon: (props) => (<img src={algorandMark} alt="Algorand" className={props && props.className ? props.className : "w-8 h-8"} />), description: "Blockchain-based identity verification", gradient: "from-cyan-500 to-green-500", action: 'verifyAlgorand' },
   { id: 'settings', title: 'Settings', icon: Settings, description: "Adjust your preferences", gradient: "from-orange-500 to-red-500" },
@@ -394,6 +395,16 @@ const handleAICoachPrompt = async (prompt) => {
     fetchUserType();
   }, [navigate, location.search]);
   
+  // Check for URL parameters to open specific modals
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('openAICoach') === 'true') {
+      setAiCoachOpen(true);
+      // Clean up the URL parameter without triggering a reload
+      window.history.replaceState(null, '', '/hub');
+    }
+  }, [location.search]);
+  
   const x = useMotionValue(0);
   const xSpring = useSpring(x, { stiffness: 300, damping: 50 });
   const rotate = useTransform(xSpring, [-150, 0, 150], [-25, 0, 25]);
@@ -442,6 +453,8 @@ const handleAICoachPrompt = async (prompt) => {
       setSwipeAppOpen(true);
     } else if (item.action === 'openAICoach') {
       setAiCoachOpen(true);
+    } else if (item.action === 'openCandidateDashboard') {
+      navigate('/candidate-dashboard');
     } else {
       setModalContent({ title: item.title, description: item.description });
       setGenericModalOpen(true);
@@ -901,56 +914,138 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
     }
 
     if (item.id === 'dashboard') {
-      // Animated dashboard overlay
-      return (
-        <div className="w-full h-full p-6 flex flex-col justify-between text-white">
-          <div className="overflow-y-auto invisible-scrollbar h-[370px]">
-            <h2 className="text-2xl font-bold mb-2 text-center text-white">Dashboard</h2>
-            <p className="text-center text-sm mb-6 text-white/80">Your hiring metrics at a glance</p>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {/* Animated stats - now clickable */}
-              {dashboardMetrics.map((metric, i) => (
-                <button
-                  key={metric.label}
-                  className="focus:outline-none"
-                  onClick={() => setSelectedMetric(metric)}
+      // Dashboard overlay - different content for candidate vs employer
+      if (userType === 'candidate') {
+        // Candidate Dashboard Card Back
+        return (
+          <div className="w-full h-full p-6 flex flex-col justify-between text-white">
+            <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+              <h2 className="text-2xl font-bold mb-2 text-center text-white">Career Dashboard</h2>
+              <p className="text-center text-sm mb-6 text-white/80">Your job search progress</p>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-white">24</p>
+                  <p className="text-xs text-white/70">Applications</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-white">8</p>
+                  <p className="text-xs text-white/70">Interviews</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-white">73%</p>
+                  <p className="text-xs text-white/70">Response Rate</p>
+                </div>
+                <div className="bg-white/10 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-white">156</p>
+                  <p className="text-xs text-white/70">Profile Views</p>
+                </div>
+              </div>
+
+              {/* Recent Applications */}
+              <div className="mb-6">
+                <p className="text-xs mb-3 text-white/70">Recent Applications</p>
+                <div className="space-y-2">
+                  {[
+                    { company: 'TechFlow', position: 'Senior Frontend Developer', status: 'Interview Scheduled', color: 'text-blue-400' },
+                    { company: 'DataVision', position: 'Full Stack Engineer', status: 'Under Review', color: 'text-yellow-400' },
+                    { company: 'CloudBase', position: 'React Developer', status: 'Application Sent', color: 'text-purple-400' }
+                  ].map((app, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + i * 0.1 }}
+                      className="bg-white/5 rounded-lg p-3 border border-white/10"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-white text-sm">{app.position}</p>
+                          <p className="text-xs text-white/70">{app.company}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full bg-white/10 ${app.color}`}>
+                          {app.status}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Coaching Insights */}
+              <div>
+                <p className="text-xs mb-3 text-white/70">AI Coach Insights</p>
+                <div className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-lg p-3 border border-purple-500/30">
+                  <p className="text-white/90 text-sm">Your interview performance has improved by 40% this month. Keep practicing!</p>
+                </div>
+              </div>
+
+              {/* Full Dashboard Button */}
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <Button
+                  onClick={() => navigate('/candidate-dashboard')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
                 >
-                  <AnimatedMetric {...metric} delay={0.1 + i * 0.1} />
-                </button>
-              ))}
-            </div>
-            {/* Diversity bar */}
-            <div className="mb-6">
-              <p className="text-xs mb-2 text-white/70">Team Diversity</p>
-              <div className="flex items-center gap-2">
-                <motion.div initial={{ width: 0 }} animate={{ width: '55%' }} transition={{ delay: 0.7, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 shadow-lg" style={{ width: '55%' }} />
-                <span className="text-xs text-white/80">55% Women</span>
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  View Full Dashboard
+                </Button>
               </div>
-              <div className="flex items-center gap-2 mt-2">
-                <motion.div initial={{ width: 0 }} animate={{ width: '40%' }} transition={{ delay: 0.8, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-green-400 shadow-lg" style={{ width: '40%' }} />
-                <span className="text-xs text-white/80">40% Minorities</span>
-              </div>
-            </div>
-            {/* Recent activity */}
-            <div>
-              <p className="text-xs mb-2 text-white/70">Recent Activity</p>
-              <motion.ul initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }} className="space-y-2">
-                {[
-                  { label: 'New applicant: Jane Doe', icon: <User className="w-4 h-4 text-cyan-400" /> },
-                  { label: 'Interview scheduled with John Smith', icon: <MessageSquare className="w-4 h-4 text-yellow-400" /> },
-                  { label: 'Offer sent to Emily Lee', icon: <Award className="w-4 h-4 text-purple-400" /> },
-                  { label: 'New hire: Michael Chen', icon: <Briefcase className="w-4 h-4 text-pink-400" /> },
-                ].map((item, i) => (
-                  <motion.li key={i} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.2 }} className="flex items-center gap-2 text-sm bg-white/10 rounded-lg px-3 py-2">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </motion.li>
-                ))}
-              </motion.ul>
             </div>
           </div>
-        </div>
-      );
+        );
+      } else {
+        // Employer Dashboard (existing code)
+        return (
+          <div className="w-full h-full p-6 flex flex-col justify-between text-white">
+            <div className="overflow-y-auto invisible-scrollbar h-[370px]">
+              <h2 className="text-2xl font-bold mb-2 text-center text-white">Dashboard</h2>
+              <p className="text-center text-sm mb-6 text-white/80">Your hiring metrics at a glance</p>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Animated stats - now clickable */}
+                {dashboardMetrics.map((metric, i) => (
+                  <button
+                    key={metric.label}
+                    className="focus:outline-none"
+                    onClick={() => setSelectedMetric(metric)}
+                  >
+                    <AnimatedMetric {...metric} delay={0.1 + i * 0.1} />
+                  </button>
+                ))}
+              </div>
+              {/* Diversity bar */}
+              <div className="mb-6">
+                <p className="text-xs mb-2 text-white/70">Team Diversity</p>
+                <div className="flex items-center gap-2">
+                  <motion.div initial={{ width: 0 }} animate={{ width: '55%' }} transition={{ delay: 0.7, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 shadow-lg" style={{ width: '55%' }} />
+                  <span className="text-xs text-white/80">55% Women</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <motion.div initial={{ width: 0 }} animate={{ width: '40%' }} transition={{ delay: 0.8, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-green-400 shadow-lg" style={{ width: '40%' }} />
+                  <span className="text-xs text-white/80">40% Minorities</span>
+                </div>
+              </div>
+              {/* Recent activity */}
+              <div>
+                <p className="text-xs mb-2 text-white/70">Recent Activity</p>
+                <motion.ul initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }} className="space-y-2">
+                  {[
+                    { label: 'New applicant: Jane Doe', icon: <User className="w-4 h-4 text-cyan-400" /> },
+                    { label: 'Interview scheduled with John Smith', icon: <MessageSquare className="w-4 h-4 text-yellow-400" /> },
+                    { label: 'Offer sent to Emily Lee', icon: <Award className="w-4 h-4 text-purple-400" /> },
+                    { label: 'New hire: Michael Chen', icon: <Briefcase className="w-4 h-4 text-pink-400" /> },
+                  ].map((item, i) => (
+                    <motion.li key={i} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1 + i * 0.2 }} className="flex items-center gap-2 text-sm bg-white/10 rounded-lg px-3 py-2">
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              </div>
+            </div>
+          </div>
+        );
+      }
     }
 
     if (item.id === 'upload_jobs') {
