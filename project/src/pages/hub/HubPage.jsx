@@ -948,9 +948,9 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 <p className="text-xs mb-3 text-white/70">Recent Applications</p>
                 <div className="space-y-2">
                   {[
-                    { company: 'TechFlow', position: 'Senior Frontend Developer', status: 'Interview Scheduled', color: 'text-blue-400' },
-                    { company: 'DataVision', position: 'Full Stack Engineer', status: 'Under Review', color: 'text-yellow-400' },
-                    { company: 'CloudBase', position: 'React Developer', status: 'Application Sent', color: 'text-purple-400' }
+                    { company: 'TechFlow', position: 'Senior Frontend Developer', status: 'Scheduled', color: 'text-white bg-blue-600/80' },
+                    { company: 'DataVision', position: 'Full Stack Engineer', status: 'Under Review', color: 'text-black bg-yellow-400/90' },
+                    { company: 'CloudBase', position: 'React Developer', status: 'Application Sent', color: 'text-white bg-purple-600/80' }
                   ].map((app, i) => (
                     <motion.div
                       key={i}
@@ -964,7 +964,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                           <p className="font-medium text-white text-sm">{app.position}</p>
                           <p className="text-xs text-white/70">{app.company}</p>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full bg-white/10 ${app.color}`}>
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${app.color}`}>
                           {app.status}
                         </span>
                       </div>
@@ -1026,7 +1026,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 </div>
               </div>
               {/* Recent activity */}
-              <div>
+              <div className="mb-6">
                 <p className="text-xs mb-2 text-white/70">Recent Activity</p>
                 <motion.ul initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }} className="space-y-2">
                   {[
@@ -1041,6 +1041,17 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                     </motion.li>
                   ))}
                 </motion.ul>
+              </div>
+
+              {/* Full Dashboard Button */}
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <Button
+                  onClick={() => navigate('/employer-dashboard')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  View Full Dashboard
+                </Button>
               </div>
             </div>
           </div>

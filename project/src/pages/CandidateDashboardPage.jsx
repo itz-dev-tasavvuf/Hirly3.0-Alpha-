@@ -137,7 +137,12 @@ const CandidateDashboardPage = () => {
                 Back to Hub
               </Button>
               <div className="h-6 w-px bg-white/20" />
-              <h1 className="text-2xl font-bold text-white">Candidate Dashboard</h1>
+              {/* Hirly Branding */}
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-black gradient-text">Hirly</h1>
+              </div>
+              <div className="h-6 w-px bg-white/20" />
+              <h2 className="text-xl font-bold text-white">Candidate Dashboard</h2>
             </div>
             <div className="flex items-center space-x-2">
               <Button

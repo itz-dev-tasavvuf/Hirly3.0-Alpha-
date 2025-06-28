@@ -12,6 +12,7 @@ import UpdatePassword from '@/pages/auth/UpdatePassword';
 import OnboardingPage from '@/pages/onboarding';
 import HubPage from '@/pages/hub/HubPage';
 import CandidateDashboardPage from '@/pages/CandidateDashboardPage';
+import EmployerDashboardPage from '@/pages/EmployerDashboardPage';
 import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
@@ -56,6 +57,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CandidateDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/employer-dashboard" 
+          element={
+            <ProtectedRoute>
+              <EmployerDashboardPage />
             </ProtectedRoute>
           } 
         />
