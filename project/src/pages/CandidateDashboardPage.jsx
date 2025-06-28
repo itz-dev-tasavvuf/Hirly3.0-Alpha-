@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -24,6 +24,12 @@ import { Progress } from '@/components/ui/progress';
 const CandidateDashboardPage = () => {
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [animatedStats, setAnimatedStats] = useState({
+    totalApplications: 0,
+    interviewsScheduled: 0,
+    responseRate: 0,
+    profileViews: 0
+  });
 
   // Mock data for the dashboard
   const stats = {
@@ -31,6 +37,69 @@ const CandidateDashboardPage = () => {
     interviewsScheduled: 8,
     responseRate: 73,
     profileViews: 156
+  };
+
+  // Counter animation effect
+  useEffect(() => {
+    const duration = 2000; // 2 seconds
+    const interval = 50; // Update every 50ms
+    const steps = duration / interval;
+    
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const progress = Math.min(step / steps, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      
+      setAnimatedStats({
+        totalApplications: Math.round(stats.totalApplications * easeOutQuart),
+        interviewsScheduled: Math.round(stats.interviewsScheduled * easeOutQuart),
+        responseRate: Math.round(stats.responseRate * easeOutQuart),
+        profileViews: Math.round(stats.profileViews * easeOutQuart)
+      });
+      
+      if (progress >= 1) {
+        clearInterval(timer);
+      }
+    }, interval);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  // Animated Progress Bar Component
+  const AnimatedProgress = ({ value, delay = 0, className = "" }) => {
+    const [animatedValue, setAnimatedValue] = useState(0);
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setAnimatedValue(value);
+      }, delay);
+      return () => clearTimeout(timer);
+    }, [value, delay]);
+
+    return (
+      <div className={`h-2 bg-white/20 rounded-full overflow-hidden ${className}`}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${animatedValue}%` }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: delay / 1000 }}
+          className="h-full bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full relative"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0] }}
+            transition={{ 
+              duration: 2, 
+              repeat: Infinity, 
+              delay: (delay / 1000) + 1.5 
+            }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+          />
+        </motion.div>
+      </div>
+    );
   };
 
   const jobApplications = [
@@ -167,56 +236,140 @@ const CandidateDashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10"
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 relative overflow-hidden"
           >
+            {/* Shimmer effect */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.5, delay: 0.5, ease: 'easeInOut' }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            />
             <div className="flex items-center justify-between mb-2">
               <Target className="w-8 h-8 text-purple-400" />
-              <span className="text-2xl font-bold text-white">{stats.totalApplications}</span>
+              <motion.span 
+                className="text-2xl font-bold text-white"
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+              >
+                {animatedStats.totalApplications}
+              </motion.span>
             </div>
             <h3 className="text-white/70 text-sm font-medium">Total Applications</h3>
-            <p className="text-green-400 text-xs mt-1">+3 this week</p>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+              className="text-green-400 text-xs mt-1"
+            >
+              +3 this week
+            </motion.p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10"
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 relative overflow-hidden"
           >
+            {/* Shimmer effect */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.5, delay: 0.7, ease: 'easeInOut' }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            />
             <div className="flex items-center justify-between mb-2">
               <Calendar className="w-8 h-8 text-blue-400" />
-              <span className="text-2xl font-bold text-white">{stats.interviewsScheduled}</span>
+              <motion.span 
+                className="text-2xl font-bold text-white"
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.0, duration: 0.5 }}
+              >
+                {animatedStats.interviewsScheduled}
+              </motion.span>
             </div>
             <h3 className="text-white/70 text-sm font-medium">Interviews Scheduled</h3>
-            <p className="text-blue-400 text-xs mt-1">2 this week</p>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.4 }}
+              className="text-blue-400 text-xs mt-1"
+            >
+              2 this week
+            </motion.p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10"
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 relative overflow-hidden"
           >
+            {/* Shimmer effect */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.5, delay: 0.9, ease: 'easeInOut' }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            />
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="w-8 h-8 text-green-400" />
-              <span className="text-2xl font-bold text-white">{stats.responseRate}%</span>
+              <motion.span 
+                className="text-2xl font-bold text-white"
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+              >
+                {animatedStats.responseRate}%
+              </motion.span>
             </div>
             <h3 className="text-white/70 text-sm font-medium">Response Rate</h3>
-            <p className="text-green-400 text-xs mt-1">+5% from last month</p>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6 }}
+              className="text-green-400 text-xs mt-1"
+            >
+              +5% from last month
+            </motion.p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10"
+            className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 relative overflow-hidden"
           >
+            {/* Shimmer effect */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{ duration: 1.5, delay: 1.1, ease: 'easeInOut' }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            />
             <div className="flex items-center justify-between mb-2">
               <Eye className="w-8 h-8 text-cyan-400" />
-              <span className="text-2xl font-bold text-white">{stats.profileViews}</span>
+              <motion.span 
+                className="text-2xl font-bold text-white"
+                initial={{ scale: 1.2, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.4, duration: 0.5 }}
+              >
+                {animatedStats.profileViews}
+              </motion.span>
             </div>
             <h3 className="text-white/70 text-sm font-medium">Profile Views</h3>
-            <p className="text-cyan-400 text-xs mt-1">+12 this week</p>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8 }}
+              className="text-cyan-400 text-xs mt-1"
+            >
+              +12 this week
+            </motion.p>
           </motion.div>
         </div>
 
@@ -294,9 +447,19 @@ const CandidateDashboardPage = () => {
                     <div className="mt-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-white/50">Application Progress</span>
-                        <span className="text-xs text-white/70">{getProgressValue(job.stage)}%</span>
+                        <motion.span 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 1.0 + index * 0.1 }}
+                          className="text-xs text-white/70"
+                        >
+                          {getProgressValue(job.stage)}%
+                        </motion.span>
                       </div>
-                      <Progress value={getProgressValue(job.stage)} className="h-2" />
+                      <AnimatedProgress 
+                        value={getProgressValue(job.stage)} 
+                        delay={1000 + index * 100}
+                      />
                     </div>
                   </motion.div>
                 ))}
@@ -323,18 +486,50 @@ const CandidateDashboardPage = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8 + index * 0.1 }}
-                    className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-lg p-4 border border-purple-500/30"
+                    className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-lg p-4 border border-purple-500/30 relative overflow-hidden"
                   >
-                    <p className="text-white/90 text-sm leading-relaxed">{prompt}</p>
+                    {/* Subtle pulse animation */}
+                    <motion.div
+                      initial={{ opacity: 0.3 }}
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ 
+                        duration: 3, 
+                        repeat: Infinity, 
+                        delay: index * 0.5 
+                      }}
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg"
+                    />
+                    <motion.p 
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 1.0 + index * 0.1 }}
+                      className="text-white/90 text-sm leading-relaxed relative z-10"
+                    >
+                      {prompt}
+                    </motion.p>
                   </motion.div>
                 ))}
               </div>
-              <Button
-                onClick={() => navigate('/hub?openAICoach=true')}
-                className="w-full mt-4 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white"
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.4 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                Open AI Coach
-              </Button>
+                <Button
+                  onClick={() => navigate('/hub?openAICoach=true')}
+                  className="w-full mt-4 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white relative overflow-hidden"
+                >
+                  <motion.div
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  />
+                  <span className="relative z-10">Open AI Coach</span>
+                </Button>
+              </motion.div>
             </motion.div>
 
             {/* Quick Actions */}
@@ -346,34 +541,28 @@ const CandidateDashboardPage = () => {
             >
               <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
               <div className="space-y-3">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Update Profile
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <Target className="w-4 h-4 mr-2" />
-                  Browse Jobs
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Check Messages
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <Award className="w-4 h-4 mr-2" />
-                  View Certificates
-                </Button>
+                {[
+                  { icon: User, text: "Update Profile" },
+                  { icon: Target, text: "Browse Jobs" },
+                  { icon: MessageSquare, text: "Check Messages" },
+                  { icon: Award, text: "View Certificates" }
+                ].map((action, index) => (
+                  <motion.div
+                    key={action.text}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.1 + index * 0.1 }}
+                    whileHover={{ x: 5 }}
+                  >
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    >
+                      <action.icon className="w-4 h-4 mr-2" />
+                      {action.text}
+                    </Button>
+                  </motion.div>
+                ))}
               </div>
             </motion.div>
           </div>

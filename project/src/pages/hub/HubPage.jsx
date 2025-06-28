@@ -74,16 +74,20 @@ const mockCompanyProfile = {
 // AnimatedMetric component for dashboard
 const AnimatedMetric = ({ label, value, icon, delay }) => {
   const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+  
   React.useEffect(() => {
     if (typeof value === 'number') {
+      setIsAnimating(true);
       let start = 0;
-      const duration = 800;
+      const duration = 1200;
       const step = Math.ceil(value / (duration / 16));
       let raf;
       const animate = () => {
         start += step;
         if (start >= value) {
           setDisplayValue(value);
+          setIsAnimating(false);
         } else {
           setDisplayValue(start);
           raf = requestAnimationFrame(animate);
@@ -96,15 +100,119 @@ const AnimatedMetric = ({ label, value, icon, delay }) => {
       };
     }
   }, [value, delay]);
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.6 }} className="bg-white/10 rounded-lg p-4 flex flex-col items-center shadow-lg">
-      <div className="mb-1">{icon}</div>
-      <div className="text-2xl font-bold text-white">
-        {typeof value === 'number' ? displayValue : value}
-      </div>
-      <div className="text-xs text-white/70 mt-1">{label}</div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20, scale: 0.9 }} 
+      animate={{ opacity: 1, y: 0, scale: 1 }} 
+      transition={{ delay, duration: 0.6, type: "spring", stiffness: 120, damping: 15 }} 
+      className="bg-white/10 rounded-lg p-4 flex flex-col items-center shadow-lg relative overflow-hidden hover:bg-white/15 transition-colors cursor-pointer"
+    >
+      {/* Animated background shimmer */}
+      <motion.div
+        initial={{ x: '-100%' }}
+        animate={{ x: '200%' }}
+        transition={{ delay: delay + 0.5, duration: 1.5, ease: "easeInOut" }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        style={{ transform: 'skewX(-20deg)' }}
+      />
+      
+      <motion.div 
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ delay: delay + 0.2, duration: 0.8, type: "spring", stiffness: 200 }}
+        className="mb-2 relative z-10"
+      >
+        {icon}
+      </motion.div>
+      
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: delay + 0.4, duration: 0.6 }}
+        className="text-2xl font-bold text-white relative z-10"
+      >
+        <motion.span
+          animate={isAnimating ? { scale: [1, 1.1, 1] } : {}}
+          transition={{ duration: 0.3 }}
+        >
+          {typeof value === 'number' ? displayValue : value}
+        </motion.span>
+      </motion.div>
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: delay + 0.6, duration: 0.4 }}
+        className="text-xs text-white/70 mt-1 relative z-10"
+      >
+        {label}
+      </motion.div>
+      
+      {/* Subtle pulse effect for numbers */}
+      {typeof value === 'number' && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: [0, 1.5, 0], opacity: [0, 0.3, 0] }}
+          transition={{ delay: delay + 0.8, duration: 1, repeat: isAnimating ? Infinity : 0, repeatDelay: 2 }}
+          className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-400/20 to-blue-400/20"
+        />
+      )}
     </motion.div>
   );
+};
+
+// Counter animation hook for candidate dashboard
+const useCounter = (target, delay = 0) => {
+  const [count, setCount] = React.useState(0);
+  
+  React.useEffect(() => {
+    let startTime;
+    let animationId;
+    
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / 1000, 1); // 1 second duration
+      
+      if (typeof target === 'string' && target.includes('%')) {
+        const numericTarget = parseInt(target);
+        setCount(Math.floor(progress * numericTarget));
+      } else if (typeof target === 'number') {
+        setCount(Math.floor(progress * target));
+      } else {
+        setCount(target);
+        return;
+      }
+      
+      if (progress < 1) {
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+    
+    const timeout = setTimeout(() => {
+      animationId = requestAnimationFrame(animate);
+    }, delay);
+    
+    return () => {
+      clearTimeout(timeout);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [target, delay]);
+  
+  return count;
+};
+
+// CounterText component for animated numbers
+const CounterText = ({ target, delay = 0 }) => {
+  const count = useCounter(target, delay);
+  
+  if (typeof target === 'string' && target.includes('%')) {
+    return <>{count}%</>;
+  }
+  
+  return <>{count}</>;
 };
 
 const candidateMenuItems = [
@@ -925,22 +1033,77 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               
               {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-white">24</p>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  transition={{ delay: 0.1, duration: 0.6 }}
+                  className="bg-white/10 rounded-lg p-3 text-center"
+                >
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    <CounterText target={24} delay={400} />
+                  </motion.p>
                   <p className="text-xs text-white/70">Applications</p>
-                </div>
-                <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-white">8</p>
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  className="bg-white/10 rounded-lg p-3 text-center"
+                >
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    <CounterText target={8} delay={500} />
+                  </motion.p>
                   <p className="text-xs text-white/70">Interviews</p>
-                </div>
-                <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-white">73%</p>
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                  className="bg-white/10 rounded-lg p-3 text-center relative overflow-hidden"
+                >
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    <CounterText target="73%" delay={600} />
+                  </motion.p>
                   <p className="text-xs text-white/70">Response Rate</p>
-                </div>
-                <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-white">156</p>
+                  {/* Progress bar background */}
+                  <motion.div 
+                    initial={{ width: 0 }} 
+                    animate={{ width: '73%' }} 
+                    transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-green-400 to-cyan-400 rounded-full"
+                  />
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  className="bg-white/10 rounded-lg p-3 text-center"
+                >
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    <CounterText target={156} delay={700} />
+                  </motion.p>
                   <p className="text-xs text-white/70">Profile Views</p>
-                </div>
+                </motion.div>
               </div>
 
               {/* Recent Applications */}
@@ -1015,14 +1178,67 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
               </div>
               {/* Diversity bar */}
               <div className="mb-6">
-                <p className="text-xs mb-2 text-white/70">Team Diversity</p>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                  className="text-xs mb-2 text-white/70"
+                >
+                  Team Diversity
+                </motion.p>
                 <div className="flex items-center gap-2">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '55%' }} transition={{ delay: 0.7, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 shadow-lg" style={{ width: '55%' }} />
-                  <span className="text-xs text-white/80">55% Women</span>
+                  <div className="relative flex-1">
+                    <div className="h-3 rounded-full bg-white/10 overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0, x: '-100%' }} 
+                        animate={{ width: '55%', x: 0 }} 
+                        transition={{ delay: 0.7, duration: 1.2, ease: "easeOut" }} 
+                        className="h-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 shadow-lg relative"
+                      >
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 1, 0] }}
+                          transition={{ delay: 1.5, duration: 1, repeat: 2 }}
+                          className="absolute inset-0 bg-white/20 rounded-full"
+                        />
+                      </motion.div>
+                    </div>
+                  </div>
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.2, duration: 0.4 }}
+                    className="text-xs text-white/80 font-medium"
+                  >
+                    55% Women
+                  </motion.span>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '40%' }} transition={{ delay: 0.8, duration: 1 }} className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-green-400 shadow-lg" style={{ width: '40%' }} />
-                  <span className="text-xs text-white/80">40% Minorities</span>
+                  <div className="relative flex-1">
+                    <div className="h-3 rounded-full bg-white/10 overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0, x: '-100%' }} 
+                        animate={{ width: '40%', x: 0 }} 
+                        transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }} 
+                        className="h-3 rounded-full bg-gradient-to-r from-blue-400 to-green-400 shadow-lg relative"
+                      >
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 1, 0] }}
+                          transition={{ delay: 1.6, duration: 1, repeat: 2 }}
+                          className="absolute inset-0 bg-white/20 rounded-full"
+                        />
+                      </motion.div>
+                    </div>
+                  </div>
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.3, duration: 0.4 }}
+                    className="text-xs text-white/80 font-medium"
+                  >
+                    40% Minorities
+                  </motion.span>
                 </div>
               </div>
               {/* Recent activity */}
