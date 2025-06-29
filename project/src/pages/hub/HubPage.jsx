@@ -45,6 +45,7 @@ import AI_Prompt from '../../components/AI_Prompt';
 import VerifyCard from '@/components/hub/VerifyCard';
 import { supabase } from '../../supabaseClient'; // adjust path if needed
 import HubBackground from '@/components/hub/HubBackground';
+import BrandedLoader from '../../components/BrandedLoader';
 
 
 // Dashboard metrics config
@@ -935,31 +936,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   // MAIN RETURN (ensure only one return in the component)
   // (Keyboard navigation: visually indicate focus on card stack for accessibility)
   if (loading) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <HubBackground />
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center space-y-4 z-10 relative"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full"
-          />
-          <motion.span 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/80 text-lg font-medium"
-          >
-            Loading your hub...
-          </motion.span>
-        </motion.div>
-      </div>
-    );
+    return <BrandedLoader fullScreen={true} message="Loading your personalized hub..." />;
   }
 
   return (
@@ -1554,7 +1531,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
     }
   }, [userType]);
 
-  if (!userType) return <div className="min-h-screen bg-gradient-to-br from-[#18122B] via-[#251E40] to-[#1A1A2E] flex items-center justify-center text-white">Loading...</div>;
+  if (!userType) return <BrandedLoader fullScreen={true} message="Setting up your workspace..." />;
 
 
   return (

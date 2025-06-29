@@ -17,12 +17,13 @@ import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
 import { AuthProvider, useAuth } from './components/AuthProvider';
+import BrandedLoader from './components/BrandedLoader';
 import API from '@/pages/API.jsx';
 import WaitlistPage from '@/pages/WaitlistPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return null; // or a loading spinner
+  if (loading) return <BrandedLoader fullScreen={true} message="Authenticating..." />;
   if (!user) {
     return <Navigate to="/login" replace />;
   }
