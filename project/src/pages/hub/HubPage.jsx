@@ -541,9 +541,15 @@ const handleAICoachPrompt = async (prompt) => {
     }
   }, [location.search]);
   
+  // Detect mobile for performance optimizations
+  const isMobile = useMemo(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  }, []);
+  
+  // Only use expensive motion values on desktop
   const x = useMotionValue(0);
-  const xSpring = useSpring(x, { stiffness: 300, damping: 50 });
-  const rotate = useTransform(xSpring, [-150, 0, 150], [-25, 0, 25]);
+  const xSpring = isMobile ? { get: () => 0 } : useSpring(x, { stiffness: 300, damping: 50 });
+  const rotate = isMobile ? { get: () => 0 } : useTransform(xSpring, [-150, 0, 150], [-25, 0, 25]);
 
   // Helper function to bring a card to the top of the stack
   const bringCardToTop = (cardId) => {

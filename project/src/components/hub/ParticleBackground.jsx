@@ -23,15 +23,31 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
 
   const currentTheme = themes[theme] || themes.purple;
 
-  // Particle count based on intensity
+  // Detect mobile for performance optimizations
+  const isMobile = useMemo(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  }, []);
+
+  // Particle count based on intensity and device capability
   const particleCount = useMemo(() => {
-    switch (intensity) {
-      case 'low': return 15;
-      case 'medium': return 25;
-      case 'high': return 35;
-      default: return 25;
+    if (isMobile) {
+      // Significantly reduce particles on mobile
+      switch (intensity) {
+        case 'low': return 5;
+        case 'medium': return 8;
+        case 'high': return 12;
+        default: return 8;
+      }
+    } else {
+      // Full particles on desktop
+      switch (intensity) {
+        case 'low': return 15;
+        case 'medium': return 25;
+        case 'high': return 35;
+        default: return 25;
+      }
     }
-  }, [intensity]);
+  }, [intensity, isMobile]);
 
   // Update dimensions on resize
   useEffect(() => {
@@ -88,19 +104,27 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
             opacity: particle.opacity
           }}
           animate={{
-            x: [
+            x: isMobile ? [
+              particle.x,
+              particle.x + particle.velocity.x * 100,
+              particle.x
+            ] : [
               particle.x,
               particle.x + particle.velocity.x * 200,
               particle.x + particle.velocity.x * 400,
               particle.x
             ],
-            y: [
+            y: isMobile ? [
+              particle.y,
+              particle.y + particle.velocity.y * 100,
+              particle.y
+            ] : [
               particle.y,
               particle.y + particle.velocity.y * 200,
               particle.y + particle.velocity.y * 400,
               particle.y
             ],
-            opacity: [
+            opacity: isMobile ? particle.opacity : [
               particle.opacity,
               particle.opacity * 0.5,
               particle.opacity * 0.8,
@@ -108,49 +132,51 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
             ]
           }}
           transition={{
-            duration: 25 + Math.random() * 15,
+            duration: isMobile ? 15 : 25 + Math.random() * 15,
             repeat: Infinity,
             ease: "linear",
-            times: [0, 0.33, 0.66, 1]
+            times: isMobile ? [0, 0.5, 1] : [0, 0.33, 0.66, 1]
           }}
         />
       ))}
 
-      {/* Connecting lines between nearby particles */}
-      <svg className="absolute inset-0 w-full h-full">
-        {particles.map((particle, i) =>
-          particles.slice(i + 1).map((otherParticle, j) => {
-            const distance = Math.sqrt(
-              Math.pow(particle.x - otherParticle.x, 2) +
-              Math.pow(particle.y - otherParticle.y, 2)
-            );
-            
-            if (distance < 120) {
-              return (
-                <motion.line
-                  key={`${i}-${j}`}
-                  x1={particle.x}
-                  y1={particle.y}
-                  x2={otherParticle.x}
-                  y2={otherParticle.y}
-                  stroke={particle.color}
-                  strokeWidth="0.5"
-                  opacity={Math.max(0, 0.2 - distance / 600)}
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut"
-                  }}
-                />
+      {/* Connecting lines between nearby particles - disabled on mobile for performance */}
+      {!isMobile && (
+        <svg className="absolute inset-0 w-full h-full">
+          {particles.map((particle, i) =>
+            particles.slice(i + 1).map((otherParticle, j) => {
+              const distance = Math.sqrt(
+                Math.pow(particle.x - otherParticle.x, 2) +
+                Math.pow(particle.y - otherParticle.y, 2)
               );
-            }
-            return null;
-          })
-        )}
-      </svg>
+              
+              if (distance < 120) {
+                return (
+                  <motion.line
+                    key={`${i}-${j}`}
+                    x1={particle.x}
+                    y1={particle.y}
+                    x2={otherParticle.x}
+                    y2={otherParticle.y}
+                    stroke={particle.color}
+                    strokeWidth="0.5"
+                    opacity={Math.max(0, 0.2 - distance / 600)}
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut"
+                    }}
+                  />
+                );
+              }
+              return null;
+            })
+          )}
+        </svg>
+      )}
     </div>
   );
 };
