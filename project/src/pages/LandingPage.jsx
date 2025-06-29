@@ -45,7 +45,7 @@ const LandingPage = () => {
            className="block transition-all duration-300 hover:shadow-2xl">
           <img src="https://storage.bolt.army/white_circle_360x360.png" 
                alt="Built with Bolt.new badge" 
-               className="w-20 h-20 md:w-28 md:h-28 rounded-full shadow-lg bolt-badge-intro"
+               className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full shadow-lg bolt-badge-intro"
                onAnimationEnd={(e) => e.target.classList.add('animated')} />
         </a>
       </div>
