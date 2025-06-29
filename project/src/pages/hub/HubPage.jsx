@@ -476,29 +476,57 @@ const handleAICoachPrompt = async (prompt) => {
 
   useEffect(() => {
     async function fetchUserType() {
-      setLoading(true);
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        setLoading(false);
-        return;
-      }
-      setUserEmail(user.email || '');
-      let type = user.user_metadata?.userType;
-      // Try to get userType from query param if not in metadata
-      if (!type) {
-        const params = new URLSearchParams(location.search);
-        const paramType = params.get('userType');
-        if (paramType === 'candidate' || paramType === 'employer') {
-          type = paramType;
-          // Persist to Supabase user_metadata
-          await supabase.auth.updateUser({ data: { userType: type } });
+      try {
+        // Check for cached user first to reduce loading time
+        const cachedUser = sessionStorage.getItem('userType');
+        const cachedEmail = sessionStorage.getItem('userEmail');
+        
+        if (cachedUser && cachedEmail) {
+          setUserType(cachedUser);
+          setUserEmail(cachedEmail);
+          setMenuItems(cachedUser === 'employer' ? employerMenuItems : candidateMenuItems);
+          setLoading(false);
         }
+
+        // Always verify with Supabase for security
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (!user) {
+          // Clear cache and redirect if no user
+          sessionStorage.removeItem('userType');
+          sessionStorage.removeItem('userEmail');
+          navigate('/login');
+          return;
+        }
+
+        const userEmail = user.email || '';
+        let type = user.user_metadata?.userType;
+        
+        // Try to get userType from query param if not in metadata
+        if (!type) {
+          const params = new URLSearchParams(location.search);
+          const paramType = params.get('userType');
+          if (paramType === 'candidate' || paramType === 'employer') {
+            type = paramType;
+            // Persist to Supabase user_metadata
+            await supabase.auth.updateUser({ data: { userType: type } });
+          }
+        }
+
+        // Update state and cache
+        setUserType(type);
+        setUserEmail(userEmail);
+        setMenuItems(type === 'employer' ? employerMenuItems : candidateMenuItems);
+        
+        // Cache for faster subsequent loads
+        if (type) sessionStorage.setItem('userType', type);
+        if (userEmail) sessionStorage.setItem('userEmail', userEmail);
+        
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        navigate('/login');
+      } finally {
+        setLoading(false);
       }
-      setUserType(type);
-      // Set menu items
-      setMenuItems(type === 'employer' ? employerMenuItems : candidateMenuItems);
-      setLoading(false);
     }
     fetchUserType();
   }, [navigate, location.search]);
@@ -902,8 +930,28 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
   // (Keyboard navigation: visually indicate focus on card stack for accessibility)
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span>Loading...</span>
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <HubBackground />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center space-y-4 z-10 relative"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full"
+          />
+          <motion.span 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-white/80 text-lg font-medium"
+          >
+            Loading your hub...
+          </motion.span>
+        </motion.div>
       </div>
     );
   }
