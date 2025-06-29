@@ -1648,7 +1648,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
         </motion.header>
       </AnimatePresence>
 
-      <div ref={cardStackRef} className="relative w-[320px] h-[450px] flex items-center justify-center" style={{ perspective: '1000px' }}>
+      <div ref={cardStackRef} className="relative w-[320px] h-[450px] flex items-center justify-center overflow-visible" style={{ perspective: '1000px' }}>
         <AnimatePresence initial={false}>
           {memoizedCards.map((item, index) => {
             const isTopCard = index === memoizedCards.length - 1;
@@ -1657,7 +1657,7 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
             return (
               <motion.div
                 key={item.id}
-                className="absolute w-[320px] h-[400px] rounded-2xl shadow-2xl cursor-grab overflow-hidden glass-effect border border-white/20 text-white"
+                className="absolute w-[320px] h-[400px] rounded-2xl shadow-2xl cursor-grab overflow-visible glass-effect border border-white/20 text-white"
                 style={{
                   x: isTopCard ? xSpring : 0,
                   rotate: isTopCard && !isFlipped ? rotate : `${item.randomRotation}deg`,
@@ -1702,11 +1702,11 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                   transition={{ duration: 0.6, type: "spring", stiffness: 200, damping: 25 }}
                 >
                   {/* Front Face */}
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden`}>
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden overflow-visible`}>
                     {/* Notification Badge */}
                     <NotificationBadge 
                       count={notifications[item.id] || 0}
-                      className="z-30"
+                      className="z-40"
                     />
                     
                     <div className="flex flex-col items-center text-center">

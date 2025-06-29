@@ -12,13 +12,13 @@ const NotificationBadge = ({ count, className = '' }) => {
         exit={{ scale: 0, opacity: 0 }}
         whileHover={{ scale: 1.1 }}
         className={`
-          absolute -top-2 -right-2 
+          absolute -top-1 -right-1 
           bg-red-500 text-white 
           rounded-full flex items-center justify-center
           text-xs font-bold
           shadow-lg border-2 border-white
-          min-w-[20px] h-5 px-1
-          z-20
+          min-w-[24px] h-6 px-2
+          z-40
           ${className}
         `}
       >
