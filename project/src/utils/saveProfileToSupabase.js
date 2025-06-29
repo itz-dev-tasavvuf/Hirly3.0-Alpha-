@@ -12,7 +12,20 @@ export async function saveProfileToSupabase(profileData) {
   }
 
   const { id, email } = user;
-  // Prepare data to match your Supabase table columns
+  
+  // 1. Update user metadata in Supabase Auth
+  const { error: metadataError } = await supabase.auth.updateUser({
+    data: { 
+      userType: profileData.userType?.toLowerCase().includes('candidate') ? 'candidate' : 'employer'
+    }
+  });
+  
+  if (metadataError) {
+    console.error('Error updating user metadata:', metadataError);
+    return { error: metadataError };
+  }
+  
+  // 2. Prepare data to match your Supabase table columns
   const data = {
     id,
     email,
@@ -26,6 +39,7 @@ export async function saveProfileToSupabase(profileData) {
     resume: profileData.resumeUrl || null,
   };
 
+  // 3. Save to profiles table
   const { error } = await supabase.from('profiles').upsert(data);
   return { error };
 }
