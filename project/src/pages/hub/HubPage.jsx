@@ -250,7 +250,7 @@ const HubPage = () => {
 };
 
 const HubPageContent = () => {
-  const { notifications, clearNotifications } = useNotifications();
+  const { notifications, clearNotifications, addMatchNotifications } = useNotifications();
   
   // ...existing state declarations...
   const [loading, setLoading] = useState(true);
@@ -610,6 +610,16 @@ const handleAICoachPrompt = async (prompt) => {
     } else if (item.action === 'openSwipeCandidates') {
       setSwipeAppContentType('candidates');
       setSwipeAppOpen(true);
+    } else if (item.id === 'matches') {
+      // Special handling for matches card
+      const matchCount = notifications.matches || 0;
+      setModalContent({ 
+        title: item.title, 
+        description: matchCount > 0 
+          ? `You have ${matchCount} new match${matchCount !== 1 ? 'es' : ''} waiting! These are profiles that liked you back.`
+          : item.description
+      });
+      setGenericModalOpen(true);
     } else if (item.action === 'openAICoach') {
       setAiCoachOpen(true);
     } else if (item.action === 'openCandidateDashboard') {
@@ -618,10 +628,23 @@ const handleAICoachPrompt = async (prompt) => {
       setModalContent({ title: item.title, description: item.description });
       setGenericModalOpen(true);
     }
-    toast({
-      title: `${item.title} Clicked`,
-      description: item.action ? `Opening ${item.title}...` : "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
-    });
+    
+    // Special toast message for matches
+    if (item.id === 'matches') {
+      const matchCount = notifications.matches || 0;
+      toast({
+        title: `${matchCount > 0 ? '🎉 ' : ''}${item.title} Opened`,
+        description: matchCount > 0 
+          ? `Viewing your ${matchCount} new match${matchCount !== 1 ? 'es' : ''}!`
+          : "Check out your profile matches!",
+        className: matchCount > 0 ? "bg-green-600 border-green-500" : undefined
+      });
+    } else {
+      toast({
+        title: `${item.title} Clicked`,
+        description: item.action ? `Opening ${item.title}...` : "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      });
+    }
   };
 
   // Swiping left advances, swiping right rewinds
@@ -636,6 +659,20 @@ const handleAICoachPrompt = async (prompt) => {
       return prev;
     });
     x.set(0);
+    
+    // Simulate match generation when swiping
+    // 30% chance of getting 1-2 new matches when swiping left (showing interest)
+    if (direction === 'left' && Math.random() < 0.3) {
+      const newMatches = Math.floor(Math.random() * 2) + 1; // 1-2 matches
+      setTimeout(() => {
+        addMatchNotifications(newMatches);
+        toast({
+          title: `🎉 New Match${newMatches > 1 ? 'es' : ''}!`,
+          description: `You have ${newMatches} new match${newMatches > 1 ? 'es' : ''} waiting for you!`,
+          className: "bg-green-600 border-green-500"
+        });
+      }, 1500); // Delay to make it feel more realistic
+    }
   };
 
   const handleLogout = () => {
