@@ -31,12 +31,12 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
   // Particle count based on intensity and device capability
   const particleCount = useMemo(() => {
     if (isMobile) {
-      // Moderate reduction on mobile (still keep some magic!)
+      // Significantly reduce particles on mobile for optimal performance
       switch (intensity) {
-        case 'low': return 8;
-        case 'medium': return 12;
-        case 'high': return 16;
-        default: return 12;
+        case 'low': return 5;
+        case 'medium': return 8;
+        case 'high': return 12;
+        default: return 8;
       }
     } else {
       // Full particles on desktop
@@ -106,7 +106,7 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
           animate={{
             x: isMobile ? [
               particle.x,
-              particle.x + particle.velocity.x * 150, // Slightly more movement
+              particle.x + particle.velocity.x * 100,
               particle.x
             ] : [
               particle.x,
@@ -116,7 +116,7 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
             ],
             y: isMobile ? [
               particle.y,
-              particle.y + particle.velocity.y * 150, // Slightly more movement
+              particle.y + particle.velocity.y * 100,
               particle.y
             ] : [
               particle.y,
@@ -124,11 +124,7 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
               particle.y + particle.velocity.y * 400,
               particle.y
             ],
-            opacity: isMobile ? [
-              particle.opacity,
-              particle.opacity * 0.7, // Bring back some opacity animation
-              particle.opacity
-            ] : [
+            opacity: isMobile ? particle.opacity : [
               particle.opacity,
               particle.opacity * 0.5,
               particle.opacity * 0.8,
@@ -136,7 +132,7 @@ const ParticleBackground = ({ intensity = 'medium', theme = 'purple' }) => {
             ]
           }}
           transition={{
-            duration: isMobile ? 18 : 25 + Math.random() * 15, // Slightly longer for smoother feel
+            duration: isMobile ? 15 : 25 + Math.random() * 15,
             repeat: Infinity,
             ease: "linear",
             times: isMobile ? [0, 0.5, 1] : [0, 0.33, 0.66, 1]

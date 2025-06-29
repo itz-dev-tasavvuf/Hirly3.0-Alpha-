@@ -546,12 +546,10 @@ const handleAICoachPrompt = async (prompt) => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
   }, []);
   
-  // Only use expensive motion values on desktop, but keep basic ones for mobile
+  // Only use expensive motion values on desktop
   const x = useMotionValue(0);
-  const xSpring = isMobile ? x : useSpring(x, { stiffness: 300, damping: 50 });
-  const rotate = isMobile ? 
-    useTransform(x, [-150, 0, 150], [-15, 0, 15]) : // Lighter rotation on mobile
-    useTransform(xSpring, [-150, 0, 150], [-25, 0, 25]);
+  const xSpring = isMobile ? { get: () => 0 } : useSpring(x, { stiffness: 300, damping: 50 });
+  const rotate = isMobile ? { get: () => 0 } : useTransform(xSpring, [-150, 0, 150], [-25, 0, 25]);
 
   // Helper function to bring a card to the top of the stack
   const bringCardToTop = (cardId) => {
