@@ -476,28 +476,27 @@ const handleAICoachPrompt = async (prompt) => {
 
   useEffect(() => {
     async function fetchUserType() {
-      try {
-        // Check for cached user first to reduce loading time
-        const cachedUser = sessionStorage.getItem('userType');
-        const cachedEmail = sessionStorage.getItem('userEmail');
-        
-        if (cachedUser && cachedEmail) {
-          setUserType(cachedUser);
-          setUserEmail(cachedEmail);
-          setMenuItems(cachedUser === 'employer' ? employerMenuItems : candidateMenuItems);
-          setLoading(false);
-        }
+      setLoading(true);
+      console.log('🔍 Starting auth check...');
+      
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.log('⚠️ Auth check timeout, redirecting to login');
+        setLoading(false);
+        navigate('/login');
+      }, 10000); // 10 second timeout
 
-        // Always verify with Supabase for security
+      try {
         const { data: { user }, error } = await supabase.auth.getUser();
+        clearTimeout(timeoutId);
+        
         if (!user) {
-          // Clear cache and redirect if no user
-          sessionStorage.removeItem('userType');
-          sessionStorage.removeItem('userEmail');
+          console.log('❌ No user found, redirecting to login');
           navigate('/login');
           return;
         }
 
+        console.log('✅ User found:', user.email);
         const userEmail = user.email || '';
         let type = user.user_metadata?.userType;
         
@@ -507,24 +506,25 @@ const handleAICoachPrompt = async (prompt) => {
           const paramType = params.get('userType');
           if (paramType === 'candidate' || paramType === 'employer') {
             type = paramType;
+            console.log('📝 Setting user type from URL param:', type);
             // Persist to Supabase user_metadata
             await supabase.auth.updateUser({ data: { userType: type } });
           }
         }
 
-        // Update state and cache
+        console.log('👤 User type:', type);
+        
+        // Update state
         setUserType(type);
         setUserEmail(userEmail);
         setMenuItems(type === 'employer' ? employerMenuItems : candidateMenuItems);
         
-        // Cache for faster subsequent loads
-        if (type) sessionStorage.setItem('userType', type);
-        if (userEmail) sessionStorage.setItem('userEmail', userEmail);
-        
       } catch (error) {
-        console.error('Auth check failed:', error);
+        clearTimeout(timeoutId);
+        console.error('❌ Auth check failed:', error);
         navigate('/login');
       } finally {
+        console.log('✅ Auth check complete, setting loading to false');
         setLoading(false);
       }
     }
