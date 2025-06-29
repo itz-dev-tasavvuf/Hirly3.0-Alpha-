@@ -105,14 +105,6 @@ const Navigation = () => {
               <Link to="/pricing" onClick={closeMobileMenu} className="text-gray-300 hover:text-white transition-colors text-left py-2">
                 Pricing
               </Link>
-              <Link to="/hub-auth" onClick={closeMobileMenu} className="w-full">
-                <Button 
-                  variant="outline" 
-                  className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20 w-full flex items-center justify-center"
-                >
-                  <Briefcase className="mr-2 h-4 w-4" /> Hub
-                </Button>
-              </Link>
               <Link to="/login" onClick={closeMobileMenu} className="w-full">
                 <Button 
                   variant="outline" 
