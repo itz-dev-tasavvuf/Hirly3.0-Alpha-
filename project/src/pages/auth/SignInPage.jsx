@@ -96,11 +96,13 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-2">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="absolute top-4 left-4">
         <Link to="/">
-          <Button variant="ghost" className="text-white hover:bg-white/10">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+          <Button variant="ghost" className="text-white hover:bg-white/10 text-sm">
+            <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4" /> 
+            <span className="hidden sm:inline">Back to Home</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </Link>
       </div>
@@ -108,75 +110,76 @@ const SignInPage = () => {
         initial={{ opacity: 0, y: -50, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5 }}
+        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl"
       >
-        <Card className="w-[600px] max-w-2xl glass-effect border-purple-500/20 shadow-2xl shadow-purple-500/10 py-2">
-          <CardHeader className="text-center">
+        <Card className="w-full glass-effect border-purple-500/20 shadow-2xl shadow-purple-500/10 py-2">
+          <CardHeader className="text-center px-4 sm:px-6">
             <div className="mx-auto mb-2">
-              <Link to="/" className="text-4xl font-bold gradient-text">Hirly</Link>
+              <Link to="/" className="text-3xl sm:text-4xl font-bold gradient-text">Hirly</Link>
             </div>
-            <CardTitle className="text-3xl font-bold text-white">Welcome Back</CardTitle>
-            <CardDescription className="text-gray-300">Sign in to continue your journey.</CardDescription>
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-white">Welcome Back</CardTitle>
+            <CardDescription className="text-gray-300 text-sm sm:text-base">Sign in to continue your journey.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">{/* ... existing code ... */}
             {/* User type toggle */}
-            <div className="flex justify-center gap-4 mb-4">
+            <div className="flex justify-center gap-2 sm:gap-4 mb-4">
               <button
                 type="button"
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 ${userType === 'candidate' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
+                className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors duration-150 flex-1 max-w-[120px] ${userType === 'candidate' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
                 onClick={() => setUserType('candidate')}
               >
                 Candidate
               </button>
               <button
                 type="button"
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 ${userType === 'employer' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
+                className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors duration-150 flex-1 max-w-[120px] ${userType === 'employer' ? 'bg-purple-600 text-white shadow' : 'bg-slate-800/50 text-gray-300 border border-slate-700'}`}
                 onClick={() => setUserType('employer')}
               >
                 Employer
               </button>
             </div>
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-300">Email</Label>
+            <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
+              <div className="space-y-1 sm:space-y-2">
+                <Label htmlFor="email" className="text-gray-300 text-sm">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input id="email" name="email" type="email" placeholder="you@example.com" required className="bg-slate-800/50 border-slate-700 text-white pl-10" disabled={loading} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required className="bg-slate-800/50 border-slate-700 text-white pl-9 sm:pl-10 text-sm sm:text-base h-10 sm:h-11" disabled={loading} />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-gray-300">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">
+                  <Label htmlFor="password" className="text-gray-300 text-sm">Password</Label>
+                  <Link to="/forgot-password" className="text-xs sm:text-sm text-purple-400 hover:text-purple-300 hover:underline">
                     Forgot password?
                   </Link>
                 </div>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input id="password" name="password" type="password" required className="bg-slate-800/50 border-slate-700 text-white pl-10" disabled={loading} />
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  <Input id="password" name="password" type="password" required className="bg-slate-800/50 border-slate-700 text-white pl-9 sm:pl-10 text-sm sm:text-base h-10 sm:h-11" disabled={loading} />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 text-lg glow-effect" disabled={loading}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2.5 sm:py-3 text-base sm:text-lg glow-effect mt-4 sm:mt-6" disabled={loading}>
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
-            <div className="flex items-center my-4">
-  <span className="flex-grow border-t border-slate-700"></span>
-  <span className="mx-4 text-gray-400 text-sm">Or continue with</span>
-  <span className="flex-grow border-t border-slate-700"></span>
-</div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2" onClick={handleGoogleSignIn}>
-                <GoogleIcon />
+            <div className="flex items-center my-3 sm:my-4">
+              <span className="flex-grow border-t border-slate-700"></span>
+              <span className="mx-2 sm:mx-4 text-gray-400 text-xs sm:text-sm whitespace-nowrap">Or continue with</span>
+              <span className="flex-grow border-t border-slate-700"></span>
+            </div>
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-4">
+              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 text-sm sm:text-base" onClick={handleGoogleSignIn} disabled={loading}>
+                <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 Google
               </Button>
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2" onClick={() => handleSocialLogin('Apple')}>
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="inline-block align-middle"><path d="M16.68 13.91c.01-2.12 1.74-3.13 1.81-3.17-1-1.47-2.54-1.67-3.09-1.7-1.32-.13-2.58.77-3.25.77-.67 0-1.7-.75-2.8-.73-1.44.02-2.77.84-3.51 2.13-1.5 2.6-.39 6.45 1.08 8.56.71 1.04 1.56 2.2 2.68 2.16 1.08-.04 1.49-.7 2.8-.7 1.31 0 1.67.7 2.81.68 1.16-.02 1.88-1.05 2.58-2.09.82-1.2 1.16-2.36 1.17-2.42-.03-.01-2.24-.86-2.25-3.41zm-2.23-6.29c.6-.72 1-1.71.89-2.7-.86.04-1.9.57-2.52 1.29-.55.63-1.04 1.64-.86 2.6.91.07 1.85-.46 2.49-1.19z"/></svg>
-  Apple
-</Button>
+              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 text-sm sm:text-base" onClick={() => handleSocialLogin('Apple')} disabled={loading}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="inline-block align-middle sm:w-5 sm:h-5"><path d="M16.68 13.91c.01-2.12 1.74-3.13 1.81-3.17-1-1.47-2.54-1.67-3.09-1.7-1.32-.13-2.58.77-3.25.77-.67 0-1.7-.75-2.8-.73-1.44.02-2.77.84-3.51 2.13-1.5 2.6-.39 6.45 1.08 8.56.71 1.04 1.56 2.2 2.68 2.16 1.08-.04 1.49-.7 2.8-.7 1.31 0 1.67.7 2.81.68 1.16-.02 1.88-1.05 2.58-2.09.82-1.2 1.16-2.36 1.17-2.42-.03-.01-2.24-.86-2.25-3.41zm-2.23-6.29c.6-.72 1-1.71.89-2.7-.86.04-1.9.57-2.52 1.29-.55.63-1.04 1.64-.86 2.6.91.07 1.85-.46 2.49-1.19z"/></svg>
+                Apple
+              </Button>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="mt-4 text-center text-gray-400 text-sm">
+          <CardFooter className="flex justify-center px-4 sm:px-6">
+            <p className="mt-2 sm:mt-4 text-center text-gray-400 text-xs sm:text-sm">
               Don&apos;t have an account?{' '}
               <Link to="/onboarding" className="text-pink-400 hover:underline font-semibold">
                 Sign Up
