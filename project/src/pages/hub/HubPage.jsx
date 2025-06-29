@@ -46,6 +46,8 @@ import VerifyCard from '@/components/hub/VerifyCard';
 import { supabase } from '../../supabaseClient'; // adjust path if needed
 import HubBackground from '@/components/hub/HubBackground';
 import BrandedLoader from '../../components/BrandedLoader';
+import { NotificationProvider, useNotifications } from '../../contexts/NotificationContext';
+import NotificationBadge from '../../components/NotificationBadge';
 
 
 // Dashboard metrics config
@@ -240,6 +242,16 @@ const employerMenuItems = [
 ];
 
 const HubPage = () => {
+  return (
+    <NotificationProvider>
+      <HubPageContent />
+    </NotificationProvider>
+  );
+};
+
+const HubPageContent = () => {
+  const { notifications, clearNotifications } = useNotifications();
+  
   // ...existing state declarations...
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -564,6 +576,10 @@ const handleAICoachPrompt = async (prompt) => {
   const handleCardClick = (item, fromNavMenu = false) => {
   // Prevent flipping if expiration modal is open
   if (isExpirationModalOpen) return;
+    
+    // Clear notifications for this item
+    clearNotifications(item.id);
+    
     // Close navigation menu when any item is clicked from nav menu
     if (fromNavMenu) {
       setIsNavMenuOpen(false);
@@ -1687,6 +1703,12 @@ if (!isExpirationModalOpen) setFlippedCardId(null); }}
                 >
                   {/* Front Face */}
                   <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} p-6 flex flex-col justify-between backface-hidden`}>
+                    {/* Notification Badge */}
+                    <NotificationBadge 
+                      count={notifications[item.id] || 0}
+                      className="z-30"
+                    />
+                    
                     <div className="flex flex-col items-center text-center">
                       <item.icon className="w-24 h-24 mb-6 opacity-90" />
                       {item.id === 'verify_algorand' ? (
