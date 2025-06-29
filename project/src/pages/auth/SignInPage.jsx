@@ -57,11 +57,8 @@ const SignInPage = () => {
       setLoading(true);
       console.log('Starting Google sign-in...');
       
-      // Use hardcoded Netlify domain for production, fallback to dynamic for local dev
-      const isProduction = window.location.hostname !== 'localhost';
-      const redirectUrl = isProduction 
-        ? 'https://hirly.netlify.app/hub' 
-        : `${window.location.origin}/hub`;
+      // Always use Netlify domain for production, even if testing
+      const redirectUrl = 'https://hirly.netlify.app/hub';
       
       console.log('Redirect URL:', redirectUrl);
       
