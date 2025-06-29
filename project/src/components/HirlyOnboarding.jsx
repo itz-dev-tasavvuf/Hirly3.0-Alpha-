@@ -11,6 +11,10 @@ import { saveProfileToSupabase } from "../utils/saveProfileToSupabase";
 import { supabase } from "../supabaseClient";
 
 const HirlyOnboarding = () => {
+  // Check if user came from Google sign-in
+  const [isGoogleAuth, setIsGoogleAuth] = useState(false);
+  const [googleUserData, setGoogleUserData] = useState(null);
+  
   // ...existing state
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupError, setSignupError] = useState(null);
@@ -29,14 +33,79 @@ const HirlyOnboarding = () => {
   const [userProfile, setUserProfile] = useState({});
   const [isComplete, setIsComplete] = useState(false);
   const [currentOptions, setCurrentOptions] = useState([]);
-  const [steps, setSteps] = useState(() => getStepConfig(undefined)); // Only declaration of steps, do not redeclare below
+  const [steps, setSteps] = useState(() => getStepConfig(undefined, false)); // Only declaration of steps, do not redeclare below
   const [textInputValue, setTextInputValue] = useState("");
   
   const chatEndRef = useRef(null);
 
+  // Check for Google authentication on component mount
+  useEffect(() => {
+    const checkGoogleAuth = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFromGoogle = urlParams.get('google') === 'true';
+      
+      if (isFromGoogle) {
+        // Get the current user from Supabase
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && !error) {
+          setIsGoogleAuth(true);
+          setGoogleUserData(user);
+          
+          // Pre-populate user profile with Google data
+          setUserProfile(prev => ({
+            ...prev,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email.split('@')[0]
+          }));
+          
+          // Skip to user type selection step  
+          const newSteps = getStepConfig(undefined, true);
+          setSteps(newSteps);
+          const userTypeStepIndex = newSteps.findIndex(step => step.id === 'userType');
+          if (userTypeStepIndex >= 0) {
+            setStep(userTypeStepIndex);
+            setMessages([
+              {
+                type: 'bot',
+                text: `Welcome ${user.user_metadata?.full_name || 'there'}! 🎉 I'm Heidi, your AI guide at Hirly. Since you're already signed in with Google, let's jump right into setting up your profile!`,
+                delay: 1200
+              }
+            ]);
+          }
+        }
+      }
+    };
+    
+    checkGoogleAuth();
+  }, []);
+
   // Helper to get step config based on userType
-  function getStepConfig(userType) {
-    const baseSteps = [
+  function getStepConfig(userType, skipAuth = false) {
+    // Base steps without auth for Google users
+    const baseStepsWithoutAuth = [
+      {
+        id: 'welcome',
+        type: 'bot',
+        text: "Hey there! I'm Heidi, your friendly AI guide at Hirly! 🎉 I'm here to help you set up your profile so you can start connecting with the perfect matches. Ready to dive in?",
+        delay: 1200
+      },
+      {
+        id: 'userType',
+        type: 'option',
+        text: "Are you looking to find your next opportunity or hire amazing talent?",
+        options: ["🎯 I'm looking for jobs (Candidate)", "🏢 I'm hiring talent (Employer)"],
+        key: 'userType'
+      },
+      {
+        id: 'askName',
+        type: 'text',
+        text: "Great, tell us your name?",
+        key: 'name',
+      },
+    ];
+    
+    // Base steps with auth for regular users
+    const baseStepsWithAuth = [
       {
         id: 'welcome',
         type: 'bot',
@@ -72,17 +141,20 @@ const HirlyOnboarding = () => {
         text: "Great, tell us your name?",
         key: 'name',
       },
-      // New: Profile picture upload (candidate only)
-      {
-        id: 'profilePic',
-        type: 'file',
-        text: "Want to add a profile picture? (Optional)",
-        key: 'profilePic',
-        accept: 'image/*',
-        skip: true,
-        candidateOnly: true
-      }
     ];
+    
+    const baseSteps = skipAuth ? baseStepsWithoutAuth : baseStepsWithAuth;
+    
+    // Add profile picture step to base steps
+    baseSteps.push({
+      id: 'profilePic',
+      type: 'file',
+      text: "Want to add a profile picture? (Optional)",
+      key: 'profilePic',
+      accept: 'image/*',
+      skip: true,
+      candidateOnly: true
+    });
 
     const candidateSteps = [
       {
@@ -296,7 +368,7 @@ const HirlyOnboarding = () => {
   useEffect(() => {
     if (!userProfile.userType) return;
     // Build new steps array for chosen userType
-    const newSteps = getStepConfig(userProfile.userType);
+    const newSteps = getStepConfig(userProfile.userType, isGoogleAuth);
     setSteps(newSteps);
     // Only update step and options, do NOT reset messages (preserve chat history)
     // Find the index of 'askName' step to jump to after userType selection
@@ -380,31 +452,35 @@ const HirlyOnboarding = () => {
 
   // Save profile to Supabase (with Supabase Auth signup)
   const handleSaveProfile = async () => {
-    // 1. Sign up user with Supabase Auth using collected email and password
-    console.log("Signing up with profile:", userProfile);
-    if (!userProfile.email || !userProfile.password) {
-      alert('Email and password are required.');
-      return;
-    }
-    // Sign up user
-    const { data, error: signupError } = await supabase.auth.signUp({
-      email: userProfile.email,
-      password: userProfile.password,
-      options: {
-        data: { userType: userProfile.userType && userProfile.userType.toLowerCase() }
-      }
-    });
-    if (signupError) {
-      // Handle duplicate email gracefully
-      if (signupError.message && signupError.message.toLowerCase().includes('already registered')) {
-        setShowProfileModal(false);
-        pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
-        // Optionally, reset step to email step:
-        // setStep(steps.findIndex(s => s.key === 'email'));
+    console.log("Saving profile:", userProfile);
+    
+    // Skip account creation for Google users (already authenticated)
+    if (!isGoogleAuth) {
+      // 1. Sign up user with Supabase Auth using collected email and password
+      if (!userProfile.email || !userProfile.password) {
+        alert('Email and password are required.');
         return;
       }
-      setSignupError('Error creating account: ' + signupError.message);
-      return;
+      // Sign up user
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email: userProfile.email,
+        password: userProfile.password,
+        options: {
+          data: { userType: userProfile.userType && userProfile.userType.toLowerCase() }
+        }
+      });
+      if (signupError) {
+        // Handle duplicate email gracefully
+        if (signupError.message && signupError.message.toLowerCase().includes('already registered')) {
+          setShowProfileModal(false);
+          pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
+          // Optionally, reset step to email step:
+          // setStep(steps.findIndex(s => s.key === 'email'));
+          return;
+        }
+        setSignupError('Error creating account: ' + signupError.message);
+        return;
+      }
     }
 
     // 2. Save profile to Supabase (convert File objects to null or placeholder for now)
@@ -418,6 +494,13 @@ const HirlyOnboarding = () => {
       setSignupError('Error saving profile: ' + error.message);
     } else {
       setIsComplete(true);
+      
+      // For Google users, redirect to hub after a short delay
+      if (isGoogleAuth) {
+        setTimeout(() => {
+          navigate('/hub');
+        }, 2000); // 2 second delay to show completion message
+      }
     }
   };
 

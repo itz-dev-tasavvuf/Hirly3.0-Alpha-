@@ -527,6 +527,21 @@ const handleAICoachPrompt = async (prompt) => {
 
         console.log('👤 User type:', type);
         
+        // Check if user has completed profile setup
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileError || !profile || !profile.user_type) {
+          console.log('📝 Profile incomplete, redirecting to onboarding');
+          navigate('/onboarding/ai?google=true');
+          return;
+        }
+        
+        console.log('✅ Profile complete:', profile);
+        
         // Update state
         setUserType(type);
         setUserEmail(userEmail);
