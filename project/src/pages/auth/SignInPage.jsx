@@ -14,12 +14,6 @@ const SignInPage = () => {
   const navigate = useNavigate();
   const [userType, setUserType] = React.useState('candidate');
   const [loading, setLoading] = React.useState(false);
-  const handleSocialLogin = (provider) => {
-    toast({
-      title: `Sign in with ${provider}`,
-      description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
-    });
-  };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -167,14 +161,15 @@ const SignInPage = () => {
               <span className="mx-2 sm:mx-4 text-gray-400 text-xs sm:text-sm whitespace-nowrap">Or continue with</span>
               <span className="flex-grow border-t border-slate-700"></span>
             </div>
-            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-4">
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 text-sm sm:text-base" onClick={handleGoogleSignIn} disabled={loading}>
-                <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                Google
-              </Button>
-              <Button variant="outline" className="bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 text-sm sm:text-base" onClick={() => handleSocialLogin('Apple')} disabled={loading}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="inline-block align-middle sm:w-5 sm:h-5"><path d="M16.68 13.91c.01-2.12 1.74-3.13 1.81-3.17-1-1.47-2.54-1.67-3.09-1.7-1.32-.13-2.58.77-3.25.77-.67 0-1.7-.75-2.8-.73-1.44.02-2.77.84-3.51 2.13-1.5 2.6-.39 6.45 1.08 8.56.71 1.04 1.56 2.2 2.68 2.16 1.08-.04 1.49-.7 2.8-.7 1.31 0 1.67.7 2.81.68 1.16-.02 1.88-1.05 2.58-2.09.82-1.2 1.16-2.36 1.17-2.42-.03-.01-2.24-.86-2.25-3.41zm-2.23-6.29c.6-.72 1-1.71.89-2.7-.86.04-1.9.57-2.52 1.29-.55.63-1.04 1.64-.86 2.6.91.07 1.85-.46 2.49-1.19z"/></svg>
-                Apple
+            <div className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full bg-slate-800/50 border-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 text-base sm:text-lg font-medium transition-all duration-200 hover:scale-[1.02]" 
+                onClick={handleGoogleSignIn} 
+                disabled={loading}
+              >
+                <GoogleIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                Continue with Google
               </Button>
             </div>
           </CardContent>
