@@ -58,9 +58,11 @@ const HirlyOnboarding = () => {
             name: user.user_metadata?.full_name || user.email.split('@')[0]
           }));
           
-          // Skip to user type selection step  
+          // Set up steps for Google users (skip auth)
           const newSteps = getStepConfig(undefined, true);
           setSteps(newSteps);
+          
+          // Skip to user type selection step  
           const userTypeStepIndex = newSteps.findIndex(step => step.id === 'userType');
           if (userTypeStepIndex >= 0) {
             setStep(userTypeStepIndex);
@@ -78,6 +80,15 @@ const HirlyOnboarding = () => {
     
     checkGoogleAuth();
   }, []);
+
+  // Handle completion - navigate to hub
+  useEffect(() => {
+    if (isComplete) {
+      setTimeout(() => {
+        navigate('/hub');
+      }, 2000); // Give user time to see completion message
+    }
+  }, [isComplete, navigate]);
 
   // Helper to get step config based on userType
   function getStepConfig(userType, skipAuth = false) {
@@ -452,35 +463,48 @@ const HirlyOnboarding = () => {
 
   // Save profile to Supabase (with Supabase Auth signup)
   const handleSaveProfile = async () => {
-    console.log("Saving profile:", userProfile);
-    
-    // Skip account creation for Google users (already authenticated)
-    if (!isGoogleAuth) {
-      // 1. Sign up user with Supabase Auth using collected email and password
-      if (!userProfile.email || !userProfile.password) {
-        alert('Email and password are required.');
+    // Skip account creation for Google users (they're already authenticated)
+    if (isGoogleAuth) {
+      // 2. Save profile to Supabase for Google users
+      const profileData = {
+        ...userProfile,
+        profilePicUrl: userProfile.profilePic && typeof userProfile.profilePic === 'string' ? userProfile.profilePic : null,
+        resumeUrl: userProfile.resume && typeof userProfile.resume === 'string' ? userProfile.resume : null,
+      };
+      const { error } = await saveProfileToSupabase(profileData);
+      if (error) {
+        setSignupError('Error saving profile: ' + error.message);
+      } else {
+        setIsComplete(true);
+      }
+      return;
+    }
+
+    // 1. Sign up user with Supabase Auth using collected email and password
+    console.log("Signing up with profile:", userProfile);
+    if (!userProfile.email || !userProfile.password) {
+      alert('Email and password are required.');
+      return;
+    }
+    // Sign up user
+    const { data, error: signupError } = await supabase.auth.signUp({
+      email: userProfile.email,
+      password: userProfile.password,
+      options: {
+        data: { userType: userProfile.userType && userProfile.userType.toLowerCase() }
+      }
+    });
+    if (signupError) {
+      // Handle duplicate email gracefully
+      if (signupError.message && signupError.message.toLowerCase().includes('already registered')) {
+        setShowProfileModal(false);
+        pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
+        // Optionally, reset step to email step:
+        // setStep(steps.findIndex(s => s.key === 'email'));
         return;
       }
-      // Sign up user
-      const { data, error: signupError } = await supabase.auth.signUp({
-        email: userProfile.email,
-        password: userProfile.password,
-        options: {
-          data: { userType: userProfile.userType && userProfile.userType.toLowerCase() }
-        }
-      });
-      if (signupError) {
-        // Handle duplicate email gracefully
-        if (signupError.message && signupError.message.toLowerCase().includes('already registered')) {
-          setShowProfileModal(false);
-          pushBotMessage('Oops! That email is already registered. Want to <a href="/login" class="text-purple-600 underline">sign in here</a> instead?', true);
-          // Optionally, reset step to email step:
-          // setStep(steps.findIndex(s => s.key === 'email'));
-          return;
-        }
-        setSignupError('Error creating account: ' + signupError.message);
-        return;
-      }
+      setSignupError('Error creating account: ' + signupError.message);
+      return;
     }
 
     // 2. Save profile to Supabase (convert File objects to null or placeholder for now)
@@ -494,13 +518,6 @@ const HirlyOnboarding = () => {
       setSignupError('Error saving profile: ' + error.message);
     } else {
       setIsComplete(true);
-      
-      // For Google users, redirect to hub after a short delay
-      if (isGoogleAuth) {
-        setTimeout(() => {
-          navigate('/hub');
-        }, 2000); // 2 second delay to show completion message
-      }
     }
   };
 
