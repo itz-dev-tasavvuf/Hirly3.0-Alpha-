@@ -221,5 +221,6 @@ export default defineConfig({
 				manualChunks: undefined,
 			},
 		},
+		copyPublicDir: true,
 	}
 });
