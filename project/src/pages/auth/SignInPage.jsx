@@ -53,12 +53,45 @@ const SignInPage = () => {
 
   // Google sign-in handler (redirect only, no One Tap)
   const handleGoogleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/hub`
+    try {
+      setLoading(true);
+      console.log('Starting Google sign-in...');
+      
+      // Use hardcoded Netlify domain for production, fallback to dynamic for local dev
+      const isProduction = window.location.hostname !== 'localhost';
+      const redirectUrl = isProduction 
+        ? 'https://hirly.netlify.app/hub' 
+        : `${window.location.origin}/hub`;
+      
+      console.log('Redirect URL:', redirectUrl);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        console.error('Google sign-in error:', error);
+        toast({
+          title: 'Sign-in failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        console.log('Google sign-in initiated:', data);
       }
-    });
+    } catch (err) {
+      console.error('Unexpected error during Google sign-in:', err);
+      toast({
+        title: 'Sign-in failed', 
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
