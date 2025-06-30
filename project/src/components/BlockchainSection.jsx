@@ -99,14 +99,9 @@ const BlockchainSection = () => {
                 </div>
               </motion.div>
 
-              {/* Verification Steps */}
+              {/* Verification Steps - Orbiting Animation */}
               {verificationSteps.map((step, index) => {
                 const IconComponent = step.icon;
-                const positions = [
-                  { top: '15%', left: '50%', transform: 'translateX(-50%)' }, // Top
-                  { top: '50%', right: '10%', transform: 'translateY(-50%)' }, // Right
-                  { top: '50%', left: '10%', transform: 'translateY(-50%)' }, // Left
-                ];
 
                 return (
                   <motion.div
@@ -115,8 +110,11 @@ const BlockchainSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6 + index * 0.2 }}
-                    className="absolute cursor-pointer"
-                    style={positions[index]}
+                    className="absolute top-1/2 left-1/2 cursor-pointer orbit-feature"
+                    style={{
+                      transform: 'translate(-50%, -50%)',
+                      '--orbit-delay': `${index * 2}s`
+                    }}
                     onMouseEnter={() => setActiveStep(index)}
                     onMouseLeave={() => setActiveStep(-1)}
                   >
@@ -133,14 +131,7 @@ const BlockchainSection = () => {
                         <IconComponent className={`w-8 h-8 ${step.color}`} />
                       </div>
 
-                      {/* Step Label */}
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-center">
-                        <span className="text-xs text-gray-400 font-medium bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
-                          {step.title}
-                        </span>
-                      </div>
-
-                      {/* Hover Info */}
+                      {/* Hover Info Only */}
                       {activeStep === index && (
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
@@ -158,42 +149,6 @@ const BlockchainSection = () => {
 
               {/* Connecting Lines */}
               <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
-                {/* Line from center to top */}
-                <motion.line
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.3 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
-                  x1="200" y1="150" x2="200" y2="60"
-                  stroke="url(#verificationGradient)"
-                  strokeWidth="2"
-                  strokeDasharray="3,3"
-                />
-                
-                {/* Line from center to right */}
-                <motion.line
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.3 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 1.4, duration: 0.5 }}
-                  x1="200" y1="150" x2="340" y2="150"
-                  stroke="url(#verificationGradient)"
-                  strokeWidth="2"
-                  strokeDasharray="3,3"
-                />
-                
-                {/* Line from center to left */}
-                <motion.line
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 0.3 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 1.6, duration: 0.5 }}
-                  x1="200" y1="150" x2="60" y2="150"
-                  stroke="url(#verificationGradient)"
-                  strokeWidth="2"
-                  strokeDasharray="3,3"
-                />
-
                 <defs>
                   <linearGradient id="verificationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#3b82f6" />
@@ -202,36 +157,7 @@ const BlockchainSection = () => {
                   </linearGradient>
                 </defs>
               </svg>
-
-              {/* Sequential Animation Indicators */}
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {verificationSteps.map((_, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.8 + index * 0.2 }}
-                    className={`w-2 h-2 rounded-full ${
-                      activeStep === index ? 'bg-blue-400' : 'bg-gray-600'
-                    } transition-colors duration-300`}
-                  />
-                ))}
-              </div>
             </div>
-
-            {/* Process Description */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 1.8 }}
-              className="mt-8 text-center"
-            >
-              <p className="text-gray-400 text-sm">
-                Secure verification happens in real-time
-              </p>
-            </motion.div>
           </motion.div>
         </div>
       </div>
