@@ -558,7 +558,7 @@ const DemoPreview = () => {
                             </div>
                             
                             {/* Scrollable expanded content */}
-                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto scrollbar-hide' : 'overflow-hidden'}`}>
                               {/* Tap to expand indicator */}
                               {!isCardExpanded && (
                                 <div className="mt-4 flex items-center justify-center text-white/50 text-xs">
@@ -642,7 +642,7 @@ const DemoPreview = () => {
                             </div>
 
                             {/* Scrollable expanded content */}
-                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto scrollbar-hide' : 'overflow-hidden'}`}>
                               {/* Tap to expand indicator */}
                               {!isCardExpanded && (
                                 <div className="flex items-center justify-center text-white/50 text-xs">
