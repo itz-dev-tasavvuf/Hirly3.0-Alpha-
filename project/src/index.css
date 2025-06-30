@@ -130,74 +130,49 @@
 }
 
 .orbit-feature {
-  animation: orbit 20s linear infinite;
+  /* Static positioning - no orbit animation */
   transform-origin: center center;
 }
 
-.orbit-feature:nth-child(1) { 
-  animation-delay: 0s; 
-  --start-angle: 0deg;
-}
-.orbit-feature:nth-child(2) { 
-  animation-delay: 5s; 
-  --start-angle: 90deg;
-}
-.orbit-feature:nth-child(3) { 
-  animation-delay: 10s; 
-  --start-angle: 180deg;
-}
-.orbit-feature:nth-child(4) { 
-  animation-delay: 15s; 
-  --start-angle: 270deg;
-}
-
-.orbit-paused {
-  animation-play-state: paused !important;
+.orbit-feature:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
 .orbit-ring {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 320px;
-  height: 320px;
-  border: 2px solid rgba(139, 92, 246, 0.2);
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  animation: ring-pulse 4s ease-in-out infinite;
+  animation: ring-pulse 6s ease-in-out infinite;
 }
 
 .orbit-ring::before {
   content: '';
   position: absolute;
-  inset: -2px;
+  inset: -1px;
   border-radius: 50%;
-  padding: 2px;
-  background: conic-gradient(from 0deg, transparent, rgba(139, 92, 246, 0.4), transparent);
+  padding: 1px;
+  background: conic-gradient(from 0deg, transparent, rgba(139, 92, 246, 0.4), rgba(59, 130, 246, 0.3), transparent);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: exclude;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: ring-rotate 8s linear infinite;
-}
-
-@keyframes orbit {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg) translateX(160px) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg) translateX(160px) rotate(-360deg);
-  }
+  animation: ring-rotate 12s linear infinite;
 }
 
 @keyframes ring-pulse {
   0%, 100% { 
     transform: translate(-50%, -50%) scale(1); 
-    opacity: 0.6;
+    opacity: 0.4;
   }
   50% { 
-    transform: translate(-50%, -50%) scale(1.05); 
-    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.02); 
+    opacity: 0.7;
   }
 }
 
