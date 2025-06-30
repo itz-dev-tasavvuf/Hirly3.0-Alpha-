@@ -368,16 +368,16 @@ const DemoPreview = () => {
                 exit={{ scale: 0.9, opacity: 0 }}
                 className="relative w-full max-w-sm mx-auto"
               >
-                {/* Close Button */}
+                {/* Close Button - Fixed positioning and visibility */}
                 <button
                   onClick={closeDemoModal}
-                  className="absolute -top-12 right-0 text-white/70 hover:text-white z-10"
+                  className="absolute -top-16 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 z-50 transition-colors border border-white/20"
                 >
                   <X className="w-6 h-6" />
                 </button>
 
                 {/* Instructions */}
-                <div className="absolute -top-12 left-0 text-white/70 text-sm">
+                <div className="absolute -top-16 left-0 text-white/90 text-sm bg-black/30 px-3 py-1 rounded-lg">
                   Use ← → arrow keys or drag to swipe
                 </div>
 
