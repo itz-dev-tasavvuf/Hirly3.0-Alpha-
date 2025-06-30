@@ -130,7 +130,7 @@
 }
 
 .orbit-feature {
-  animation: orbit 15s linear infinite;
+  animation: orbit 20s linear infinite;
   animation-delay: var(--orbit-delay, 0s);
   transform-origin: center center;
 }
@@ -141,10 +141,10 @@
 
 @keyframes orbit {
   0% {
-    transform: translate(-50%, -50%) rotate(0deg) translateX(120px) rotate(0deg);
+    transform: translate(-50%, -50%) rotate(0deg) translateX(140px) rotate(0deg);
   }
   100% {
-    transform: translate(-50%, -50%) rotate(360deg) translateX(120px) rotate(-360deg);
+    transform: translate(-50%, -50%) rotate(360deg) translateX(140px) rotate(-360deg);
   }
 }
 

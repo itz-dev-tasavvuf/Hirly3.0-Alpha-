@@ -8,14 +8,6 @@ const BlockchainSection = () => {
 
   const verificationSteps = [
     {
-      icon: Lock,
-      title: 'Identity Lock',
-      description: 'User identity gets cryptographically verified',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/20',
-      glowColor: 'shadow-blue-500/30'
-    },
-    {
       icon: Shield,
       title: 'Job Authentication',
       description: 'Job posts are validated and secured',
@@ -85,23 +77,26 @@ const BlockchainSection = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative w-full max-w-lg mx-auto h-[400px]">
+            <div className="relative w-full max-w-lg mx-auto h-[400px] flex items-center justify-center">
               {/* Central Shield Hub */}
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+                className="relative z-20"
               >
                 <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl border-2 border-white/20 backdrop-blur-xl pulse-glow">
                   <Shield className="w-12 h-12 text-white drop-shadow-lg" />
                 </div>
               </motion.div>
 
-              {/* Verification Steps - Orbiting Animation */}
+              {/* Verification Steps - Triangular Formation */}
               {verificationSteps.map((step, index) => {
                 const IconComponent = step.icon;
+                // Create triangular positioning - spread them out more
+                const angles = [120, 240]; // 120 degrees apart for triangle formation
+                const angle = angles[index];
 
                 return (
                   <motion.div
@@ -109,11 +104,13 @@ const BlockchainSection = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.6 + index * 0.2 }}
-                    className="absolute top-1/2 left-1/2 cursor-pointer orbit-feature"
+                    transition={{ delay: 0.6 + index * 0.3 }}
+                    className="absolute cursor-pointer orbit-feature"
                     style={{
-                      transform: 'translate(-50%, -50%)',
-                      '--orbit-delay': `${index * 2}s`
+                      top: '50%',
+                      left: '50%',
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateX(140px) rotate(-${angle}deg)`,
+                      '--orbit-delay': `${index * 4}s`
                     }}
                     onMouseEnter={() => setActiveStep(index)}
                     onMouseLeave={() => setActiveStep(-1)}
