@@ -128,3 +128,21 @@
 .testimonial-card:hover {
   transform: translateY(-8px) scale(1.02);
 }
+
+.orbit-feature {
+  animation: orbit var(--orbit-duration, 20s) linear infinite;
+  animation-delay: var(--orbit-delay, 0s);
+}
+
+.orbit-paused {
+  animation-play-state: paused;
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(var(--orbit-radius, 140px)) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(var(--orbit-radius, 140px)) rotate(-360deg);
+  }
+}

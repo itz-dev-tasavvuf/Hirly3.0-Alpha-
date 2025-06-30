@@ -1,29 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, CheckCircle, Zap } from 'lucide-react';
 import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 
 const BlockchainSection = () => {
+  const [hoveredFeature, setHoveredFeature] = useState(null);
+
   const features = [
     {
       icon: Shield,
       title: 'Identity Verification',
-      description: 'Every user profile is cryptographically verified on the Algorand blockchain'
+      description: 'Every user profile is cryptographically verified on the Algorand blockchain',
+      color: 'from-green-500 to-emerald-500'
     },
     {
       icon: Lock,
       title: 'Secure Job Posts',
-      description: 'All job listings are authenticated to eliminate fake postings and scams'
+      description: 'All job listings are authenticated to eliminate fake postings and scams',
+      color: 'from-blue-500 to-cyan-500'
     },
     {
       icon: CheckCircle,
       title: 'Immutable Records',
-      description: 'Employment history and credentials stored permanently and transparently'
+      description: 'Employment history and credentials stored permanently and transparently',
+      color: 'from-purple-500 to-violet-500'
     },
     {
       icon: Zap,
       title: 'Instant Verification',
-      description: 'Real-time verification process takes seconds, not days'
+      description: 'Real-time verification process takes seconds, not days',
+      color: 'from-orange-500 to-yellow-500'
     }
   ];
 
@@ -57,25 +63,19 @@ const BlockchainSection = () => {
               Just real people, verified securely through Algorand's carbon-negative blockchain.
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-start"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                    <feature.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-400 text-sm">{feature.description}</p>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="space-y-4">
+              <div className="flex items-center text-green-400">
+                <CheckCircle className="w-5 h-5 mr-3" />
+                <span className="text-lg">Instant verification in seconds</span>
+              </div>
+              <div className="flex items-center text-blue-400">
+                <Lock className="w-5 h-5 mr-3" />
+                <span className="text-lg">Zero tolerance for fake profiles</span>
+              </div>
+              <div className="flex items-center text-purple-400">
+                <Shield className="w-5 h-5 mr-3" />
+                <span className="text-lg">Immutable employment records</span>
+              </div>
             </div>
           </motion.div>
 
@@ -85,7 +85,8 @@ const BlockchainSection = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative w-full max-w-md mx-auto">
+            <div className="relative w-full max-w-lg mx-auto h-96">
+              {/* Central Shield */}
               <motion.div
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
@@ -98,11 +99,9 @@ const BlockchainSection = () => {
                 </div>
               </motion.div>
 
-              {[...Array(8)].map((_, index) => {
-                const angle = (index * 45) * (Math.PI / 180);
-                const radius = 120;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
+              {/* Orbiting Feature Cards */}
+              {features.map((feature, index) => {
+                const IconComponent = feature.icon;
 
                 return (
                   <motion.div
@@ -111,26 +110,51 @@ const BlockchainSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.7 + index * 0.1 }}
-                    className="absolute top-1/2 left-1/2 blockchain-node"
+                    className={`absolute top-1/2 left-1/2 cursor-pointer transform -translate-x-1/2 -translate-y-1/2 ${
+                      hoveredFeature === index ? 'orbit-paused' : 'orbit-feature'
+                    }`}
                     style={{
-                      transform: `translate(${x - 16}px, ${y - 16}px)`,
-                      animationDelay: `${index * 0.3}s`
+                      '--orbit-radius': '140px',
+                      '--orbit-duration': `${20 + index * 2}s`,
+                      '--orbit-delay': `${index * 5}s`,
                     }}
+                    onMouseEnter={() => setHoveredFeature(index)}
+                    onMouseLeave={() => setHoveredFeature(null)}
                   >
-                    <div className="w-8 h-8 bg-purple-500/30 rounded-full border-2 border-purple-400 flex items-center justify-center">
-                      <div className="w-3 h-3 bg-purple-400 rounded-full" />
+                    <div className={`relative transition-all duration-300 ${
+                      hoveredFeature === index ? 'scale-110' : 'scale-100'
+                    }`}>
+                      {/* Feature Card */}
+                      <div className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-sm ${
+                        hoveredFeature === index ? 'shadow-2xl glow-effect' : ''
+                      }`}>
+                        <IconComponent className="w-7 h-7 text-white" />
+                      </div>
+
+                      {/* Hover Information */}
+                      {hoveredFeature === index && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          className="absolute top-24 left-1/2 transform -translate-x-1/2 w-64 glass-effect rounded-lg p-4 z-30"
+                        >
+                          <h3 className="text-white font-semibold mb-2 text-center">{feature.title}</h3>
+                          <p className="text-gray-300 text-sm text-center leading-relaxed">{feature.description}</p>
+                        </motion.div>
+                      )}
                     </div>
                   </motion.div>
                 );
               })}
 
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 300">
-                {[...Array(8)].map((_, index) => {
-                  const angle1 = (index * 45) * (Math.PI / 180);
-                  const angle2 = ((index + 1) * 45) * (Math.PI / 180);
-                  const radius = 120;
-                  const centerX = 150;
-                  const centerY = 150;
+              {/* Connection Lines */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400">
+                {features.map((_, index) => {
+                  const angle1 = (index * 90) * (Math.PI / 180);
+                  const angle2 = ((index + 1) * 90) * (Math.PI / 180);
+                  const radius = 140;
+                  const centerX = 200;
+                  const centerY = 200;
                   
                   const x1 = centerX + Math.cos(angle1) * radius;
                   const y1 = centerY + Math.sin(angle1) * radius;
@@ -141,7 +165,7 @@ const BlockchainSection = () => {
                     <motion.line
                       key={index}
                       initial={{ pathLength: 0, opacity: 0 }}
-                      whileInView={{ pathLength: 1, opacity: 0.3 }}
+                      whileInView={{ pathLength: 1, opacity: 0.2 }}
                       viewport={{ once: true }}
                       transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
                       x1={x1}
@@ -150,9 +174,38 @@ const BlockchainSection = () => {
                       y2={y2}
                       stroke="url(#gradient)"
                       strokeWidth="2"
+                      strokeDasharray="5,5"
                     />
                   );
                 })}
+                
+                {/* Lines from center to features */}
+                {features.map((_, index) => {
+                  const angle = (index * 90) * (Math.PI / 180);
+                  const radius = 140;
+                  const centerX = 200;
+                  const centerY = 200;
+                  
+                  const x = centerX + Math.cos(angle) * radius;
+                  const y = centerY + Math.sin(angle) * radius;
+
+                  return (
+                    <motion.line
+                      key={`center-${index}`}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 0.15 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 1.2 + index * 0.05, duration: 0.3 }}
+                      x1={centerX}
+                      y1={centerY}
+                      x2={x}
+                      y2={y}
+                      stroke="url(#gradient)"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+
                 <defs>
                   <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#8B5CF6" />
@@ -162,6 +215,7 @@ const BlockchainSection = () => {
               </svg>
             </div>
 
+            {/* Static verification badges */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
