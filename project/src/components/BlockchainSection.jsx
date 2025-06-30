@@ -99,11 +99,11 @@ const BlockchainSection = () => {
                 </div>
               </motion.div>
 
-              {/* Verification Steps - Triangular Formation */}
+              {/* Verification Steps - Evenly Spaced Formation */}
               {verificationSteps.map((step, index) => {
                 const IconComponent = step.icon;
-                // Create perfect triangular positioning - 120 degrees apart
-                const angles = [0, 120, 240]; // Perfect triangle formation
+                // Create evenly spaced positioning - 120 degrees apart starting from top
+                const angles = [-90, 30, 150]; // Evenly distributed: top, bottom-right, bottom-left
                 const angle = angles[index];
 
                 return (
