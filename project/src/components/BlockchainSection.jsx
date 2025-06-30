@@ -134,15 +134,64 @@ const BlockchainSection = () => {
                 );
               })}
 
-              {/* Connecting Lines */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
+              {/* Orbital Connection Lines */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
                 <defs>
-                  <linearGradient id="verificationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="50%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#8b5cf6" />
+                  <linearGradient id="orbitalGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(34, 197, 94, 0.6)" />
+                    <stop offset="100%" stopColor="rgba(34, 197, 94, 0.1)" />
+                  </linearGradient>
+                  <linearGradient id="orbitalGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(168, 85, 247, 0.6)" />
+                    <stop offset="100%" stopColor="rgba(168, 85, 247, 0.1)" />
+                  </linearGradient>
+                  <linearGradient id="orbitalGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(59, 130, 246, 0.6)" />
+                    <stop offset="100%" stopColor="rgba(59, 130, 246, 0.1)" />
                   </linearGradient>
                 </defs>
+                
+                {/* Orbital connection lines */}
+                {verificationSteps.map((_, index) => {
+                  const angles = [-90, 30, 150];
+                  const angle = angles[index];
+                  const radian = (angle * Math.PI) / 180;
+                  const radius = 140;
+                  
+                  // Calculate orbital position
+                  const orbX = 200 + radius * Math.cos(radian);
+                  const orbY = 200 + radius * Math.sin(radian);
+                  
+                  return (
+                    <line
+                      key={`line-${index}`}
+                      x1="200"
+                      y1="200"
+                      x2={orbX}
+                      y2={orbY}
+                      stroke={`url(#orbitalGradient${index + 1})`}
+                      strokeWidth="2"
+                      strokeDasharray="4 4"
+                      className="orbital-connection-line"
+                      style={{
+                        animation: `pulse-line 3s ease-in-out infinite`,
+                        animationDelay: `${index * 0.5}s`
+                      }}
+                    />
+                  );
+                })}
+                
+                {/* Central orbital ring */}
+                <circle
+                  cx="200"
+                  cy="200"
+                  r="140"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="1"
+                  strokeDasharray="8 8"
+                  className="orbital-ring"
+                />
               </svg>
             </div>
           </motion.div>

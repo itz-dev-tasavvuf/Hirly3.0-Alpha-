@@ -200,6 +200,31 @@
 }
 
 @keyframes ring-rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Orbital connection line animations */
+.orbital-connection-line {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.orbital-ring {
+  animation: ring-rotate 40s linear infinite;
+}
+
+@keyframes pulse-line {
+  0%, 100% {
+    opacity: 0.4;
+    stroke-dasharray: 4 4;
+  }
+  50% {
+    opacity: 0.8;
+    stroke-dasharray: 8 2;
+  }
 }
