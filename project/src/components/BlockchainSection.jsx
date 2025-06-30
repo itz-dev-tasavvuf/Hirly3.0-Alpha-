@@ -85,17 +85,36 @@ const BlockchainSection = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative w-full max-w-lg mx-auto h-96">
-              {/* Central Shield */}
+            <div className="relative w-full max-w-2xl mx-auto h-[500px]">
+              {/* Orbit Ring */}
+              <div className="orbit-ring"></div>
+              
+              {/* Inner glow ring */}
+              <div className="absolute top-1/2 left-1/2 w-80 h-80 border border-purple-500/30 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_50px_rgba(139,92,246,0.3)]"></div>
+              
+              {/* Central Shield Hub */}
               <motion.div
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
+                initial={{ scale: 0, rotate: -180 }}
+                whileInView={{ scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5, type: "spring" }}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
               >
-                <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center pulse-glow">
-                  <Shield className="w-12 h-12 text-white" />
+                <div className="relative">
+                  {/* Main shield */}
+                  <div className="w-32 h-32 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/20 backdrop-blur-xl pulse-glow">
+                    <Shield className="w-16 h-16 text-white drop-shadow-lg" />
+                  </div>
+                  
+                  {/* Rotating border */}
+                  <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 animate-spin" style={{ animationDuration: '4s' }}>
+                    <div className="w-full h-full bg-slate-900 rounded-3xl m-0.5"></div>
+                  </div>
+                  
+                  {/* Center content (shield) */}
+                  <div className="absolute inset-0 w-32 h-32 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center">
+                    <Shield className="w-16 h-16 text-white drop-shadow-lg" />
+                  </div>
                 </div>
               </motion.div>
 
@@ -109,52 +128,101 @@ const BlockchainSection = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                    className={`absolute top-1/2 left-1/2 cursor-pointer ${
+                    transition={{ delay: 0.8 + index * 0.15 }}
+                    className={`absolute top-1/2 left-1/2 cursor-pointer z-20 ${
                       hoveredFeature === index ? 'orbit-paused' : 'orbit-feature'
                     }`}
                     onMouseEnter={() => setHoveredFeature(index)}
                     onMouseLeave={() => setHoveredFeature(null)}
                     onClick={() => setHoveredFeature(hoveredFeature === index ? null : index)}
                   >
-                    <div className={`relative transition-all duration-300 ${
-                      hoveredFeature === index ? 'scale-125' : 'scale-100'
-                    }`}>
+                    <motion.div 
+                      className={`relative transition-all duration-500 ${
+                        hoveredFeature === index ? 'scale-125 z-50' : 'scale-100'
+                      }`}
+                      whileHover={{ scale: 1.1 }}
+                    >
                       {/* Feature Card */}
-                      <div className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 ${
-                        hoveredFeature === index ? 'shadow-2xl' : 'shadow-lg'
+                      <div className={`w-24 h-24 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/30 backdrop-blur-xl transition-all duration-500 ${
+                        hoveredFeature === index ? 'shadow-[0_0_40px_rgba(139,92,246,0.6)]' : 'shadow-xl'
                       }`}
                       style={{
                         boxShadow: hoveredFeature === index ? 
-                          `0 0 30px ${feature.color.includes('green') ? 'rgba(34, 197, 94, 0.5)' : 
-                            feature.color.includes('blue') ? 'rgba(59, 130, 246, 0.5)' :
-                            feature.color.includes('purple') ? 'rgba(168, 85, 247, 0.5)' :
-                            'rgba(251, 146, 60, 0.5)'}`
-                          : 'none'
+                          `0 0 40px ${feature.color.includes('green') ? 'rgba(34, 197, 94, 0.7)' : 
+                            feature.color.includes('blue') ? 'rgba(59, 130, 246, 0.7)' :
+                            feature.color.includes('purple') ? 'rgba(168, 85, 247, 0.7)' :
+                            'rgba(251, 146, 60, 0.7)'}, 0 20px 40px rgba(0,0,0,0.3)`
+                          : '0 10px 25px rgba(0,0,0,0.2)'
                       }}>
-                        <IconComponent className="w-7 h-7 text-white" />
+                        <IconComponent className="w-8 h-8 text-white drop-shadow-lg" />
                       </div>
 
-                      {/* Feature Label - Always visible when hovered */}
+                      {/* Floating label */}
+                      <motion.div 
+                        className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-center pointer-events-none"
+                        animate={{ 
+                          y: hoveredFeature === index ? -5 : 0,
+                          scale: hoveredFeature === index ? 1.1 : 1 
+                        }}
+                      >
+                        <span className="text-xs text-white font-semibold bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                          {feature.title.split(' ')[0]}
+                        </span>
+                      </motion.div>
+
+                      {/* Detailed hover card */}
                       {hoveredFeature === index && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="absolute top-24 left-1/2 transform -translate-x-1/2 w-72 glass-effect rounded-lg p-4 z-50 pointer-events-none"
+                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                          className="absolute top-32 left-1/2 transform -translate-x-1/2 w-80 glass-effect rounded-2xl p-6 z-50 pointer-events-none border border-white/20"
+                          style={{
+                            background: `linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 100%)`,
+                            backdropFilter: 'blur(20px)',
+                            boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 30px rgba(139,92,246,0.3)'
+                          }}
                         >
-                          <h3 className="text-white font-bold mb-2 text-center text-lg">{feature.title}</h3>
-                          <p className="text-gray-300 text-sm text-center leading-relaxed">{feature.description}</p>
+                          <div className="flex items-center mb-3">
+                            <div className={`w-10 h-10 bg-gradient-to-br ${feature.color} rounded-lg flex items-center justify-center mr-3`}>
+                              <IconComponent className="w-5 h-5 text-white" />
+                            </div>
+                            <h3 className="text-white font-bold text-lg">{feature.title}</h3>
+                          </div>
+                          <p className="text-gray-300 text-sm leading-relaxed">{feature.description}</p>
+                          
+                          {/* Decorative elements */}
+                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
                         </motion.div>
                       )}
 
-                      {/* Simple label below card - always visible */}
-                      <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center pointer-events-none">
-                        <span className="text-xs text-gray-400 font-medium bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
-                          {feature.title.split(' ')[0]}
-                        </span>
-                      </div>
-                    </div>
+                      {/* Particle effect on hover */}
+                      {hoveredFeature === index && (
+                        <div className="absolute inset-0 pointer-events-none">
+                          {[...Array(6)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="absolute w-1 h-1 bg-white rounded-full"
+                              initial={{ 
+                                x: 12, 
+                                y: 12, 
+                                opacity: 0 
+                              }}
+                              animate={{ 
+                                x: Math.cos(i * 60 * Math.PI / 180) * 30 + 12, 
+                                y: Math.sin(i * 60 * Math.PI / 180) * 30 + 12, 
+                                opacity: [0, 1, 0] 
+                              }}
+                              transition={{ 
+                                duration: 1.5, 
+                                repeat: Infinity, 
+                                delay: i * 0.1 
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -164,7 +232,7 @@ const BlockchainSection = () => {
                 {features.map((_, index) => {
                   const angle1 = (index * 90) * (Math.PI / 180);
                   const angle2 = ((index + 1) * 90) * (Math.PI / 180);
-                  const radius = 140;
+                  const radius = 160;
                   const centerX = 200;
                   const centerY = 200;
                   
@@ -194,7 +262,7 @@ const BlockchainSection = () => {
                 {/* Lines from center to features */}
                 {features.map((_, index) => {
                   const angle = (index * 90) * (Math.PI / 180);
-                  const radius = 140;
+                  const radius = 160;
                   const centerX = 200;
                   const centerY = 200;
                   
