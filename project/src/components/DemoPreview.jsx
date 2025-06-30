@@ -407,6 +407,14 @@ const DemoPreview = () => {
                       <div className={`w-full h-full bg-gradient-to-br ${demoCards[currentCardIndex].bgColor} rounded-2xl shadow-2xl overflow-hidden`}>
                         {demoCards[currentCardIndex].type === 'instruction' ? (
                           <div className="p-6 flex flex-col items-center justify-center h-full text-center">
+                            {/* Hirly Logo - only show on first instruction card */}
+                            {currentCardIndex === 0 && (
+                              <div className="mb-6">
+                                <div className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                                  Hirly
+                                </div>
+                              </div>
+                            )}
                             <h2 className="text-xl font-bold text-white mb-4">
                               {demoCards[currentCardIndex].title}
                             </h2>
