@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Briefcase, X, Send } from 'lucide-react';
 
 const Careers = () => {
@@ -6,6 +7,8 @@ const Careers = () => {
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [isCardExpanded, setIsCardExpanded] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,11 +17,28 @@ const Careers = () => {
     coverLetter: ''
   });
 
-  // Motion values for drag gestures (temporarily disabled)
-  // const x = useMotionValue(0);
-  // const rotate = useTransform(x, [-200, 200], [-10, 10]);
+  // Motion values for drag gestures
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
   const departments = ['Engineering', 'Product', 'Design', 'Marketing', 'Sales', 'Operations'];
+
+  // Keyboard event handler
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (selectedJob || showApplicationForm) return; // Don't handle keys when modals are open
+      
+      if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
+        handleSwipe('left');
+      } else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
+        handleSwipe('right');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentJobIndex, selectedJob, showApplicationForm]);
 
   const jobData = {
     Engineering: [
@@ -236,20 +256,46 @@ const Careers = () => {
   const currentJobs = jobData[selectedDepartment] || [];
 
   const handleSwipe = (direction) => {
-    if (direction === 'left' && currentJobIndex > 0) {
-      setCurrentJobIndex(currentJobIndex - 1);
-    } else if (direction === 'right' && currentJobIndex < currentJobs.length - 1) {
-      setCurrentJobIndex(currentJobIndex + 1);
+    if (isCardExpanded) return; // Prevent swiping when card is expanded
+    
+    setSwipeDirection(direction);
+    // Reset motion values
+    x.set(direction === 'left' ? -300 : 300);
+    
+    setTimeout(() => {
+      if (direction === 'left' && currentJobIndex > 0) {
+        setCurrentJobIndex(currentJobIndex - 1);
+      } else if (direction === 'right' && currentJobIndex < currentJobs.length - 1) {
+        setCurrentJobIndex(currentJobIndex + 1);
+      }
+      setSwipeDirection(null);
+      setIsCardExpanded(false); // Reset expansion for new card
+      x.set(0); // Reset position
+    }, 300);
+  };
+
+  const handleDragEnd = (event, info) => {
+    if (isCardExpanded) return; // Prevent dragging when card is expanded
+    
+    const threshold = 100;
+    if (Math.abs(info.offset.x) > threshold) {
+      handleSwipe(info.offset.x > 0 ? 'right' : 'left');
+    } else {
+      x.set(0); // Snap back to center
     }
   };
 
-  // Simplified drag handler (no framer-motion)
-  const handleDragEnd = () => {
-    // Drag functionality temporarily disabled
+  const handleCardClick = (e) => {
+    e.stopPropagation();
+    setIsCardExpanded(!isCardExpanded);
   };
 
   const handleJobClick = (job) => {
-    setSelectedJob(job);
+    if (typeof job === 'object') {
+      setSelectedJob(job);
+    } else {
+      setSelectedJob(currentJobs[currentJobIndex]);
+    }
   };
 
   const handleApply = () => {
@@ -306,55 +352,155 @@ const Careers = () => {
       </div>
 
       {/* Job Cards */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative h-[600px]">
-          {currentJobs.length > 0 && (
-            <div
-              key={`${selectedDepartment}-${currentJobIndex}`}
-              className="absolute inset-0 w-full cursor-pointer"
-              onClick={() => handleJobClick(currentJobs[currentJobIndex])}
-            >
-                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-2xl p-6 flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        {currentJobs[currentJobIndex].title}
-                      </h3>
-                      <div className="flex items-center text-white/80 mb-2">
-                        <Briefcase className="w-4 h-4 mr-2" />
-                        <span>{currentJobs[currentJobIndex].department}</span>
+      <div className="max-w-sm mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`relative perspective-1000 transition-all duration-300 ${
+          isCardExpanded ? 'h-[600px]' : 'h-[500px]'
+        }`}>
+          <AnimatePresence mode="wait">
+            {currentJobs.length > 0 && (
+              <motion.div
+                key={`${selectedDepartment}-${currentJobIndex}`}
+                drag={isCardExpanded ? false : "x"}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={handleDragEnd}
+                style={{ 
+                  x,
+                  rotate,
+                  opacity
+                }}
+                initial={{ scale: 1, rotateY: 0, x: 0 }}
+                animate={{
+                  x: swipeDirection === 'left' ? -300 : swipeDirection === 'right' ? 300 : 0,
+                  rotate: swipeDirection === 'left' ? -30 : swipeDirection === 'right' ? 30 : 0,
+                  opacity: swipeDirection ? 0 : 1,
+                  scale: isCardExpanded ? 1.02 : 1
+                }}
+                transition={{ duration: 0.3 }}
+                className={`absolute inset-0 w-full h-full ${
+                  isCardExpanded ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+                }`}
+                onClick={handleCardClick}
+              >
+                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-2xl overflow-hidden">
+                  <div className="p-6 h-full flex flex-col">
+                    <div className="flex-shrink-0">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-white mb-2">
+                            {currentJobs[currentJobIndex].title}
+                          </h3>
+                          <div className="flex items-center text-white/80 mb-2">
+                            <Briefcase className="w-4 h-4 mr-2" />
+                            <span>{currentJobs[currentJobIndex].department}</span>
+                          </div>
+                        </div>
+                        <div className="text-white/60 text-sm">
+                          {currentJobIndex + 1} / {currentJobs.length}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-white/60 text-sm">
-                      {currentJobIndex + 1} / {currentJobs.length}
-                    </div>
-                  </div>
 
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center text-white/90">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span>{currentJobs[currentJobIndex].location}</span>
-                    </div>
-                    <div className="flex items-center text-white/90">
-                      <Clock className="w-4 h-4 mr-2" />
-                      <span>{currentJobs[currentJobIndex].type} • {currentJobs[currentJobIndex].experience}</span>
-                    </div>
-                    <div className="flex items-center text-green-300 font-semibold">
-                      <Users className="w-4 h-4 mr-2" />
-                      <span>{currentJobs[currentJobIndex].salary}</span>
-                    </div>
-                  </div>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center text-white/90">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          <span className="text-sm">{currentJobs[currentJobIndex].location}</span>
+                        </div>
+                        <div className="flex items-center text-white/90">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span className="text-sm">{currentJobs[currentJobIndex].type} • {currentJobs[currentJobIndex].experience}</span>
+                        </div>
+                        <div className="flex items-center text-green-300 font-semibold">
+                          <Users className="w-4 h-4 mr-2" />
+                          <span className="text-sm">{currentJobs[currentJobIndex].salary}</span>
+                        </div>
+                      </div>
 
-                  <p className="text-white/90 mb-6 flex-1">
-                    {currentJobs[currentJobIndex].description}
-                  </p>
+                      <p className="text-white/90 text-sm leading-relaxed">
+                        {currentJobs[currentJobIndex].description}
+                      </p>
+                    </div>
 
-                  <div className="text-center text-white/60 text-sm">
-                    Tap for details • Swipe to browse
+                    {/* Scrollable expanded content */}
+                    <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto scrollbar-hide' : 'overflow-hidden'}`}>
+                      {/* Tap to expand indicator */}
+                      {!isCardExpanded && (
+                        <div className="mt-4 flex items-center justify-center text-white/50 text-xs">
+                          <span>Tap to see more details</span>
+                        </div>
+                      )}
+                      
+                      {/* Expanded Content */}
+                      <AnimatePresence>
+                        {isCardExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-4 space-y-4"
+                          >
+                            <div>
+                              <h4 className="text-white font-semibold mb-2 text-sm">Responsibilities</h4>
+                              <ul className="space-y-1">
+                                {currentJobs[currentJobIndex].responsibilities.slice(0, 3).map((resp, index) => (
+                                  <li key={index} className="flex items-start text-white/80 text-xs">
+                                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2 mt-1.5 flex-shrink-0" />
+                                    <span>{resp}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h4 className="text-white font-semibold mb-2 text-sm">Requirements</h4>
+                              <ul className="space-y-1">
+                                {currentJobs[currentJobIndex].requirements.slice(0, 3).map((req, index) => (
+                                  <li key={index} className="flex items-start text-white/80 text-xs">
+                                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full mr-2 mt-1.5 flex-shrink-0" />
+                                    <span>{req}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h4 className="text-white font-semibold mb-2 text-sm">Benefits</h4>
+                              <div className="flex flex-wrap gap-1">
+                                {currentJobs[currentJobIndex].benefits.slice(0, 4).map((benefit, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-2 py-1 bg-purple-500/20 rounded-full text-purple-200 text-xs"
+                                  >
+                                    {benefit}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleJobClick(currentJobs[currentJobIndex]);
+                              }}
+                              className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-lg py-2 text-sm transition-all duration-300"
+                            >
+                              View Full Details
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Instructions */}
+                    {!isCardExpanded && (
+                      <div className="text-center text-white/60 text-xs mt-4">
+                        Use ← → keys or swipe to browse
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
+          </AnimatePresence>
         </div>
 
         {/* Navigation */}
@@ -386,14 +532,30 @@ const Careers = () => {
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Instructions */}
+        <div className="text-center text-white/60 text-sm mt-4">
+          Use keyboard arrows (← →) or drag cards to browse jobs
+        </div>
       </div>
 
       {/* Job Details Modal */}
-      {selectedJob && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedJob(null)}>
-          <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
-            onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {selectedJob && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedJob(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">{selectedJob.title}</h2>
@@ -476,16 +638,28 @@ const Careers = () => {
                   Apply for this Position
                 </button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
       {/* Application Form Modal */}
-      {showApplicationForm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowApplicationForm(false)}>
-          <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
-            onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {showApplicationForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowApplicationForm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Apply Now</h2>
                 <button
@@ -562,9 +736,10 @@ const Careers = () => {
                   Submit Application
                 </button>
               </form>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
     </div>
   );
 };
