@@ -450,9 +450,9 @@ const DemoPreview = () => {
                             )}
                           </div>
                         ) : demoCards[currentCardIndex].type === 'job' ? (
-                          <div className="p-5 h-full flex flex-col">
+                          <div className="p-6 h-full flex flex-col">
                             {demoCards[currentCardIndex].image && (
-                              <div className="h-24 mb-3 rounded-xl overflow-hidden">
+                              <div className="h-32 mb-4 rounded-xl overflow-hidden">
                                 <img 
                                   src={demoCards[currentCardIndex].image}
                                   alt="Company"
@@ -460,25 +460,25 @@ const DemoPreview = () => {
                                 />
                               </div>
                             )}
-                            <div className="flex items-center mb-2">
-                              <h3 className="text-lg font-bold text-white mr-2">
+                            <div className="flex items-center mb-3">
+                              <h3 className="text-xl font-bold text-white mr-2">
                                 {demoCards[currentCardIndex].company}
                               </h3>
                               {demoCards[currentCardIndex].verified && (
-                                <Shield className="w-4 h-4 text-green-400" />
+                                <Shield className="w-5 h-5 text-green-400" />
                               )}
                             </div>
-                            <h4 className="text-base font-semibold text-white/90 mb-2">
+                            <h4 className="text-lg font-semibold text-white/90 mb-3">
                               {demoCards[currentCardIndex].position}
                             </h4>
-                            <p className="text-white/70 text-sm mb-1">{demoCards[currentCardIndex].location}</p>
-                            <p className="text-green-300 font-semibold text-sm mb-3">{demoCards[currentCardIndex].salary}</p>
-                            <p className="text-white/80 text-sm flex-1">{demoCards[currentCardIndex].description}</p>
+                            <p className="text-white/70 text-base mb-2">{demoCards[currentCardIndex].location}</p>
+                            <p className="text-green-300 font-semibold text-base mb-4">{demoCards[currentCardIndex].salary}</p>
+                            <p className="text-white/80 text-base flex-1 leading-relaxed">{demoCards[currentCardIndex].description}</p>
                           </div>
                         ) : (
-                          <div className="p-5 h-full flex flex-col">
-                            <div className="flex items-center mb-4">
-                              <div className="w-16 h-16 rounded-full overflow-hidden mr-3">
+                          <div className="p-6 h-full flex flex-col">
+                            <div className="flex items-center mb-6">
+                              <div className="w-20 h-20 rounded-full overflow-hidden mr-4">
                                 <img 
                                   src={demoCards[currentCardIndex].image}
                                   alt={demoCards[currentCardIndex].name}
@@ -486,22 +486,22 @@ const DemoPreview = () => {
                                 />
                               </div>
                               <div>
-                                <div className="flex items-center">
-                                  <h3 className="text-lg font-bold text-white mr-2">
+                                <div className="flex items-center mb-1">
+                                  <h3 className="text-xl font-bold text-white mr-2">
                                     {demoCards[currentCardIndex].name}
                                   </h3>
                                   {demoCards[currentCardIndex].verified && (
-                                    <Shield className="w-4 h-4 text-green-400" />
+                                    <Shield className="w-5 h-5 text-green-400" />
                                   )}
                                 </div>
-                                <p className="text-white/90 text-sm">{demoCards[currentCardIndex].title}</p>
-                                <p className="text-white/70 text-xs">{demoCards[currentCardIndex].experience} experience</p>
+                                <p className="text-white/90 text-base">{demoCards[currentCardIndex].title}</p>
+                                <p className="text-white/70 text-sm">{demoCards[currentCardIndex].experience} experience</p>
                               </div>
                             </div>
-                            <p className="text-white/70 mb-3 text-sm">{demoCards[currentCardIndex].location}</p>
-                            <div className="flex flex-wrap gap-2 mb-4">
+                            <p className="text-white/70 mb-4 text-base">{demoCards[currentCardIndex].location}</p>
+                            <div className="flex flex-wrap gap-2 mb-6">
                               {demoCards[currentCardIndex].skills?.map((skill, i) => (
-                                <span key={i} className="px-2 py-1 bg-white/20 rounded-full text-white text-xs">
+                                <span key={i} className="px-3 py-2 bg-white/20 rounded-full text-white text-sm">
                                   {skill}
                                 </span>
                               ))}
