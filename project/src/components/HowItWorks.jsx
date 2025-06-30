@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { User, Heart, Shield, Zap } from 'lucide-react';
@@ -90,6 +89,39 @@ const HowItWorks = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Loom Video Demo Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-20 mb-16"
+        >
+          <div className="text-center mb-8">
+            <h3 className="text-3xl font-bold text-white mb-4">
+              See <span className="gradient-text">Hirly</span> in Action
+            </h3>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Watch our quick demo to see how easy it is to find your perfect job match
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="glass-effect rounded-2xl p-6 hover:glow-effect transition-all duration-300">
+              <div className="relative w-full h-0 pb-[55.995599559956%] rounded-xl overflow-hidden">
+                <iframe
+                  src="https://www.loom.com/embed/24b56e7fd68d48918118132e8fad8350?sid=a20b80c3-acdf-4198-8d14-639335e1f467"
+                  frameBorder="0"
+                  webKitAllowFullScreen
+                  mozAllowFullScreen
+                  allowFullScreen
+                  className="absolute top-0 left-0 w-full h-full rounded-xl"
+                  title="Hirly Demo Video"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Bottom CTA */}
         <motion.div
