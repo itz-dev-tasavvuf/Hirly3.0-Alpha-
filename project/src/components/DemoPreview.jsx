@@ -385,39 +385,18 @@ const DemoPreview = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-6 mt-12"
+            className="flex justify-center mt-12"
           >
-            {[
-              {
-                title: 'Interactive Demo',
-                description: 'Try the full Hirly experience with real-time swiping and matching',
-                onClick: handleInteractiveDemo
-              },
-              {
-                title: 'No Signup Required',
-                description: 'Jump right in and explore all features without creating an account'
-              },
-              {
-                title: 'Real Data Preview',
-                description: 'See how verified profiles and job posts look in the actual app'
-              }
-            ].map((feature, index) => (
-              <div 
-                key={index} 
-                className={`glass-effect rounded-2xl p-6 text-center transition-all duration-300 ${
-                  feature.onClick ? 'cursor-pointer hover:bg-white/10 hover:scale-105' : ''
-                }`}
-                onClick={feature.onClick}
-              >
-                <h3 className="text-white font-semibold mb-3">{feature.title}</h3>
-                <p className="text-gray-300 text-sm">{feature.description}</p>
-                {feature.onClick && (
-                  <Button className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                    Try Demo
-                  </Button>
-                )}
-              </div>
-            ))}
+            <div 
+              className="glass-effect rounded-2xl p-6 text-center transition-all duration-300 cursor-pointer hover:bg-white/10 hover:scale-105 max-w-sm"
+              onClick={handleInteractiveDemo}
+            >
+              <h3 className="text-white font-semibold mb-3">Interactive Demo</h3>
+              <p className="text-gray-300 text-sm mb-4">Try the full Hirly experience with real-time swiping and matching</p>
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                Try Demo
+              </Button>
+            </div>
           </motion.div>
         </motion.div>                {/* Interactive Demo Modal */}
         <AnimatePresence>
