@@ -12,7 +12,7 @@ const Testimonials = () => {
       name: 'Sarah Chen',
       title: 'Senior Frontend Developer',
       company: 'TechFlow Inc.',
-      image: 'Professional woman with short black hair in business attire',
+      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
       rating: 5,
       text: 'Hirly completely changed how I approach job hunting. The swipe interface is intuitive, and knowing every profile is blockchain-verified gives me confidence. Found my dream job in just 2 weeks!'
     },
@@ -20,7 +20,7 @@ const Testimonials = () => {
       name: 'Marcus Rodriguez',
       title: 'Hiring Manager',
       company: 'StartupHub',
-      image: 'Hispanic man with beard wearing casual business shirt',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
       rating: 5,
       text: 'As a hiring manager, the quality of candidates on Hirly is exceptional. No more fake profiles or unqualified applicants. The AI matching is spot-on, saving us hours of screening time.'
     },
@@ -28,7 +28,7 @@ const Testimonials = () => {
       name: 'Emily Watson',
       title: 'UX Designer',
       company: 'DesignCo',
-      image: 'Young woman with blonde hair and creative style',
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
       rating: 5,
       text: 'The user experience is phenomenal! Swiping through opportunities feels natural and fun. The blockchain verification badge gives me trust that companies are legitimate.'
     },
@@ -36,7 +36,7 @@ const Testimonials = () => {
       name: 'David Kim',
       title: 'CTO',
       company: 'InnovateLabs',
-      image: 'Asian man with glasses in professional setting',
+      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
       rating: 5,
       text: 'Hirly has revolutionized our recruitment process. The smart contracts for managing agreements are brilliant. We\'ve reduced our time-to-hire by 60% while improving candidate quality.'
     },
@@ -44,7 +44,7 @@ const Testimonials = () => {
       name: 'Lisa Thompson',
       title: 'Product Manager',
       company: 'GrowthTech',
-      image: 'Professional woman with curly hair smiling confidently',
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face',
       rating: 5,
       text: 'I love how transparent everything is on Hirly. The blockchain verification means I can trust the job postings are real, and the AI matching actually understands my preferences.'
     }
@@ -109,11 +109,12 @@ const Testimonials = () => {
 
                   {/* Author Info */}
                   <div className="flex items-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-4 overflow-hidden">
                       <img  
                         className="w-16 h-16 rounded-full object-cover" 
                         alt={`${testimonials[currentIndex].name} profile photo`}
-                       src="https://images.unsplash.com/photo-1644424235476-295f24d503d9" />
+                        src={testimonials[currentIndex].image}
+                      />
                     </div>
                     <div>
                       <h4 className="text-white font-semibold text-lg">
@@ -178,7 +179,13 @@ const Testimonials = () => {
             >
               <div className="glass-effect rounded-2xl p-4">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3" />
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3 overflow-hidden">
+                    <img
+                      className="w-10 h-10 rounded-full object-cover"
+                      src={testimonials[(currentIndex - 1 + testimonials.length) % testimonials.length].image}
+                      alt={`${testimonials[(currentIndex - 1 + testimonials.length) % testimonials.length].name} profile`}
+                    />
+                  </div>
                   <div>
                     <p className="text-white text-sm font-medium">
                       {testimonials[(currentIndex - 1 + testimonials.length) % testimonials.length].name}
@@ -199,7 +206,13 @@ const Testimonials = () => {
             >
               <div className="glass-effect rounded-2xl p-4">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3" />
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3 overflow-hidden">
+                    <img
+                      className="w-10 h-10 rounded-full object-cover"
+                      src={testimonials[(currentIndex + 1) % testimonials.length].image}
+                      alt={`${testimonials[(currentIndex + 1) % testimonials.length].name} profile`}
+                    />
+                  </div>
                   <div>
                     <p className="text-white text-sm font-medium">
                       {testimonials[(currentIndex + 1) % testimonials.length].name}
