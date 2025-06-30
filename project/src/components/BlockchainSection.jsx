@@ -110,38 +110,50 @@ const BlockchainSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.7 + index * 0.1 }}
-                    className={`absolute top-1/2 left-1/2 cursor-pointer transform -translate-x-1/2 -translate-y-1/2 ${
+                    className={`absolute top-1/2 left-1/2 cursor-pointer ${
                       hoveredFeature === index ? 'orbit-paused' : 'orbit-feature'
                     }`}
-                    style={{
-                      '--orbit-radius': '140px',
-                      '--orbit-duration': `${20 + index * 2}s`,
-                      '--orbit-delay': `${index * 5}s`,
-                    }}
                     onMouseEnter={() => setHoveredFeature(index)}
                     onMouseLeave={() => setHoveredFeature(null)}
+                    onClick={() => setHoveredFeature(hoveredFeature === index ? null : index)}
                   >
                     <div className={`relative transition-all duration-300 ${
-                      hoveredFeature === index ? 'scale-110' : 'scale-100'
+                      hoveredFeature === index ? 'scale-125' : 'scale-100'
                     }`}>
                       {/* Feature Card */}
-                      <div className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-sm ${
-                        hoveredFeature === index ? 'shadow-2xl glow-effect' : ''
-                      }`}>
+                      <div className={`w-20 h-20 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 ${
+                        hoveredFeature === index ? 'shadow-2xl' : 'shadow-lg'
+                      }`}
+                      style={{
+                        boxShadow: hoveredFeature === index ? 
+                          `0 0 30px ${feature.color.includes('green') ? 'rgba(34, 197, 94, 0.5)' : 
+                            feature.color.includes('blue') ? 'rgba(59, 130, 246, 0.5)' :
+                            feature.color.includes('purple') ? 'rgba(168, 85, 247, 0.5)' :
+                            'rgba(251, 146, 60, 0.5)'}`
+                          : 'none'
+                      }}>
                         <IconComponent className="w-7 h-7 text-white" />
                       </div>
 
-                      {/* Hover Information */}
+                      {/* Feature Label - Always visible when hovered */}
                       {hoveredFeature === index && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          className="absolute top-24 left-1/2 transform -translate-x-1/2 w-64 glass-effect rounded-lg p-4 z-30"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="absolute top-24 left-1/2 transform -translate-x-1/2 w-72 glass-effect rounded-lg p-4 z-50 pointer-events-none"
                         >
-                          <h3 className="text-white font-semibold mb-2 text-center">{feature.title}</h3>
+                          <h3 className="text-white font-bold mb-2 text-center text-lg">{feature.title}</h3>
                           <p className="text-gray-300 text-sm text-center leading-relaxed">{feature.description}</p>
                         </motion.div>
                       )}
+
+                      {/* Simple label below card - always visible */}
+                      <div className="absolute top-24 left-1/2 transform -translate-x-1/2 text-center pointer-events-none">
+                        <span className="text-xs text-gray-400 font-medium bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+                          {feature.title.split(' ')[0]}
+                        </span>
+                      </div>
                     </div>
                   </motion.div>
                 );
