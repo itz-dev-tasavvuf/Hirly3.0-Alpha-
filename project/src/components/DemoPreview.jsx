@@ -430,6 +430,14 @@ const DemoPreview = () => {
                                   <ArrowLeft className="w-4 h-4 mr-2" />
                                   Try Again
                                 </Button>
+                                <Button
+                                  onClick={closeDemoModal}
+                                  variant="outline"
+                                  className="w-full border-red-400/50 text-red-400 hover:bg-red-500/20 text-sm"
+                                >
+                                  <X className="w-4 h-4 mr-2" />
+                                  Close Demo
+                                </Button>
                               </div>
                             )}
                           </div>
