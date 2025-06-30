@@ -16,6 +16,7 @@ import EmployerDashboardPage from '@/pages/EmployerDashboardPage';
 import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
+import Careers from '@/pages/Careers';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import BrandedLoader from './components/BrandedLoader';
 import API from '@/pages/API.jsx';
@@ -38,6 +39,7 @@ function App() {
           <Route index element={<LandingPage />} />
           <Route path="pricing" element={<PricingPage />} />
           <Route path="about" element={<AboutPage />} />
+          <Route path="careers" element={<Careers />} />
         </Route>
         <Route path="/developer" element={<API />} />
         <Route path="/login" element={<SignInPage />} />

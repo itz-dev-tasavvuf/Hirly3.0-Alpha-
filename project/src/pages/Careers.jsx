@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Briefcase, X, Send } from 'lucide-react';
 
 const Careers = () => {
@@ -15,9 +14,9 @@ const Careers = () => {
     coverLetter: ''
   });
 
-  // Motion values for drag gestures
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-10, 10]);
+  // Motion values for drag gestures (temporarily disabled)
+  // const x = useMotionValue(0);
+  // const rotate = useTransform(x, [-200, 200], [-10, 10]);
 
   const departments = ['Engineering', 'Product', 'Design', 'Marketing', 'Sales', 'Operations'];
 
@@ -242,18 +241,11 @@ const Careers = () => {
     } else if (direction === 'right' && currentJobIndex < currentJobs.length - 1) {
       setCurrentJobIndex(currentJobIndex + 1);
     }
-    x.set(0);
   };
 
-  const handleDragEnd = (event, info) => {
-    const threshold = 100;
-    if (info.offset.x > threshold && currentJobIndex > 0) {
-      handleSwipe('left');
-    } else if (info.offset.x < -threshold && currentJobIndex < currentJobs.length - 1) {
-      handleSwipe('right');
-    } else {
-      x.set(0);
-    }
+  // Simplified drag handler (no framer-motion)
+  const handleDragEnd = () => {
+    // Drag functionality temporarily disabled
   };
 
   const handleJobClick = (job) => {
@@ -282,21 +274,12 @@ const Careers = () => {
       {/* Header */}
       <div className="pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold text-white mb-6"
-          >
-            Join the <span className="gradient-text">Hirly</span> Team
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl text-gray-300 max-w-3xl mx-auto"
-          >
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Join the <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Hirly</span> Team
+          </h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Help us revolutionize the future of work. Swipe through our open positions!
-          </motion.p>
+          </p>
         </div>
       </div>
 
@@ -324,23 +307,13 @@ const Careers = () => {
 
       {/* Job Cards */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative h-[600px] perspective-1000">
-          <AnimatePresence mode="wait">
-            {currentJobs.length > 0 && (
-              <motion.div
-                key={`${selectedDepartment}-${currentJobIndex}`}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
-                style={{ x, rotate }}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 w-full cursor-grab active:cursor-grabbing"
-                onClick={() => handleJobClick(currentJobs[currentJobIndex])}
-              >
+        <div className="relative h-[600px]">
+          {currentJobs.length > 0 && (
+            <div
+              key={`${selectedDepartment}-${currentJobIndex}`}
+              className="absolute inset-0 w-full cursor-pointer"
+              onClick={() => handleJobClick(currentJobs[currentJobIndex])}
+            >
                 <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-2xl p-6 flex flex-col">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -380,9 +353,8 @@ const Careers = () => {
                     Tap for details • Swipe to browse
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
 
         {/* Navigation */}
@@ -417,22 +389,11 @@ const Careers = () => {
       </div>
 
       {/* Job Details Modal */}
-      <AnimatePresence>
-        {selectedJob && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedJob(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
-              onClick={(e) => e.stopPropagation()}
-            >
+      {selectedJob && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedJob(null)}>
+          <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
+            onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">{selectedJob.title}</h2>
@@ -515,28 +476,16 @@ const Careers = () => {
                   Apply for this Position
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
       {/* Application Form Modal */}
-      <AnimatePresence>
-        {showApplicationForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowApplicationForm(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
-              onClick={(e) => e.stopPropagation()}
-            >
+      {showApplicationForm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowApplicationForm(false)}>
+          <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto scrollbar-hide"
+            onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Apply Now</h2>
                 <button
@@ -613,10 +562,9 @@ const Careers = () => {
                   Submit Application
                 </button>
               </form>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 };
