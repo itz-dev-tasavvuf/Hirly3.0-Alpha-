@@ -37,6 +37,29 @@ const DemoPreview = () => {
     }
   }, [showDemoModal, currentCardIndex]);
 
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (showDemoModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Prevent body scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      return () => {
+        // Restore body scroll
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showDemoModal]);
+
   const demoCards = [
     {
       type: 'instruction',
@@ -505,157 +528,167 @@ const DemoPreview = () => {
                             )}
                           </div>
                         ) : demoCards[currentCardIndex].type === 'job' ? (
-                          <div className="p-6 h-full flex flex-col overflow-hidden">
-                            {demoCards[currentCardIndex].image && (
-                              <div className="h-32 mb-4 rounded-xl overflow-hidden">
-                                <img 
-                                  src={demoCards[currentCardIndex].image}
-                                  alt="Company"
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            <div className="flex items-center mb-3">
-                              <h3 className="text-xl font-bold text-white mr-2">
-                                {demoCards[currentCardIndex].company}
-                              </h3>
-                              {demoCards[currentCardIndex].verified && (
-                                <Shield className="w-5 h-5 text-green-400" />
+                          <div className="p-6 h-full flex flex-col">
+                            <div className="flex-shrink-0">
+                              {demoCards[currentCardIndex].image && (
+                                <div className="h-32 mb-4 rounded-xl overflow-hidden">
+                                  <img 
+                                    src={demoCards[currentCardIndex].image}
+                                    alt="Company"
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
                               )}
+                              <div className="flex items-center mb-3">
+                                <h3 className="text-xl font-bold text-white mr-2">
+                                  {demoCards[currentCardIndex].company}
+                                </h3>
+                                {demoCards[currentCardIndex].verified && (
+                                  <Shield className="w-5 h-5 text-green-400" />
+                                )}
+                              </div>
+                              <h4 className="text-lg font-semibold text-white/90 mb-3">
+                                {demoCards[currentCardIndex].position}
+                              </h4>
+                              <p className="text-white/70 text-base mb-2">{demoCards[currentCardIndex].location}</p>
+                              <p className="text-green-300 font-semibold text-base mb-4">{demoCards[currentCardIndex].salary}</p>
+                              <p className="text-white/80 text-base leading-relaxed">
+                                {demoCards[currentCardIndex].description}
+                              </p>
                             </div>
-                            <h4 className="text-lg font-semibold text-white/90 mb-3">
-                              {demoCards[currentCardIndex].position}
-                            </h4>
-                            <p className="text-white/70 text-base mb-2">{demoCards[currentCardIndex].location}</p>
-                            <p className="text-green-300 font-semibold text-base mb-4">{demoCards[currentCardIndex].salary}</p>
-                            <p className="text-white/80 text-base flex-1 leading-relaxed overflow-hidden">
-                              {demoCards[currentCardIndex].description}
-                            </p>
                             
-                            {/* Tap to expand indicator */}
-                            {!isCardExpanded && (
-                              <div className="mt-4 flex items-center justify-center text-white/50 text-xs">
-                                <span>Tap to see more details</span>
-                              </div>
-                            )}
-                            
-                            {/* Expanded Content */}
-                            <AnimatePresence>
-                              {isCardExpanded && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="mt-4 pt-4 border-t border-white/20"
-                                >
-                                  <h5 className="text-white font-semibold mb-2">Benefits & Perks</h5>
-                                  <div className="space-y-2 mb-4">
-                                    <div className="flex items-center text-white/80 text-sm">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                      Health, Dental & Vision Insurance
-                                    </div>
-                                    <div className="flex items-center text-white/80 text-sm">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                      4 weeks PTO + Holidays
-                                    </div>
-                                    <div className="flex items-center text-white/80 text-sm">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                      Remote Work Flexibility
-                                    </div>
-                                    <div className="flex items-center text-white/80 text-sm">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                      $3,000 Learning Budget
-                                    </div>
-                                  </div>
-                                  <h5 className="text-white font-semibold mb-2">Required Skills</h5>
-                                  <div className="flex flex-wrap gap-2">
-                                    {['React', 'TypeScript', 'Node.js', 'AWS', 'Docker'].map((skill, i) => (
-                                      <span key={i} className="px-2 py-1 bg-blue-500/20 rounded text-blue-200 text-xs">
-                                        {skill}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </motion.div>
+                            {/* Scrollable expanded content */}
+                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                              {/* Tap to expand indicator */}
+                              {!isCardExpanded && (
+                                <div className="mt-4 flex items-center justify-center text-white/50 text-xs">
+                                  <span>Tap to see more details</span>
+                                </div>
                               )}
-                            </AnimatePresence>
+                              
+                              {/* Expanded Content */}
+                              <AnimatePresence>
+                                {isCardExpanded && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mt-4 pt-4 border-t border-white/20"
+                                  >
+                                    <h5 className="text-white font-semibold mb-2">Benefits & Perks</h5>
+                                    <div className="space-y-2 mb-4">
+                                      <div className="flex items-center text-white/80 text-sm">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                        Health, Dental & Vision Insurance
+                                      </div>
+                                      <div className="flex items-center text-white/80 text-sm">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                        4 weeks PTO + Holidays
+                                      </div>
+                                      <div className="flex items-center text-white/80 text-sm">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                        Remote Work Flexibility
+                                      </div>
+                                      <div className="flex items-center text-white/80 text-sm">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                        $3,000 Learning Budget
+                                      </div>
+                                    </div>
+                                    <h5 className="text-white font-semibold mb-2">Required Skills</h5>
+                                    <div className="flex flex-wrap gap-2">
+                                      {['React', 'TypeScript', 'Node.js', 'AWS', 'Docker'].map((skill, i) => (
+                                        <span key={i} className="px-2 py-1 bg-blue-500/20 rounded text-blue-200 text-xs">
+                                          {skill}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
                           </div>
                         ) : (
-                          <div className="p-6 h-full flex flex-col overflow-hidden">
-                            <div className="flex items-center mb-6">
-                              <div className="w-20 h-20 rounded-full overflow-hidden mr-4">
-                                <img 
-                                  src={demoCards[currentCardIndex].image}
-                                  alt={demoCards[currentCardIndex].name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div>
-                                <div className="flex items-center mb-1">
-                                  <h3 className="text-xl font-bold text-white mr-2">
-                                    {demoCards[currentCardIndex].name}
-                                  </h3>
-                                  {demoCards[currentCardIndex].verified && (
-                                    <Shield className="w-5 h-5 text-green-400" />
-                                  )}
+                          <div className="p-6 h-full flex flex-col">
+                            <div className="flex-shrink-0">
+                              <div className="flex items-center mb-6">
+                                <div className="w-20 h-20 rounded-full overflow-hidden mr-4">
+                                  <img 
+                                    src={demoCards[currentCardIndex].image}
+                                    alt={demoCards[currentCardIndex].name}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
-                                <p className="text-white/90 text-base">{demoCards[currentCardIndex].title}</p>
-                                <p className="text-white/70 text-sm">{demoCards[currentCardIndex].experience} experience</p>
+                                <div>
+                                  <div className="flex items-center mb-1">
+                                    <h3 className="text-xl font-bold text-white mr-2">
+                                      {demoCards[currentCardIndex].name}
+                                    </h3>
+                                    {demoCards[currentCardIndex].verified && (
+                                      <Shield className="w-5 h-5 text-green-400" />
+                                    )}
+                                  </div>
+                                  <p className="text-white/90 text-base">{demoCards[currentCardIndex].title}</p>
+                                  <p className="text-white/70 text-sm">{demoCards[currentCardIndex].experience} experience</p>
+                                </div>
+                              </div>
+                              <p className="text-white/70 mb-4 text-base">{demoCards[currentCardIndex].location}</p>
+                              <div className="flex flex-wrap gap-2 mb-6">
+                                {demoCards[currentCardIndex].skills?.map((skill, i) => (
+                                  <span key={i} className="px-3 py-2 bg-white/20 rounded-full text-white text-sm">
+                                    {skill}
+                                  </span>
+                                ))}
                               </div>
                             </div>
-                            <p className="text-white/70 mb-4 text-base">{demoCards[currentCardIndex].location}</p>
-                            <div className="flex flex-wrap gap-2 mb-6">
-                              {demoCards[currentCardIndex].skills?.map((skill, i) => (
-                                <span key={i} className="px-3 py-2 bg-white/20 rounded-full text-white text-sm">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
 
-                            {/* Tap to expand indicator */}
-                            {!isCardExpanded && (
-                              <div className="mt-auto flex items-center justify-center text-white/50 text-xs">
-                                <span>Tap to see resume details</span>
-                              </div>
-                            )}
-
-                            {/* Expanded Content */}
-                            <AnimatePresence>
-                              {isCardExpanded && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="mt-4 pt-4 border-t border-white/20"
-                                >
-                                  <h5 className="text-white font-semibold mb-3">Resume Summary</h5>
-                                  <p className="text-white/80 text-sm mb-4 leading-relaxed">
-                                    Experienced frontend developer with a passion for creating intuitive user interfaces. 
-                                    Led multiple successful product launches and mentored junior developers. 
-                                    Strong background in React ecosystem and modern web technologies.
-                                  </p>
-                                  
-                                  <h5 className="text-white font-semibold mb-2">Recent Experience</h5>
-                                  <div className="space-y-3 mb-4">
-                                    <div className="text-sm">
-                                      <div className="text-white/90 font-medium">Senior Frontend Developer</div>
-                                      <div className="text-white/70">TechCorp Inc. • 2022-2024</div>
-                                      <div className="text-white/60 text-xs mt-1">Led frontend architecture for 3 major products</div>
-                                    </div>
-                                    <div className="text-sm">
-                                      <div className="text-white/90 font-medium">Frontend Developer</div>
-                                      <div className="text-white/70">StartupXYZ • 2020-2022</div>
-                                      <div className="text-white/60 text-xs mt-1">Built responsive web applications from scratch</div>
-                                    </div>
-                                  </div>
-                                  
-                                  <h5 className="text-white font-semibold mb-2">Education</h5>
-                                  <div className="text-sm text-white/80">
-                                    <div>B.S. Computer Science</div>
-                                    <div className="text-white/60">University of Technology • 2020</div>
-                                  </div>
-                                </motion.div>
+                            {/* Scrollable expanded content */}
+                            <div className={`flex-1 ${isCardExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                              {/* Tap to expand indicator */}
+                              {!isCardExpanded && (
+                                <div className="flex items-center justify-center text-white/50 text-xs">
+                                  <span>Tap to see resume details</span>
+                                </div>
                               )}
-                            </AnimatePresence>
+
+                              {/* Expanded Content */}
+                              <AnimatePresence>
+                                {isCardExpanded && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="pt-4 border-t border-white/20"
+                                  >
+                                    <h5 className="text-white font-semibold mb-3">Resume Summary</h5>
+                                    <p className="text-white/80 text-sm mb-4 leading-relaxed">
+                                      Experienced frontend developer with a passion for creating intuitive user interfaces. 
+                                      Led multiple successful product launches and mentored junior developers. 
+                                      Strong background in React ecosystem and modern web technologies.
+                                    </p>
+                                    
+                                    <h5 className="text-white font-semibold mb-2">Recent Experience</h5>
+                                    <div className="space-y-3 mb-4">
+                                      <div className="text-sm">
+                                        <div className="text-white/90 font-medium">Senior Frontend Developer</div>
+                                        <div className="text-white/70">TechCorp Inc. • 2022-2024</div>
+                                        <div className="text-white/60 text-xs mt-1">Led frontend architecture for 3 major products</div>
+                                      </div>
+                                      <div className="text-sm">
+                                        <div className="text-white/90 font-medium">Frontend Developer</div>
+                                        <div className="text-white/70">StartupXYZ • 2020-2022</div>
+                                        <div className="text-white/60 text-xs mt-1">Built responsive web applications from scratch</div>
+                                      </div>
+                                    </div>
+                                    
+                                    <h5 className="text-white font-semibold mb-2">Education</h5>
+                                    <div className="text-sm text-white/80">
+                                      <div>B.S. Computer Science</div>
+                                      <div className="text-white/60">University of Technology • 2020</div>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
                           </div>
                         )}
                       </div>
