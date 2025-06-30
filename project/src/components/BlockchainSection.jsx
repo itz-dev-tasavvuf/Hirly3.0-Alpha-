@@ -22,6 +22,14 @@ const BlockchainSection = () => {
       color: 'text-purple-400',
       bgColor: 'bg-purple-500/20',
       glowColor: 'shadow-purple-500/30'
+    },
+    {
+      icon: Lock,
+      title: 'Profile Verification',
+      description: 'User profiles are cryptographically secured',
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/20',
+      glowColor: 'shadow-blue-500/30'
     }
   ];
 
@@ -94,8 +102,8 @@ const BlockchainSection = () => {
               {/* Verification Steps - Triangular Formation */}
               {verificationSteps.map((step, index) => {
                 const IconComponent = step.icon;
-                // Create triangular positioning - spread them out more
-                const angles = [120, 240]; // 120 degrees apart for triangle formation
+                // Create perfect triangular positioning - 120 degrees apart
+                const angles = [0, 120, 240]; // Perfect triangle formation
                 const angle = angles[index];
 
                 return (
@@ -104,41 +112,23 @@ const BlockchainSection = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.6 + index * 0.3 }}
+                    transition={{ delay: 0.6 + index * 0.2 }}
                     className="absolute cursor-pointer orbit-feature"
                     style={{
                       top: '50%',
                       left: '50%',
                       transform: `translate(-50%, -50%) rotate(${angle}deg) translateX(140px) rotate(-${angle}deg)`,
-                      '--orbit-delay': `${index * 4}s`
+                      '--orbit-delay': `${index * 2.5}s`
                     }}
-                    onMouseEnter={() => setActiveStep(index)}
-                    onMouseLeave={() => setActiveStep(-1)}
                   >
                     <motion.div
-                      className={`relative transition-all duration-300 ${
-                        activeStep === index ? 'scale-110' : 'scale-100'
-                      }`}
+                      className="relative transition-all duration-300"
                       whileHover={{ scale: 1.05 }}
                     >
-                      {/* Step Circle */}
-                      <div className={`w-16 h-16 ${step.bgColor} rounded-full flex items-center justify-center border-2 border-white/20 backdrop-blur-xl transition-all duration-300 ${
-                        activeStep === index ? `${step.glowColor} shadow-2xl` : 'shadow-lg'
-                      }`}>
+                      {/* Step Circle - No hover interactions */}
+                      <div className={`w-16 h-16 ${step.bgColor} rounded-full flex items-center justify-center border-2 border-white/20 backdrop-blur-xl shadow-lg`}>
                         <IconComponent className={`w-8 h-8 ${step.color}`} />
                       </div>
-
-                      {/* Hover Info Only */}
-                      {activeStep === index && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute top-20 left-1/2 transform -translate-x-1/2 w-48 glass-effect rounded-lg p-3 z-30 pointer-events-none"
-                        >
-                          <h4 className="text-white font-semibold text-sm mb-1">{step.title}</h4>
-                          <p className="text-gray-300 text-xs">{step.description}</p>
-                        </motion.div>
-                      )}
                     </motion.div>
                   </motion.div>
                 );
