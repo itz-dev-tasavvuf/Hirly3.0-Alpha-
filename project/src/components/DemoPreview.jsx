@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Play, Pause, Volume2, X, Heart, MessageCircle, Shield, ArrowLeft, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -10,12 +10,37 @@ const DemoPreview = () => {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
+  
+  // Motion values for drag gestures
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-30, 30]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+  // Keyboard event handler
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (!showDemoModal || currentCardIndex >= demoCards.length - 1) return;
+      
+      if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
+        handleSwipe('left');
+      } else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
+        handleSwipe('right');
+      } else if (event.key === 'Escape') {
+        closeDemoModal();
+      }
+    };
+
+    if (showDemoModal) {
+      window.addEventListener('keydown', handleKeyPress);
+      return () => window.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [showDemoModal, currentCardIndex]);
 
   const demoCards = [
     {
       type: 'instruction',
       title: 'Welcome to Hirly Demo!',
-      content: 'Swipe right (💚) to like a job or candidate, swipe left (❌) to pass. Try it out!',
+      content: 'Swipe right (→) to like, swipe left (←) to pass. Use arrow keys or drag the card!',
       bgColor: 'from-purple-600 to-blue-600'
     },
     {
@@ -80,12 +105,25 @@ const DemoPreview = () => {
 
   const handleSwipe = (direction) => {
     setSwipeDirection(direction);
+    // Reset motion values
+    x.set(direction === 'left' ? -300 : 300);
+    
     setTimeout(() => {
       if (currentCardIndex < demoCards.length - 1) {
         setCurrentCardIndex(prev => prev + 1);
         setSwipeDirection(null);
+        x.set(0); // Reset position
       }
     }, 300);
+  };
+
+  const handleDragEnd = (event, info) => {
+    const threshold = 100;
+    if (Math.abs(info.offset.x) > threshold) {
+      handleSwipe(info.offset.x > 0 ? 'right' : 'left');
+    } else {
+      x.set(0); // Snap back to center
+    }
   };
 
   const handleContactSales = () => {
@@ -104,6 +142,7 @@ const DemoPreview = () => {
     setShowDemoModal(false);
     setCurrentCardIndex(0);
     setSwipeDirection(null);
+    x.set(0);
   };
 
   return (
@@ -327,21 +366,35 @@ const DemoPreview = () => {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-md mx-auto"
+                className="relative w-full max-w-sm mx-auto"
               >
                 {/* Close Button */}
                 <button
                   onClick={closeDemoModal}
                   className="absolute -top-12 right-0 text-white/70 hover:text-white z-10"
                 >
-                  <X className="w-8 h-8" />
+                  <X className="w-6 h-6" />
                 </button>
 
+                {/* Instructions */}
+                <div className="absolute -top-12 left-0 text-white/70 text-sm">
+                  Use ← → arrow keys or drag to swipe
+                </div>
+
                 {/* Card Stack */}
-                <div className="relative h-[600px] perspective-1000">
+                <div className="relative h-[500px] perspective-1000">
                   {currentCardIndex < demoCards.length && (
                     <motion.div
                       key={currentCardIndex}
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.2}
+                      onDragEnd={handleDragEnd}
+                      style={{ 
+                        x,
+                        rotate,
+                        opacity
+                      }}
                       initial={{ scale: 1, rotateY: 0, x: 0 }}
                       animate={{
                         x: swipeDirection === 'left' ? -300 : swipeDirection === 'right' ? 300 : 0,
@@ -349,30 +402,30 @@ const DemoPreview = () => {
                         opacity: swipeDirection ? 0 : 1
                       }}
                       transition={{ duration: 0.3 }}
-                      className="absolute inset-0 w-full h-full"
+                      className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"
                     >
-                      <div className={`w-full h-full bg-gradient-to-br ${demoCards[currentCardIndex].bgColor} rounded-3xl shadow-2xl overflow-hidden`}>
+                      <div className={`w-full h-full bg-gradient-to-br ${demoCards[currentCardIndex].bgColor} rounded-2xl shadow-2xl overflow-hidden`}>
                         {demoCards[currentCardIndex].type === 'instruction' ? (
-                          <div className="p-8 flex flex-col items-center justify-center h-full text-center">
-                            <h2 className="text-2xl font-bold text-white mb-6">
+                          <div className="p-6 flex flex-col items-center justify-center h-full text-center">
+                            <h2 className="text-xl font-bold text-white mb-4">
                               {demoCards[currentCardIndex].title}
                             </h2>
-                            <p className="text-white/90 text-lg leading-relaxed">
+                            <p className="text-white/90 text-base leading-relaxed">
                               {demoCards[currentCardIndex].content}
                             </p>
                             {currentCardIndex === demoCards.length - 1 && (
-                              <div className="mt-8 space-y-4 w-full">
+                              <div className="mt-6 space-y-3 w-full">
                                 <Button
                                   onClick={handleContactSales}
-                                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                                  className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 text-sm"
                                 >
                                   <Mail className="w-4 h-4 mr-2" />
-                                  Contact Sales for Full Demo
+                                  Contact Sales
                                 </Button>
                                 <Button
                                   onClick={handleGoBack}
                                   variant="outline"
-                                  className="w-full border-white/30 text-white hover:bg-white/20"
+                                  className="w-full border-white/30 text-white hover:bg-white/20 text-sm"
                                 >
                                   <ArrowLeft className="w-4 h-4 mr-2" />
                                   Try Again
@@ -381,9 +434,9 @@ const DemoPreview = () => {
                             )}
                           </div>
                         ) : demoCards[currentCardIndex].type === 'job' ? (
-                          <div className="p-6 h-full flex flex-col">
+                          <div className="p-5 h-full flex flex-col">
                             {demoCards[currentCardIndex].image && (
-                              <div className="h-32 mb-4 rounded-2xl overflow-hidden">
+                              <div className="h-24 mb-3 rounded-xl overflow-hidden">
                                 <img 
                                   src={demoCards[currentCardIndex].image}
                                   alt="Company"
@@ -392,24 +445,24 @@ const DemoPreview = () => {
                               </div>
                             )}
                             <div className="flex items-center mb-2">
-                              <h3 className="text-xl font-bold text-white mr-2">
+                              <h3 className="text-lg font-bold text-white mr-2">
                                 {demoCards[currentCardIndex].company}
                               </h3>
                               {demoCards[currentCardIndex].verified && (
-                                <Shield className="w-5 h-5 text-green-400" />
+                                <Shield className="w-4 h-4 text-green-400" />
                               )}
                             </div>
-                            <h4 className="text-lg font-semibold text-white/90 mb-2">
+                            <h4 className="text-base font-semibold text-white/90 mb-2">
                               {demoCards[currentCardIndex].position}
                             </h4>
-                            <p className="text-white/70 mb-2">{demoCards[currentCardIndex].location}</p>
-                            <p className="text-green-300 font-semibold mb-4">{demoCards[currentCardIndex].salary}</p>
+                            <p className="text-white/70 text-sm mb-1">{demoCards[currentCardIndex].location}</p>
+                            <p className="text-green-300 font-semibold text-sm mb-3">{demoCards[currentCardIndex].salary}</p>
                             <p className="text-white/80 text-sm flex-1">{demoCards[currentCardIndex].description}</p>
                           </div>
                         ) : (
-                          <div className="p-6 h-full flex flex-col">
-                            <div className="flex items-center justify-center mb-6">
-                              <div className="w-20 h-20 rounded-full overflow-hidden mr-4">
+                          <div className="p-5 h-full flex flex-col">
+                            <div className="flex items-center mb-4">
+                              <div className="w-16 h-16 rounded-full overflow-hidden mr-3">
                                 <img 
                                   src={demoCards[currentCardIndex].image}
                                   alt={demoCards[currentCardIndex].name}
@@ -418,21 +471,21 @@ const DemoPreview = () => {
                               </div>
                               <div>
                                 <div className="flex items-center">
-                                  <h3 className="text-xl font-bold text-white mr-2">
+                                  <h3 className="text-lg font-bold text-white mr-2">
                                     {demoCards[currentCardIndex].name}
                                   </h3>
                                   {demoCards[currentCardIndex].verified && (
-                                    <Shield className="w-5 h-5 text-green-400" />
+                                    <Shield className="w-4 h-4 text-green-400" />
                                   )}
                                 </div>
-                                <p className="text-white/90">{demoCards[currentCardIndex].title}</p>
-                                <p className="text-white/70 text-sm">{demoCards[currentCardIndex].experience} experience</p>
+                                <p className="text-white/90 text-sm">{demoCards[currentCardIndex].title}</p>
+                                <p className="text-white/70 text-xs">{demoCards[currentCardIndex].experience} experience</p>
                               </div>
                             </div>
-                            <p className="text-white/70 mb-4">{demoCards[currentCardIndex].location}</p>
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <p className="text-white/70 mb-3 text-sm">{demoCards[currentCardIndex].location}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
                               {demoCards[currentCardIndex].skills?.map((skill, i) => (
-                                <span key={i} className="px-3 py-1 bg-white/20 rounded-full text-white text-sm">
+                                <span key={i} className="px-2 py-1 bg-white/20 rounded-full text-white text-xs">
                                   {skill}
                                 </span>
                               ))}
@@ -446,32 +499,32 @@ const DemoPreview = () => {
 
                 {/* Swipe Actions */}
                 {currentCardIndex < demoCards.length - 1 && (
-                  <div className="flex justify-center space-x-8 mt-6">
+                  <div className="flex justify-center space-x-6 mt-4">
                     <Button
                       onClick={() => handleSwipe('left')}
                       variant="outline"
-                      size="lg"
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/20 rounded-full w-16 h-16"
+                      size="sm"
+                      className="border-red-500/50 text-red-400 hover:bg-red-500/20 rounded-full w-12 h-12"
                     >
-                      <X className="w-8 h-8" />
+                      <X className="w-5 h-5" />
                     </Button>
                     <Button
                       onClick={() => handleSwipe('right')}
                       variant="outline"
-                      size="lg"
-                      className="border-green-500/50 text-green-400 hover:bg-green-500/20 rounded-full w-16 h-16"
+                      size="sm"
+                      className="border-green-500/50 text-green-400 hover:bg-green-500/20 rounded-full w-12 h-12"
                     >
-                      <Heart className="w-8 h-8" />
+                      <Heart className="w-5 h-5" />
                     </Button>
                   </div>
                 )}
 
                 {/* Progress Indicator */}
-                <div className="flex justify-center space-x-2 mt-6">
+                <div className="flex justify-center space-x-1 mt-4">
                   {demoCards.map((_, index) => (
                     <div
                       key={index}
-                      className={`w-2 h-2 rounded-full transition-colors ${
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${
                         index <= currentCardIndex ? 'bg-white' : 'bg-white/30'
                       }`}
                     />
