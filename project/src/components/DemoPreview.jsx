@@ -242,15 +242,140 @@ const DemoPreview = () => {
         >
           {/* Video Container */}
           <div className="relative glass-effect rounded-3xl overflow-hidden glow-effect">
-            <div className="relative w-full h-0 pb-[55.995599559956%] rounded-xl overflow-hidden">
-              <iframe
-                src="https://www.loom.com/embed/24b56e7fd68d48918118132e8fad8350?sid=a20b80c3-acdf-4198-8d14-639335e1f467"
-                frameBorder="0"
-                webKitAllowFullScreen
-                mozAllowFullScreen
-                allowFullScreen
-                className="absolute top-0 left-0 w-full h-full rounded-xl"
-                title="Hirly Demo Video"
+            <div className="aspect-video bg-gradient-to-br from-purple-900/50 to-pink-900/50 flex items-center justify-center relative">
+              {/* Mock Video Content */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-purple-900 opacity-90" />
+              
+              {/* Demo Interface Mockup */}
+              <div className="relative z-10 w-full h-full flex items-center justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 w-full max-w-4xl">
+                  {/* Mobile App Preview */}
+                  <div className="flex justify-center">
+                    <div className="w-48 h-80 bg-black rounded-3xl p-2 shadow-2xl">
+                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex flex-col p-4">
+                        <div className="flex justify-center mb-4">
+                          <div className="w-12 h-1 bg-white/30 rounded-full" />
+                        </div>
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                          <div className="w-32 h-40 bg-white/10 rounded-2xl mb-4 flex items-center justify-center">
+                            <span className="text-white text-xs">Profile Card</span>
+                          </div>
+                          <div className="flex space-x-4">
+                            <div className="w-12 h-12 bg-red-500/30 rounded-full flex items-center justify-center">
+                              <span className="text-red-400">✕</span>
+                            </div>
+                            <div className="w-12 h-12 bg-green-500/30 rounded-full flex items-center justify-center">
+                              <span className="text-green-400">♥</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Features List */}
+                  <div className="space-y-4">
+                    <h3 className="text-white font-bold text-lg mb-4">Key Features</h3>
+                    {[
+                      'Swipe-based matching',
+                      'Blockchain verification',
+                      'AI-powered recommendations',
+                      'Smart contract agreements',
+                      'Real-time messaging'
+                    ].map((feature, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex items-center text-gray-300"
+                      >
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mr-3" />
+                        <span>{feature}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="space-y-4">
+                    <h3 className="text-white font-bold text-lg mb-4">Platform Stats</h3>
+                    {[
+                      { label: 'Active Users', value: '50K+' },
+                      { label: 'Successful Matches', value: '12K+' },
+                      { label: 'Verified Companies', value: '2.5K+' },
+                      { label: 'Average Match Time', value: '3 days' }
+                    ].map((stat, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 }}
+                        className="glass-effect rounded-lg p-3"
+                      >
+                        <div className="text-purple-300 font-semibold">{stat.value}</div>
+                        <div className="text-gray-400 text-sm">{stat.label}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Play Button Overlay */}
+              <motion.button
+                onClick={handlePlayDemo}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="absolute inset-0 flex items-center justify-center z-20 bg-black/20 hover:bg-black/30 transition-colors"
+              >
+                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                  {isPlaying ? (
+                    <Pause className="w-8 h-8 text-white" />
+                  ) : (
+                    <Play className="w-8 h-8 text-white ml-1" />
+                  )}
+                </div>
+              </motion.button>
+            </div>
+
+            {/* Video Controls */}
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={handlePlayDemo}
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </Button>
+                <span className="text-white text-sm">2:34 / 4:12</span>
+              </div>
+              
+              <Button
+                onClick={handleWatchFullDemo}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/20"
+              >
+                Watch Full Demo
+              </Button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+              <motion.div
+                initial={{ width: '0%' }}
+                animate={{ width: isPlaying ? '60%' : '0%' }}
+                transition={{ duration: 2 }}
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
               />
             </div>
           </div>
