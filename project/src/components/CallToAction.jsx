@@ -31,16 +31,6 @@ const CallToAction = () => {
         >
           {/* Main CTA Card */}
           <div className="glass-effect rounded-3xl p-12 md:p-16 glow-effect max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex items-center justify-center mb-6"
-            >
-              <Sparkles className="w-8 h-8 text-purple-400 mr-3" />
-              <span className="text-purple-300 font-semibold text-lg">Ready to Transform Your Career?</span>
-            </motion.div>
-
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
