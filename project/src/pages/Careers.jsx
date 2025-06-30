@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Briefcase, X, Send } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
 
 const Careers = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('Engineering');
@@ -268,10 +266,8 @@ const Careers = () => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    toast({
-      title: "Application Submitted! 🎉",
-      description: "Thank you for your interest in Hirly. We'll be in touch soon!"
-    });
+    // Simple alert instead of toast to avoid dependency issues
+    alert("Application Submitted! 🎉\nThank you for your interest in Hirly. We'll be in touch soon!");
     setShowApplicationForm(false);
     setSelectedJob(null);
     setFormData({ name: '', email: '', phone: '', resume: null, coverLetter: '' });
@@ -308,21 +304,20 @@ const Careers = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="flex flex-wrap justify-center gap-4">
           {departments.map((dept) => (
-            <Button
+            <button
               key={dept}
               onClick={() => {
                 setSelectedDepartment(dept);
                 setCurrentJobIndex(0);
               }}
-              variant={selectedDepartment === dept ? 'default' : 'outline'}
-              className={`${
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                 selectedDepartment === dept
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  : 'border-white/30 text-white hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                  : 'border border-white/30 text-white hover:bg-white/10'
               }`}
             >
               {dept}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -392,15 +387,13 @@ const Careers = () => {
 
         {/* Navigation */}
         <div className="flex justify-center items-center mt-8 space-x-6">
-          <Button
+          <button
             onClick={() => handleSwipe('left')}
             disabled={currentJobIndex === 0}
-            variant="outline"
-            size="icon"
-            className="border-white/30 text-white hover:bg-white/10 disabled:opacity-30"
+            className="p-3 rounded-lg border border-white/30 text-white hover:bg-white/10 disabled:opacity-30 transition-all duration-300"
           >
             <ArrowLeft className="w-5 h-5" />
-          </Button>
+          </button>
           
           <div className="flex space-x-2">
             {currentJobs.map((_, index) => (
@@ -413,15 +406,13 @@ const Careers = () => {
             ))}
           </div>
           
-          <Button
+          <button
             onClick={() => handleSwipe('right')}
             disabled={currentJobIndex === currentJobs.length - 1}
-            variant="outline"
-            size="icon"
-            className="border-white/30 text-white hover:bg-white/10 disabled:opacity-30"
+            className="p-3 rounded-lg border border-white/30 text-white hover:bg-white/10 disabled:opacity-30 transition-all duration-300"
           >
             <ArrowRight className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -450,14 +441,12 @@ const Careers = () => {
                     <span>{selectedJob.department}</span>
                   </div>
                 </div>
-                <Button
+                <button
                   onClick={() => setSelectedJob(null)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10"
+                  className="p-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300"
                 >
                   <X className="w-6 h-6" />
-                </Button>
+                </button>
               </div>
 
               <div className="space-y-6">
@@ -519,12 +508,12 @@ const Careers = () => {
                   </div>
                 </div>
 
-                <Button
+                <button
                   onClick={handleApply}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-lg transition-all duration-300"
                 >
                   Apply for this Position
-                </Button>
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -550,14 +539,12 @@ const Careers = () => {
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Apply Now</h2>
-                <Button
+                <button
                   onClick={() => setShowApplicationForm(false)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10"
+                  className="p-2 rounded-lg text-white hover:bg-white/10 transition-all duration-300"
                 >
                   <X className="w-6 h-6" />
-                </Button>
+                </button>
               </div>
 
               <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -618,13 +605,13 @@ const Careers = () => {
                   />
                 </div>
 
-                <Button
+                <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Submit Application
-                </Button>
+                </button>
               </form>
             </motion.div>
           </motion.div>
