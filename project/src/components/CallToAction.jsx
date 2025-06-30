@@ -60,8 +60,7 @@ const CallToAction = () => {
               transition={{ delay: 0.2 }}
               className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto"
             >
-              No signup needed. Just a better way to hire and get hired.
-              Experience the future of job hunting today.
+              Are you ready? Experience the future of job hunting today.
             </motion.p>
 
             <motion.div
@@ -72,7 +71,7 @@ const CallToAction = () => {
               className="flex justify-center mb-12"
             >
               <Button
-                onClick={() => window.location.href = '/signup'}
+                onClick={() => window.location.href = '/onboarding'}
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-14 py-7 rounded-2xl text-xl glow-effect transform hover:scale-105 transition-all duration-300 shadow-lg"
               >
