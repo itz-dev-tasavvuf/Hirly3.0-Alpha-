@@ -290,6 +290,10 @@ const Careers = () => {
     setIsCardExpanded(!isCardExpanded);
   };
 
+  const handleBackgroundClick = () => {
+    setIsCardExpanded(false);
+  };
+
   const handleJobClick = (job) => {
     if (typeof job === 'object') {
       setSelectedJob(job);
@@ -333,11 +337,14 @@ const Careers = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="flex flex-wrap justify-center gap-4">
           {departments.map((dept) => (
-            <button
+            <motion.button
               key={dept}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 setSelectedDepartment(dept);
                 setCurrentJobIndex(0);
+                setIsCardExpanded(false); // Reset expansion when changing departments
               }}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                 selectedDepartment === dept
@@ -346,13 +353,20 @@ const Careers = () => {
               }`}
             >
               {dept}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* Job Cards */}
-      <div className="max-w-sm mx-auto px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        key={selectedDepartment}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="max-w-sm mx-auto px-4 sm:px-6 lg:px-8" 
+        onClick={handleBackgroundClick}
+      >
         <div className={`relative perspective-1000 transition-all duration-300 ${
           isCardExpanded ? 'h-[600px]' : 'h-[500px]'
         }`}>
@@ -369,14 +383,16 @@ const Careers = () => {
                   rotate,
                   opacity
                 }}
-                initial={{ scale: 1, rotateY: 0, x: 0 }}
+                initial={{ scale: 0.8, opacity: 0, y: 50 }}
                 animate={{
                   x: swipeDirection === 'left' ? -300 : swipeDirection === 'right' ? 300 : 0,
                   rotate: swipeDirection === 'left' ? -30 : swipeDirection === 'right' ? 30 : 0,
                   opacity: swipeDirection ? 0 : 1,
-                  scale: isCardExpanded ? 1.02 : 1
+                  scale: isCardExpanded ? 1.02 : 1,
+                  y: 0
                 }}
-                transition={{ duration: 0.3 }}
+                exit={{ scale: 0.8, opacity: 0, y: -50 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className={`absolute inset-0 w-full h-full ${
                   isCardExpanded ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
                 }`}
@@ -385,18 +401,13 @@ const Careers = () => {
                 <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-2xl overflow-hidden">
                   <div className="p-6 h-full flex flex-col">
                     <div className="flex-shrink-0">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-white mb-2">
-                            {currentJobs[currentJobIndex].title}
-                          </h3>
-                          <div className="flex items-center text-white/80 mb-2">
-                            <Briefcase className="w-4 h-4 mr-2" />
-                            <span>{currentJobs[currentJobIndex].department}</span>
-                          </div>
-                        </div>
-                        <div className="text-white/60 text-sm">
-                          {currentJobIndex + 1} / {currentJobs.length}
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-white mb-2">
+                          {currentJobs[currentJobIndex].title}
+                        </h3>
+                        <div className="flex items-center text-white/80 mb-2">
+                          <Briefcase className="w-4 h-4 mr-2" />
+                          <span>{currentJobs[currentJobIndex].department}</span>
                         </div>
                       </div>
 
@@ -505,18 +516,23 @@ const Careers = () => {
 
         {/* Navigation */}
         <div className="flex justify-center items-center mt-8 space-x-6">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleSwipe('left')}
             disabled={currentJobIndex === 0}
             className="p-3 rounded-lg border border-white/30 text-white hover:bg-white/10 disabled:opacity-30 transition-all duration-300"
           >
             <ArrowLeft className="w-5 h-5" />
-          </button>
+          </motion.button>
           
           <div className="flex space-x-2">
             {currentJobs.map((_, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ scale: 0.8 }}
+                animate={{ scale: index === currentJobIndex ? 1.2 : 1 }}
+                transition={{ duration: 0.2 }}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   index === currentJobIndex ? 'bg-white' : 'bg-white/30'
                 }`}
@@ -524,20 +540,22 @@ const Careers = () => {
             ))}
           </div>
           
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleSwipe('right')}
             disabled={currentJobIndex === currentJobs.length - 1}
             className="p-3 rounded-lg border border-white/30 text-white hover:bg-white/10 disabled:opacity-30 transition-all duration-300"
           >
             <ArrowRight className="w-5 h-5" />
-          </button>
+          </motion.button>
         </div>
 
         {/* Instructions */}
         <div className="text-center text-white/60 text-sm mt-4">
           Use keyboard arrows (← →) or drag cards to browse jobs
         </div>
-      </div>
+      </motion.div>
 
       {/* Job Details Modal */}
       <AnimatePresence>
