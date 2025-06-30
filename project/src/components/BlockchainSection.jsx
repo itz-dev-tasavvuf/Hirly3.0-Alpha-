@@ -4,32 +4,32 @@ import { Shield, Lock, CheckCircle, Zap } from 'lucide-react';
 import algorandFullLogoWhite from '@/assets/algorand_full_logo_white.png';
 
 const BlockchainSection = () => {
-  const [hoveredFeature, setHoveredFeature] = useState(null);
+  const [activeStep, setActiveStep] = useState(0);
 
-  const features = [
-    {
-      icon: Shield,
-      title: 'Identity Verification',
-      description: 'Every user profile is cryptographically verified on the Algorand blockchain',
-      color: 'from-green-500 to-emerald-500'
-    },
+  const verificationSteps = [
     {
       icon: Lock,
-      title: 'Secure Job Posts',
-      description: 'All job listings are authenticated to eliminate fake postings and scams',
-      color: 'from-blue-500 to-cyan-500'
+      title: 'Identity Lock',
+      description: 'User identity gets cryptographically verified',
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/20',
+      glowColor: 'shadow-blue-500/30'
+    },
+    {
+      icon: Shield,
+      title: 'Job Authentication',
+      description: 'Job posts are validated and secured',
+      color: 'text-green-400',
+      bgColor: 'bg-green-500/20',
+      glowColor: 'shadow-green-500/30'
     },
     {
       icon: CheckCircle,
-      title: 'Immutable Records',
-      description: 'Employment history and credentials stored permanently and transparently',
-      color: 'from-purple-500 to-violet-500'
-    },
-    {
-      icon: Zap,
-      title: 'Instant Verification',
-      description: 'Real-time verification process takes seconds, not days',
-      color: 'from-orange-500 to-yellow-500'
+      title: 'Trust Established',
+      description: 'Secure connection between verified parties',
+      color: 'text-purple-400',
+      bgColor: 'bg-purple-500/20',
+      glowColor: 'shadow-purple-500/30'
     }
   ];
 
@@ -85,43 +85,28 @@ const BlockchainSection = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative w-full max-w-2xl mx-auto h-[500px]">
-              {/* Orbit Ring */}
-              <div className="orbit-ring"></div>
-              
-              {/* Inner glow ring */}
-              <div className="absolute top-1/2 left-1/2 w-80 h-80 border border-purple-500/30 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_50px_rgba(139,92,246,0.3)]"></div>
-              
+            <div className="relative w-full max-w-lg mx-auto h-[400px]">
               {/* Central Shield Hub */}
               <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                whileInView={{ scale: 1, rotate: 0 }}
+                initial={{ scale: 0, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
               >
-                <div className="relative">
-                  {/* Main shield */}
-                  <div className="w-32 h-32 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl border-2 border-white/20 backdrop-blur-xl pulse-glow">
-                    <Shield className="w-16 h-16 text-white drop-shadow-lg" />
-                  </div>
-                  
-                  {/* Rotating border */}
-                  <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 animate-spin" style={{ animationDuration: '4s' }}>
-                    <div className="w-full h-full bg-slate-900 rounded-3xl m-0.5"></div>
-                  </div>
-                  
-                  {/* Center content (shield) */}
-                  <div className="absolute inset-0 w-32 h-32 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center">
-                    <Shield className="w-16 h-16 text-white drop-shadow-lg" />
-                  </div>
+                <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl border-2 border-white/20 backdrop-blur-xl pulse-glow">
+                  <Shield className="w-12 h-12 text-white drop-shadow-lg" />
                 </div>
               </motion.div>
 
-              {/* Orbiting Feature Cards */}
-              {features.map((feature, index) => {
-                const IconComponent = feature.icon;
-                const angle = (index * 90) * (Math.PI / 180); // Start positions: 0°, 90°, 180°, 270°
+              {/* Verification Steps */}
+              {verificationSteps.map((step, index) => {
+                const IconComponent = step.icon;
+                const positions = [
+                  { top: '15%', left: '50%', transform: 'translateX(-50%)' }, // Top
+                  { top: '50%', right: '10%', transform: 'translateY(-50%)' }, // Right
+                  { top: '50%', left: '10%', transform: 'translateY(-50%)' }, // Left
+                ];
 
                 return (
                   <motion.div
@@ -129,109 +114,123 @@ const BlockchainSection = () => {
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.8 + index * 0.15 }}
-                    className={`absolute cursor-pointer z-20 ${
-                      hoveredFeature === index ? '' : 'orbit-feature'
-                    }`}
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      transform: `translate(-50%, -50%) rotate(${angle * (180/Math.PI)}deg) translateX(160px) rotate(-${angle * (180/Math.PI)}deg)`,
-                    }}
-                    onMouseEnter={() => setHoveredFeature(index)}
-                    onMouseLeave={() => setHoveredFeature(null)}
-                    onClick={() => setHoveredFeature(hoveredFeature === index ? null : index)}
+                    transition={{ delay: 0.6 + index * 0.2 }}
+                    className="absolute cursor-pointer"
+                    style={positions[index]}
+                    onMouseEnter={() => setActiveStep(index)}
+                    onMouseLeave={() => setActiveStep(-1)}
                   >
-                    <motion.div 
-                      className={`relative transition-all duration-500 ${
-                        hoveredFeature === index ? 'scale-110 z-50' : 'scale-100'
+                    <motion.div
+                      className={`relative transition-all duration-300 ${
+                        activeStep === index ? 'scale-110' : 'scale-100'
                       }`}
                       whileHover={{ scale: 1.05 }}
                     >
-                      {/* Feature Card - More like the screenshot */}
-                      <div className={`min-w-[140px] h-12 bg-gradient-to-r ${feature.color} rounded-lg flex items-center px-3 shadow-2xl border border-white/30 backdrop-blur-xl transition-all duration-500 ${
-                        hoveredFeature === index ? 'shadow-[0_0_30px_rgba(139,92,246,0.6)]' : 'shadow-xl'
-                      }`}
-                      style={{
-                        background: hoveredFeature === index ? 
-                          `linear-gradient(135deg, ${feature.color.includes('green') ? '#059669, #10b981' : 
-                            feature.color.includes('blue') ? '#2563eb, #3b82f6' :
-                            feature.color.includes('purple') ? '#7c3aed, #8b5cf6' :
-                            '#ea580c, #f97316'})` :
-                          `linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(51, 65, 85, 0.8))`,
-                        boxShadow: hoveredFeature === index ? 
-                          `0 0 30px ${feature.color.includes('green') ? 'rgba(34, 197, 94, 0.5)' : 
-                            feature.color.includes('blue') ? 'rgba(59, 130, 246, 0.5)' :
-                            feature.color.includes('purple') ? 'rgba(168, 85, 247, 0.5)' :
-                            'rgba(251, 146, 60, 0.5)'}, 0 10px 25px rgba(0,0,0,0.3)`
-                          : '0 5px 15px rgba(0,0,0,0.2)'
-                      }}>
-                        <IconComponent className="w-5 h-5 text-white mr-2 flex-shrink-0" />
-                        <span className="text-white text-sm font-medium truncate">
-                          {feature.title}
+                      {/* Step Circle */}
+                      <div className={`w-16 h-16 ${step.bgColor} rounded-full flex items-center justify-center border-2 border-white/20 backdrop-blur-xl transition-all duration-300 ${
+                        activeStep === index ? `${step.glowColor} shadow-2xl` : 'shadow-lg'
+                      }`}>
+                        <IconComponent className={`w-8 h-8 ${step.color}`} />
+                      </div>
+
+                      {/* Step Label */}
+                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-center">
+                        <span className="text-xs text-gray-400 font-medium bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+                          {step.title}
                         </span>
                       </div>
 
-                      {/* Detailed hover card */}
-                      {hoveredFeature === index && (
+                      {/* Hover Info */}
+                      {activeStep === index && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                          className="absolute top-16 left-1/2 transform -translate-x-1/2 w-72 glass-effect rounded-2xl p-5 z-50 pointer-events-none border border-white/20"
-                          style={{
-                            background: `linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(30,41,59,0.8) 100%)`,
-                            backdropFilter: 'blur(20px)',
-                            boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 30px rgba(139,92,246,0.3)'
-                          }}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="absolute top-20 left-1/2 transform -translate-x-1/2 w-48 glass-effect rounded-lg p-3 z-30 pointer-events-none"
                         >
-                          <div className="flex items-center mb-3">
-                            <div className={`w-8 h-8 bg-gradient-to-br ${feature.color} rounded-lg flex items-center justify-center mr-3`}>
-                              <IconComponent className="w-4 h-4 text-white" />
-                            </div>
-                            <h3 className="text-white font-bold text-base">{feature.title}</h3>
-                          </div>
-                          <p className="text-gray-300 text-sm leading-relaxed">{feature.description}</p>
-                          
-                          {/* Decorative elements */}
-                          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                          <h4 className="text-white font-semibold text-sm mb-1">{step.title}</h4>
+                          <p className="text-gray-300 text-xs">{step.description}</p>
                         </motion.div>
                       )}
-
-                      {/* Connection line to center */}
-                      <div className="absolute top-1/2 left-1/2 w-px h-32 bg-gradient-to-b from-purple-400/30 to-transparent transform -translate-x-1/2 -translate-y-full origin-bottom opacity-60">
-                      </div>
                     </motion.div>
                   </motion.div>
                 );
               })}
+
+              {/* Connecting Lines */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
+                {/* Line from center to top */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  whileInView={{ pathLength: 1, opacity: 0.3 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 1.2, duration: 0.5 }}
+                  x1="200" y1="150" x2="200" y2="60"
+                  stroke="url(#verificationGradient)"
+                  strokeWidth="2"
+                  strokeDasharray="3,3"
+                />
+                
+                {/* Line from center to right */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  whileInView={{ pathLength: 1, opacity: 0.3 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 1.4, duration: 0.5 }}
+                  x1="200" y1="150" x2="340" y2="150"
+                  stroke="url(#verificationGradient)"
+                  strokeWidth="2"
+                  strokeDasharray="3,3"
+                />
+                
+                {/* Line from center to left */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  whileInView={{ pathLength: 1, opacity: 0.3 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 1.6, duration: 0.5 }}
+                  x1="200" y1="150" x2="60" y2="150"
+                  stroke="url(#verificationGradient)"
+                  strokeWidth="2"
+                  strokeDasharray="3,3"
+                />
+
+                <defs>
+                  <linearGradient id="verificationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="50%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              {/* Sequential Animation Indicators */}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {verificationSteps.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8 + index * 0.2 }}
+                    className={`w-2 h-2 rounded-full ${
+                      activeStep === index ? 'bg-blue-400' : 'bg-gray-600'
+                    } transition-colors duration-300`}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Static verification badges */}
+            {/* Process Description */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 1.5 }}
-              className="absolute -top-4 -right-4 glass-effect rounded-lg p-3"
+              transition={{ delay: 1.8 }}
+              className="mt-8 text-center"
             >
-              <div className="flex items-center text-green-400">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                <span className="text-sm font-medium">Verified</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 1.7 }}
-              className="absolute -bottom-4 -left-4 glass-effect rounded-lg p-3"
-            >
-              <div className="flex items-center text-blue-400">
-                <Lock className="w-4 h-4 mr-2" />
-                <span className="text-sm font-medium">Secure</span>
-              </div>
+              <p className="text-gray-400 text-sm">
+                Secure verification happens in real-time
+              </p>
             </motion.div>
           </motion.div>
         </div>
