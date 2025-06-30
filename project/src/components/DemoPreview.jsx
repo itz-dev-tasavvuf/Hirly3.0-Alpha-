@@ -513,27 +513,7 @@ const DemoPreview = () => {
                   )}
                 </div>
 
-                {/* Swipe Actions */}
-                {currentCardIndex < demoCards.length - 1 && (
-                  <div className="flex justify-center space-x-6 mt-4">
-                    <Button
-                      onClick={() => handleSwipe('left')}
-                      variant="outline"
-                      size="sm"
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/20 rounded-full w-12 h-12"
-                    >
-                      <X className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      onClick={() => handleSwipe('right')}
-                      variant="outline"
-                      size="sm"
-                      className="border-green-500/50 text-green-400 hover:bg-green-500/20 rounded-full w-12 h-12"
-                    >
-                      <Heart className="w-5 h-5" />
-                    </Button>
-                  </div>
-                )}
+                {/* Swipe Actions - Removed for cleaner interface */}
 
                 {/* Progress Indicator */}
                 <div className="flex justify-center space-x-1 mt-4">
