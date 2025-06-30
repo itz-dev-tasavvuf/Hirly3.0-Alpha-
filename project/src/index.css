@@ -135,6 +135,11 @@
   transform-origin: center center;
 }
 
+.orbit-feature.reverse {
+  animation: orbit-reverse 20s linear infinite;
+  animation-delay: var(--orbit-delay, 0s);
+}
+
 .orbit-feature:hover {
   animation-play-state: paused;
 }
@@ -145,6 +150,15 @@
   }
   100% {
     transform: translate(-50%, -50%) rotate(360deg) translateX(140px) rotate(-360deg);
+  }
+}
+
+@keyframes orbit-reverse {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(140px) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-360deg) translateX(140px) rotate(360deg);
   }
 }
 

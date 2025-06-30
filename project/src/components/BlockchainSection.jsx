@@ -113,7 +113,7 @@ const BlockchainSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6 + index * 0.2 }}
-                    className="absolute cursor-pointer orbit-feature"
+                    className={`absolute cursor-pointer orbit-feature ${index === 1 || index === 2 ? 'reverse' : ''}`}
                     style={{
                       top: '50%',
                       left: '50%',
