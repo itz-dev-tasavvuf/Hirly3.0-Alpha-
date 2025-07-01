@@ -8,72 +8,51 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Get the Stripe secret key from environment variables
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
-    
-    // Debug: Log if the key exists (without exposing the actual key)
-    console.log('Stripe key exists:', !!stripeSecretKey);
-    console.log('Stripe key starts with sk_:', stripeSecretKey?.startsWith('sk_'));
     
     if (!stripeSecretKey) {
       return new Response(JSON.stringify({
-        error: "STRIPE_SECRET_KEY environment variable is not set in Supabase"
+        error: "STRIPE_SECRET_KEY not found"
       }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Initialize Stripe with the secret key
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
-    // Get request data
-    const { action, priceId, companyName, companyEmail, successUrl, cancelUrl } = await req.json();
-
-    console.log('Stripe checkout request:', { action, priceId, companyName, companyEmail });
+    const { action, priceId, companyEmail } = await req.json();
 
     if (action === "create-checkout-session") {
-      // Validate required fields
-      if (!priceId || !companyEmail) {
+      if (!priceId) {
         return new Response(JSON.stringify({
-          error: "Missing required fields: priceId and companyEmail are required"
+          error: "priceId is required"
         }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
 
-      // Create Stripe Checkout Session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'subscription',
-        customer_email: companyEmail,
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        success_url: successUrl || 'https://hirly.netlify.app/payment-success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: cancelUrl || 'https://hirly.netlify.app/payment-cancel',
-        subscription_data: {
-          trial_period_days: 14
-        }
+        line_items: [{
+          price: priceId,
+          quantity: 1,
+        }],
+        success_url: 'https://hirly.netlify.app/payment-success',
+        cancel_url: 'https://hirly.netlify.app/payment-cancel',
       });
-
-      console.log('Stripe session created successfully:', session.id);
 
       return new Response(JSON.stringify({ 
         success: true,
-        sessionId: session.id,
         url: session.url 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -82,18 +61,17 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ 
-      error: "Invalid action. Supported actions: create-checkout-session" 
+      error: "Invalid action" 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });
 
   } catch (error) {
-    console.error("Stripe error:", error);
+    console.error("Error:", error);
     
     return new Response(JSON.stringify({ 
-      error: error.message || "Internal server error",
-      details: error.type || "unknown_error"
+      error: error.message || "Internal server error"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
