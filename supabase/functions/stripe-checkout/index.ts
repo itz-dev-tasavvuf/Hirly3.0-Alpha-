@@ -62,23 +62,11 @@ serve(async (req) => {
             quantity: 1,
           },
         ],
-        metadata: {
-          companyName: companyName || 'Unknown Company',
-          plan: 'employer_pro',
-          source: 'hirly_pricing_page'
-        },
-        subscription_data: {
-          metadata: {
-            companyName: companyName || 'Unknown Company',
-            signupCount: '0',
-            tier: 'starter'
-          },
-          trial_period_days: 14 // 14-day free trial
-        },
         success_url: successUrl || `${req.headers.get('origin')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl || `${req.headers.get('origin')}/pricing`,
-        allow_promotion_codes: true,
-        billing_address_collection: 'required'
+        subscription_data: {
+          trial_period_days: 14
+        }
       });
 
       console.log('Stripe session created successfully:', session.id);
