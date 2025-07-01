@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -7,12 +7,14 @@ import ScrollToTopButton from '@/components/ScrollToTopButton';
 import ContactSalesModal from '@/components/ContactSalesModal';
 
 const PricingPage = () => {
-  const [contactModalOpen, setContactModalOpen] = React.useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleGetStarted = (plan) => {
+  const handleGetStarted = async (plan) => {
     if (plan === 'Job Seekers') {
       window.location.href = '/onboarding';
       return;
@@ -21,6 +23,46 @@ const PricingPage = () => {
       setContactModalOpen(true);
       return;
     }
+
+    // Handle Stripe checkout for Employers plan
+    if (plan === 'Employers') {
+      setIsLoading(true);
+      
+      try {
+        const priceId = 'price_1OxxxxxxxxxxxxxxxxxxxE'; // Replace with actual Stripe price ID
+        
+        const response = await fetch('/.netlify/functions/stripe-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            priceId,
+            successUrl: `${window.location.origin}/payment-success`,
+            cancelUrl: `${window.location.origin}/payment-cancel`
+          })
+        });
+
+        const { sessionUrl } = await response.json();
+        
+        if (sessionUrl) {
+          window.location.href = sessionUrl;
+        } else {
+          throw new Error('Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Payment error:', error);
+        toast({
+          title: 'Payment Error',
+          description: 'Something went wrong. Please try again.',
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     toast({
       title: `Get Started with ${plan}`,
       description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
@@ -172,6 +214,7 @@ const PricingPage = () => {
               <div className="mt-10">
                 <Button
                   onClick={() => handleGetStarted(plan.title)}
+                  disabled={isLoading}
                   size="lg"
                   className={`w-full font-semibold px-8 py-4 rounded-xl text-lg ${
                     plan.title === 'Job Seekers' || plan.cta === 'Contact Sales'
@@ -179,9 +222,9 @@ const PricingPage = () => {
                       : plan.isFeatured
                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white glow-effect transform hover:scale-105 transition-all'
                         : 'border-purple-500/50 text-purple-300 hover:bg-purple-500/20'
-                  }`}
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {plan.cta}
+                  {isLoading && plan.title === 'Employers' ? 'Processing...' : plan.cta}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
