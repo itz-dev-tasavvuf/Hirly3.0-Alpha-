@@ -137,13 +137,13 @@ const DemoPreview = () => {
   const handlePlayDemo = () => {
     setIsPlaying(!isPlaying);
     toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      title: "� Not available yet, but will be soon!"
     });
   };
 
   const handleWatchFullDemo = () => {
     toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      title: "� Not available yet, but will be soon!"
     });
   };
 

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from 'react      title: "👻 Not available yet, but will be soon!";
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Users, Zap } from 'lucide-react';
@@ -8,7 +7,22 @@ import { toast } from '@/components/ui/use-toast';
 const CallToAction = () => {
   const handleTryDemo = () => {
     toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      title: "👻 Not available yet, but will be soon!"
+    });
+  };andleTryDemo = () => {
+    toast({
+      title: "👻 Not available yet, but will be soon!"
+    });
+  };t from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Sparkles, Users, Zap } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+
+const CallToAction = () => {
+  const handleTryDemo = () => {
+    toast({
+      title: "� Not available yet, but will be soon!"
     });
   };
 

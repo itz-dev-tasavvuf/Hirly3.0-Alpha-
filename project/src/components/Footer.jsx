@@ -1,4 +1,8 @@
-import React from 'react';
+import   const handleLinkClick = (linkName) => {
+    toast({
+      title: "👻 Not available yet, but will be soon!"
+    });
+  }; from 'react';
 import { motion } from 'framer-motion';
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -7,7 +11,7 @@ import algorandLogo from '@/assets/algorand-logo.svg';
 const Footer = () => {
   const handleLinkClick = (linkName) => {
     toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      title: "� Not available yet, but will be soon!"
     });
   };
 

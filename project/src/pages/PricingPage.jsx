@@ -75,10 +75,10 @@ const PricingPage = () => {
       return;
     }
 
-    toast({
-      title: `Get Started with ${plan}`,
-      description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
-    });
+  toast({
+    title: `Get Started with ${plan}`,
+    description: "� Not available yet, but will be soon!",
+  });
   };
 
   const plans = [
