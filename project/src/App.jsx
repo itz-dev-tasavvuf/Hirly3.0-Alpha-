@@ -17,6 +17,8 @@ import HelpCenter from '@/pages/HelpCenter';
 import Documentation from '@/pages/Documentation';
 import Community from '@/pages/Community';
 import Careers from '@/pages/Careers';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentCancel from '@/pages/PaymentCancel';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import BrandedLoader from './components/BrandedLoader';
 import API from '@/pages/API.jsx';
@@ -74,6 +76,8 @@ function App() {
         <Route path="/help-center" element={<HelpCenter />} />
         <Route path="/documentation" element={<Documentation />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
         <Route path="/waitlist" element={<WaitlistPage />} />
       </Routes>
       <Toaster />
