@@ -6,9 +6,25 @@ import algorandLogo from '@/assets/algorand-logo.svg';
 
 const Footer = () => {
   const handleLinkClick = (linkName) => {
-    toast({
-      title: "👻 Not available yet, but will be soon!"
-    });
+    // Pages that actually exist and should navigate
+    const workingPages = {
+      'About': '/about',
+      'Pricing': '/pricing',
+      'Documentation': '/documentation',
+      'Help Center': '/help-center', 
+      'Community': '/community',
+      'API': '/developer',
+      'Careers': '/careers'
+    };
+
+    if (workingPages[linkName]) {
+      window.location.href = workingPages[linkName];
+    } else {
+      // Show toast for features not implemented yet
+      toast({
+        title: "👻 Not available yet, but will be soon!"
+      });
+    }
   };
 
   const footerLinks = {
