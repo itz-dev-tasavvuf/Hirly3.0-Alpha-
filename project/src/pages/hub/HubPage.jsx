@@ -639,12 +639,13 @@ const handleAICoachPrompt = async (prompt) => {
           : "Check out your profile matches!",
         className: matchCount > 0 ? "bg-green-600 border-green-500" : undefined
       });
-    } else {
+    } else if (!item.action) {
+      // Only show toast for items without actions (truly not implemented features)
       toast({
-        title: `${item.title} Clicked`,
-        description: item.action ? `Opening ${item.title}...` : "� Not available yet, but will be soon!"
+        title: "👻 Not available yet, but will be soon!"
       });
     }
+    // Removed toast for items with actions to eliminate "Opening Messages..." notifications
   };
 
   // Swiping left advances, swiping right rewinds
