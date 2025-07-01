@@ -1,4 +1,8 @@
-import React from 'react';
+import R  const handleTryDemo = () => {
+    toast({
+      title: "👻 Not available yet, but will be soon!"
+    });
+  };from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
