@@ -1,8 +1,4 @@
-import R  const handleTryDemo = () => {
-    toast({
-      title: "👻 Not available yet, but will be soon!"
-    });
-  };from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -12,7 +8,7 @@ import ComingSoonStores from '@/components/ComingSoonStores';
 const HeroSection = () => {
   const handleTryDemo = () => {
     toast({
-      title: "� Not available yet, but will be soon!"
+      title: "👻 Not available yet, but will be soon!"
     });
   };
 

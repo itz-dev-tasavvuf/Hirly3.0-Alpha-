@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from '  toast({
-    title: `Get Started with ${plan}`,
-    description: "👻 Not available yet, but will be soon!",
-  });er-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { CheckCircle, ArrowRight, User, Building, Gift, Star } from 'lucide-react';
