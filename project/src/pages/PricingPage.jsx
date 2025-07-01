@@ -36,11 +36,7 @@ const PricingPage = () => {
         const { data, error } = await supabase.functions.invoke('stripe-checkout', {
           body: {
             action: 'create-checkout-session',
-            priceId,
-            companyName: 'Test Company',
-            companyEmail: 'test@company.com',
-            successUrl: `${window.location.origin}/payment-success`,
-            cancelUrl: `${window.location.origin}/payment-cancel`
+            priceId
           }
         });
 

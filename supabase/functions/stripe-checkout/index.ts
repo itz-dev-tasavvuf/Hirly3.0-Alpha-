@@ -28,7 +28,7 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { action, priceId, companyEmail } = await req.json();
+    const { action, priceId } = await req.json();
 
     if (action === "create-checkout-session") {
       if (!priceId) {
