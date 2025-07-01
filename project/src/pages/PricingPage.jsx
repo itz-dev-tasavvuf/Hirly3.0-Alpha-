@@ -5,6 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 import { CheckCircle, ArrowRight, User, Building, Gift, Star } from 'lucide-react';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import ContactSalesModal from '@/components/ContactSalesModal';
+import { supabase } from '@/supabaseClient';
 
 const PricingPage = () => {
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -29,24 +30,26 @@ const PricingPage = () => {
       setIsLoading(true);
       
       try {
-        const priceId = 'price_1OxxxxxxxxxxxxxxxxxxxE'; // Replace with actual Stripe price ID
+        const priceId = 'price_1Rg1PxL4YJLoYOlSyqt4AAZT'; // Your actual Stripe Price ID
         
-        const response = await fetch('/.netlify/functions/stripe-checkout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        // Call the Supabase Edge Function directly
+        const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+          body: {
+            action: 'create-checkout-session',
             priceId,
+            companyName: 'Test Company',
+            companyEmail: 'test@company.com',
             successUrl: `${window.location.origin}/payment-success`,
             cancelUrl: `${window.location.origin}/payment-cancel`
-          })
+          }
         });
 
-        const { sessionUrl } = await response.json();
+        if (error) {
+          throw error;
+        }
         
-        if (sessionUrl) {
-          window.location.href = sessionUrl;
+        if (data?.url) {
+          window.location.href = data.url;
         } else {
           throw new Error('Failed to create checkout session');
         }
@@ -54,7 +57,7 @@ const PricingPage = () => {
         console.error('Payment error:', error);
         toast({
           title: 'Payment Error',
-          description: 'Something went wrong. Please try again.',
+          description: `Something went wrong: ${error.message}. Please try again.`,
           variant: 'destructive'
         });
       } finally {
