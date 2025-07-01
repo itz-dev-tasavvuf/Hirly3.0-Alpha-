@@ -13,6 +13,19 @@ const PricingPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Check if payment was canceled
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('canceled') === 'true') {
+      toast({
+        title: 'Payment Canceled',
+        description: '💙 No worries! Your payment was canceled and no charges were made. Try again when you\'re ready!',
+        variant: 'default'
+      });
+      
+      // Clean up the URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   const handleGetStarted = async (plan) => {

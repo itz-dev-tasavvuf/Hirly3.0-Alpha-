@@ -69,7 +69,7 @@ const PaymentSuccess = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-gray-600 mb-8 leading-relaxed"
         >
-          Welcome to Hirly! Your subscription has been activated and you can now start posting jobs and connecting with top talent.
+          🎉 Welcome to Hirly! Your subscription is now active. You can now access our AI-powered, blockchain-verified recruiting platform to find the perfect candidates.
         </motion.p>
 
         <motion.div
@@ -102,7 +102,7 @@ const PaymentSuccess = () => {
           className="mt-8 pt-6 border-t border-gray-100"
         >
           <p className="text-sm text-gray-500">
-            Your 14-day free trial has started. You can cancel anytime from your dashboard.
+            🚀 Your Hirly Employer Pro subscription is now active! Start posting jobs and finding top talent. You can manage your subscription anytime from your dashboard.
           </p>
         </motion.div>
       </motion.div>
