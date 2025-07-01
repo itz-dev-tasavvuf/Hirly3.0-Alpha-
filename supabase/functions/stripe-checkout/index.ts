@@ -57,16 +57,12 @@ serve(async (req) => {
           terms_of_service_acceptance: {
             message: 'I agree to the [Terms of Service](https://hirly.netlify.app/terms) and [Privacy Policy](https://hirly.netlify.app/privacy)'
           },
-          shipping_address: {
-            message: 'Business address for billing purposes'
-          },
           after_submit: {
             message: 'Welcome to Hirly! We\'re excited to help you find the perfect candidates through blockchain-verified recruiting.'
           }
         },
         consent_collection: {
-          terms_of_service: 'required',
-          promotions: 'auto'
+          terms_of_service: 'required'
         },
         // Subscription settings with enhanced description
         subscription_data: {
@@ -86,18 +82,6 @@ serve(async (req) => {
         allow_promotion_codes: true,
         automatic_tax: {
           enabled: true
-        },
-        // Invoice settings for better branding
-        invoice_creation: {
-          enabled: true,
-          invoice_data: {
-            description: 'Hirly Employer Pro Subscription',
-            footer: 'Thank you for choosing Hirly - The future of recruiting is here!',
-            metadata: {
-              platform: 'hirly',
-              product: 'employer_pro'
-            }
-          }
         },
         // Locale for better user experience
         locale: 'auto'
