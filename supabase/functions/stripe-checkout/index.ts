@@ -62,8 +62,8 @@ serve(async (req) => {
             quantity: 1,
           },
         ],
-        success_url: successUrl || `${req.headers.get('origin')}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: cancelUrl || `${req.headers.get('origin')}/pricing`,
+        success_url: successUrl || 'https://hirly.netlify.app/payment-success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: cancelUrl || 'https://hirly.netlify.app/payment-cancel',
         subscription_data: {
           trial_period_days: 14
         }
